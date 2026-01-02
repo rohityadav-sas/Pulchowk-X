@@ -2,7 +2,9 @@
 	import {
 		Router,
 		type RouteConfig,
-		route
+		route,
+		query,
+		goto
 	} from '@mateothegreat/svelte5-router'
 	import Home from './pages/Home.svelte'
 	import Register from './pages/Register.svelte'
@@ -10,6 +12,11 @@
 	import { authClient } from './lib/auth-client'
 
 	const session = authClient.useSession()
+
+	const error = query('error')
+	let showError = $state(error === 'unauthorized_domain')
+
+	if (error) goto('/')
 
 	const routes: RouteConfig[] = [
 		{
@@ -68,6 +75,56 @@
 		</div>
 	</div>
 </nav>
+
+<!-- Error Toast -->
+{#if showError}
+	<div
+		class="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300"
+	>
+		<div
+			class="bg-red-50 border border-red-200 rounded-lg px-6 py-4 shadow-lg flex items-center gap-3"
+		>
+			<svg
+				class="w-5 h-5 text-red-500 shrink-0"
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+				></path>
+			</svg>
+			<div>
+				<p class="text-red-800 font-medium">Unauthorized Email Domain</p>
+				<p class="text-red-600 text-sm">
+					Only <span class="font-semibold">@pcampus.edu.np</span> emails are allowed.
+				</p>
+			</div>
+			<button
+				aria-label="Close error message"
+				onclick={() => (showError = false)}
+				class="ml-4 text-red-400 hover:text-red-600 transition-colors"
+			>
+				<svg
+					class="w-5 h-5"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					></path>
+				</svg>
+			</button>
+		</div>
+	</div>
+{/if}
 
 <main class="min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-50">
 	<Router {routes} />
