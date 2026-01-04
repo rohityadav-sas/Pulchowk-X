@@ -8,8 +8,8 @@
 		FillLayer
 	} from 'svelte-maplibre-gl'
 	import type { FeatureCollection } from 'geojson'
-	import nepal from './pulchowk.json'
-	import { fade } from 'svelte/transition' // For smooth exit
+	import nepal from './nepal.json'
+	import { fade } from 'svelte/transition'
 
 	const nepalData = nepal as FeatureCollection
 
