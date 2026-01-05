@@ -42,49 +42,49 @@
 </script>
 
 <nav
-	class="bg-white border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm"
+	class="bg-white/80 border-b border-gray-200 sticky top-0 z-50 backdrop-blur-md"
 >
-	<div class="max-w-7xl mx-auto px-6 py-4">
-		<div class="flex items-center justify-between">
-			<a href="/" class="flex items-center gap-2 group">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="flex items-center justify-between h-16">
+			<a href="/" class="flex items-center gap-2.5 group">
 				<div
-					class="w-8 h-8 bg-linear-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110"
+					class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20 transition-transform group-hover:scale-105"
 				>
-					<span class="text-white font-bold text-sm">P</span>
+					<span class="text-white font-bold text-lg">P</span>
 				</div>
 				<span
-					class="text-xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+					class="text-xl font-bold text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors"
 					>PulchowkX</span
 				>
 			</a>
-			<div class="flex items-center gap-6">
+			<div class="flex items-center gap-1 sm:gap-2">
 				<a
 					use:route
 					href="/"
-					class="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+					class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
 					>Home</a
 				>
 				{#if $session.isPending}
 					<div
-						class="h-10 w-24 bg-gray-200 rounded-lg animate-pulse"
+						class="h-9 w-24 bg-gray-100 rounded-lg animate-pulse"
 					></div>
 				{:else if $session.data?.user}
 					<a
 						use:route
-						href="/dashboard"
-						class="text-gray-600 hover:text-gray-900 font-medium transition-colors"
-						>Dashboard</a
+						href="/map"
+						class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
+						>Map</a
 					>
 					<a
 						use:route
-						href="/map"
-						class="text-gray-600 hover:text-gray-900 font-medium transition-colors"
-						>Map</a
+						href="/dashboard"
+						class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
+						>Dashboard</a
 					>
 				{:else}
 					<a
 						href="/register"
-						class="bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+						class="ml-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95"
 						>Sign In</a
 					>
 				{/if}
@@ -96,37 +96,40 @@
 <!-- Error Toast -->
 {#if showError}
 	<div
-		class="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300"
+		class="fixed top-24 right-4 z-50 animate-in fade-in slide-in-from-right-8 duration-300 max-w-md w-full"
 	>
 		<div
-			class="bg-red-50 border border-red-200 rounded-lg px-6 py-4 shadow-lg flex items-center gap-3"
+			class="bg-white border-l-4 border-red-500 rounded-r-lg shadow-xl p-4 flex items-start gap-3"
 		>
-			<svg
-				class="w-5 h-5 text-red-500 shrink-0"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-				></path>
-			</svg>
-			<div>
-				<p class="text-red-800 font-medium">
-					Unauthorized Email Domain
-				</p>
-				<p class="text-red-600 text-sm">
-					Only <span class="font-semibold">@pcampus.edu.np</span> emails
-					are allowed.
+			<div class="p-1 bg-red-50 rounded-full text-red-500 shrink-0">
+				<svg
+					class="w-5 h-5"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+					></path>
+				</svg>
+			</div>
+			<div class="flex-1">
+				<h3 class="text-sm font-semibold text-gray-900">
+					Access Denied
+				</h3>
+				<p class="text-sm text-gray-600 mt-1">
+					Please use your <span class="font-medium text-gray-900"
+						>@pcampus.edu.np</span
+					> email address to sign in.
 				</p>
 			</div>
 			<button
 				aria-label="Close error message"
 				onclick={() => (showError = false)}
-				class="ml-4 text-red-400 hover:text-red-600 transition-colors"
+				class="text-gray-400 hover:text-gray-600 transition-colors"
 			>
 				<svg
 					class="w-5 h-5"
@@ -146,7 +149,7 @@
 	</div>
 {/if}
 
-<main class="min-h-screen bg-blue-200">
+<main class="min-h-[calc(100vh-4rem)] bg-gray-50">
 	{#if instance?.navigating}
 		<div
 			class="fixed inset-0 z-40 bg-white/80 backdrop-blur-sm flex items-center justify-center"
@@ -157,10 +160,34 @@
 	<Router bind:instance {routes} />
 </main>
 
-<footer class="bg-white border-t border-gray-200 py-8">
-	<div class="max-w-7xl mx-auto px-6 text-center">
-		<p class="text-gray-600 text-sm">
-			© 2026 PulchowkX. All rights reserved.
-		</p>
-	</div>
-</footer>
+{#if instance?.current?.route?.path !== "/map"}
+	<footer class="bg-white border-t border-gray-200 py-8 mt-auto">
+		<div
+			class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4"
+		>
+			<p class="text-gray-500 text-sm">
+				© 2026 PulchowkX. Built for IOE Pulchowk Campus.
+			</p>
+			<div class="flex items-center gap-6">
+				<!-- svelte-ignore a11y_invalid_attribute -->
+				<a
+					href="#"
+					class="text-gray-400 hover:text-gray-600 transition-colors"
+					>Privacy</a
+				>
+				<!-- svelte-ignore a11y_invalid_attribute -->
+				<a
+					href="#"
+					class="text-gray-400 hover:text-gray-600 transition-colors"
+					>Terms</a
+				>
+				<!-- svelte-ignore a11y_invalid_attribute -->
+				<a
+					href="#"
+					class="text-gray-400 hover:text-gray-600 transition-colors"
+					>Contact</a
+				>
+			</div>
+		</div>
+	</footer>
+{/if}
