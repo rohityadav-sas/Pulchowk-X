@@ -5,15 +5,16 @@
 		GeolocateControl,
 		FullScreenControl,
 		GeoJSONSource,
-		FillLayer
-	} from 'svelte-maplibre-gl'
-	import type { FeatureCollection } from 'geojson'
-	import nepal from './pulchowk.json'
-	import { fade } from 'svelte/transition'
+		FillLayer,
+		SymbolLayer,
+	} from "svelte-maplibre-gl";
+	import type { FeatureCollection } from "geojson";
+	import nepal from "./pulchowk.json";
+	import { fade } from "svelte/transition";
 
-	const nepalData = nepal as FeatureCollection
+	const nepalData = nepal as FeatureCollection;
 
-	let isLoaded = $state(false)
+	let isLoaded = $state(false);
 </script>
 
 <div class="relative w-full h-full min-h-[80vh]">
@@ -51,22 +52,34 @@
 		center={[85.319319, 27.682102]}
 		class="size-150 mx-auto"
 		style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-		onclick={(e)=>{
-			console.log(e.lngLat)
+		onclick={(e) => {
+			const latitude = e.lngLat.lat;
+			const longitude = e.lngLat.lng;
+			navigator.clipboard.writeText(`[${longitude}, ${latitude}]`);
 		}}
 		onload={() => (isLoaded = true)}
 	>
 		<GeoJSONSource data={nepalData} maxzoom={22}>
 			<FillLayer
 				paint={{
-					'fill-color': '#fff',
-					'fill-opacity': 1,
-					'fill-outline-color': '#333'
+					"fill-color": "#fff",
+					"fill-opacity": 1,
+					"fill-outline-color": "#333",
+				}}
+			/>
+			<SymbolLayer
+				layout={{
+					"text-field": "{description}",
+					"text-size": 10,
+					"text-anchor": "top",
+					"text-justify": "center",
+					"text-max-width": 5,
+				}}
+				paint={{
+					"text-color": "green",
 				}}
 			/>
 		</GeoJSONSource>
-
-		<Marker lnglat={[85.319319, 27.682102]} />
 
 		<GeolocateControl
 			position="top-right"
