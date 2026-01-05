@@ -1079,7 +1079,7 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Pulchowk Boys Hostle"
+                "description": "Block A Pulchowk Boys Hostel"
             },
             "geometry": {
                 "type": "Point",
@@ -1100,6 +1100,16 @@
                     85.32321651934609,
                     27.681833530683008
                 ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Calisthenics park, Outdoor Gym"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [85.32277525891658, 27.68190370401871]
             }
         },
         {
@@ -1178,6 +1188,16 @@
                     85.324714775784,
                     27.683030311890363
                 ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Exam Control Office, IOE"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [85.32103017170311, 27.681071855710286]
             }
         }
     ]
