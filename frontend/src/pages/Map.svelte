@@ -6,25 +6,104 @@
 		GeoJSONSource,
 		FillLayer,
 		SymbolLayer,
+		RasterLayer,
 	} from "svelte-maplibre-gl";
 	import type { FeatureCollection } from "geojson";
 	import pulchowk from "./pulchowk.json";
 	import { fade, fly } from "svelte/transition";
 	import LoadingSpinner from "../components/LoadingSpinner.svelte";
 
+	const SATELLITE_STYLE: any = {
+		version: 8,
+		sources: {
+			"arcgis-world-imagery": {
+				type: "raster",
+				tiles: [
+					"https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+				],
+				tileSize: 256,
+				attribution:
+					"Source: Esri, Maxar, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community",
+			},
+		},
+		layers: [
+			{
+				id: "arcgis-world-imagery",
+				type: "raster",
+				source: "arcgis-world-imagery",
+				minzoom: 0,
+				maxzoom: 22,
+			},
+		],
+	};
+
+	const VECTOR_STYLE =
+		"https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
+
 	const pulchowkData = pulchowk as FeatureCollection;
+
+	// Assign icons based on description
+	pulchowkData.features.forEach((feature) => {
+		if (!feature.properties) feature.properties = {};
+		const desc = feature.properties.description?.toLowerCase() || "";
+
+		if (desc.includes("bank") || desc.includes("atm")) {
+			feature.properties.icon = "bank-icon";
+		} else if (
+			desc.includes("mess") ||
+			desc.includes("canteen") ||
+			desc.includes("food")
+		) {
+			feature.properties.icon = "food-icon";
+		} else if (desc.includes("library")) {
+			feature.properties.icon = "library-icon";
+		} else {
+			feature.properties.icon = "custom-marker";
+		}
+	});
 
 	const labels = pulchowkData.features.slice(1);
 
 	let search = $state("");
 	let showSuggestions = $state(false);
 	let selectedIndex = $state(-1);
+	let isSatellite = $state(false);
 	let mapCenter = $state<[number, number]>([
 		85.32121137093469, 27.68222689200303,
 	]);
 	let map: any = $state();
 
 	let isLoaded = $state(false);
+
+	const loadIcons = async () => {
+		if (!map) return;
+		const icons = [
+			{
+				name: "custom-marker",
+				url: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",
+			},
+			{
+				name: "bank-icon",
+				url: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png",
+			},
+			{
+				name: "food-icon",
+				url: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+			},
+			{
+				name: "library-icon",
+				url: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png",
+			},
+		];
+
+		await Promise.all(
+			icons.map(async ({ name, url }) => {
+				const image = await map.loadImage(url);
+				if (!map.hasImage(name)) map.addImage(name, image.data);
+			}),
+		);
+		isLoaded = true;
+	};
 
 	const filteredSuggestions = $derived(
 		search.trim()
@@ -305,18 +384,40 @@
 		</div>
 	{/if}
 
+	<div
+		class="absolute bottom-6 left-6 z-10 bg-white/90 backdrop-blur rounded-lg shadow-lg border border-gray-100 p-1 flex gap-1"
+	>
+		<button
+			class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors {isSatellite
+				? 'text-gray-600 hover:bg-gray-100'
+				: 'bg-blue-50 text-blue-700'}"
+			onclick={() => (isSatellite = false)}
+		>
+			Map
+		</button>
+		<button
+			class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors {isSatellite
+				? 'bg-blue-50 text-blue-700'
+				: 'text-gray-600 hover:bg-gray-100'}"
+			onclick={() => (isSatellite = true)}
+		>
+			Satellite
+		</button>
+	</div>
+
 	<MapLibre
 		bind:map
 		zoom={16}
+		maxZoom={isSatellite ? 18.4 : 22}
 		center={mapCenter}
 		class="w-full h-full"
-		style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+		style={isSatellite ? SATELLITE_STYLE : VECTOR_STYLE}
 		onclick={(e) => {
 			const latitude = e.lngLat.lat;
 			const longitude = e.lngLat.lng;
 			navigator.clipboard.writeText(`[${longitude}, ${latitude}]`);
 		}}
-		onload={() => (isLoaded = true)}
+		onload={loadIcons}
 		maxBounds={[
 			[85.31217093201366, 27.678215308346253],
 			[85.329947502668, 27.686583278518555],
@@ -332,14 +433,17 @@
 			/>
 			<SymbolLayer
 				layout={{
+					"icon-image": ["get", "icon"],
+					"icon-size": 0.5,
 					"text-field": "{description}",
 					"text-size": 10,
 					"text-anchor": "top",
+					"text-offset": [0, 0.5],
 					"text-justify": "center",
 					"text-max-width": 5,
 				}}
 				paint={{
-					"text-color": "green",
+					"text-color": isSatellite ? "#ffffff" : "green",
 				}}
 			/>
 		</GeoJSONSource>
