@@ -660,7 +660,10 @@
                 "description": "ICTC Building",
                 "title": "ICTC Building",
                 "about": "This is the location for ICTC Building.",
-                "image": "https://media.istockphoto.com/id/523460307/photo/little-girl-at-the-library-picking-a-book.jpg?s=612x612&w=0&k=20&c=aIdRKhvYwbC9hR-tnFP-AuONm2pqb5pv3UrSuoYW-Fo="
+                "image": [
+                    "https://media.istockphoto.com/id/523460307/photo/little-girl-at-the-library-picking-a-book.jpg?s=612x612&w=0&k=20&c=aIdRKhvYwbC9hR-tnFP-AuONm2pqb5pv3UrSuoYW-Fo=",
+                    "https://img.freepik.com/free-photo/vibrant-autumn-leaves-reveal-nature-beauty-generated-by-ai_188544-15039.jpg"
+                ]
             },
             "geometry": {
                 "type": "Point",

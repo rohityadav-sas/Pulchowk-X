@@ -141,8 +141,10 @@
 	let popupData = $state<{
 		title: string;
 		description: string;
-		image?: string;
+		image?: string | string[];
 	}>({ title: "", description: "" });
+
+	let currentImageIndex = $state(0);
 
 	const icons = [
 		{
@@ -393,6 +395,38 @@
 				});
 			}
 		}, 0);
+	}
+
+	let touchStartX = 0;
+	let touchEndX = 0;
+
+	function handleTouchStart(e: TouchEvent) {
+		touchStartX = e.changedTouches[0].screenX;
+	}
+
+	function handleTouchEnd(e: TouchEvent) {
+		touchEndX = e.changedTouches[0].screenX;
+		handleSwipe();
+	}
+
+	function handleSwipe() {
+		if (!Array.isArray(popupData.image) || popupData.image.length <= 1)
+			return;
+
+		const SWIPE_THRESHOLD = 50;
+
+		if (touchEndX < touchStartX - SWIPE_THRESHOLD) {
+			// Swipe Left -> Next Image
+			currentImageIndex =
+				(currentImageIndex + 1) % popupData.image.length;
+		}
+
+		if (touchEndX > touchStartX + SWIPE_THRESHOLD) {
+			// Swipe Right -> Previous Image
+			currentImageIndex =
+				(currentImageIndex - 1 + popupData.image.length) %
+				popupData.image.length;
+		}
 	}
 </script>
 
@@ -688,14 +722,32 @@
 							}
 
 							popupLngLat = centerLngLat;
+
+							let image = props.image;
+							if (
+								typeof image === "string" &&
+								image.startsWith("[") &&
+								image.endsWith("]")
+							) {
+								try {
+									image = JSON.parse(image);
+								} catch (e) {
+									console.error(
+										"Failed to parse image array",
+										e,
+									);
+								}
+							}
+
 							popupData = {
 								title:
 									props.title ||
 									props.description ||
 									"Unknown Location",
 								description: props.about || "",
-								image: props.image || undefined,
+								image: image || undefined,
 							};
+							currentImageIndex = 0;
 							popupOpen = true;
 						}
 					}}
@@ -716,15 +768,108 @@
 				<div class="max-w-xs popup-content">
 					{#if popupData.image}
 						<div
-							class="overflow-hidden rounded-t-lg mb-2 relative group"
+							class="overflow-hidden rounded-t-lg mb-2 relative group h-32"
+							ontouchstart={handleTouchStart}
+							ontouchend={handleTouchEnd}
 						>
-							<img
-								src={popupData.image}
-								alt={popupData.title}
-								class="w-full h-32 object-cover transition-transform duration-700 group-hover:scale-110"
-							/>
+							{#if Array.isArray(popupData.image)}
+								{#each popupData.image as img, i}
+									<img
+										src={img}
+										alt={popupData.title}
+										class="absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-300 {i ===
+										currentImageIndex
+											? 'opacity-100'
+											: 'opacity-0'}"
+									/>
+								{/each}
+
+								{#if popupData.image.length > 1}
+									<button
+										aria-label="Previous Image"
+										class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+										onclick={(e) => {
+											e.stopPropagation();
+											if (
+												Array.isArray(popupData.image)
+											) {
+												currentImageIndex =
+													(currentImageIndex -
+														1 +
+														popupData.image
+															.length) %
+													popupData.image.length;
+											}
+										}}
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke-width="2"
+											stroke="currentColor"
+											class="w-4 h-4"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												d="M15.75 19.5L8.25 12l7.5-7.5"
+											/>
+										</svg>
+									</button>
+
+									<button
+										aria-label="Next Image"
+										class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+										onclick={(e) => {
+											e.stopPropagation();
+											if (
+												Array.isArray(popupData.image)
+											) {
+												currentImageIndex =
+													(currentImageIndex + 1) %
+													popupData.image.length;
+											}
+										}}
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke-width="2"
+											stroke="currentColor"
+											class="w-4 h-4"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												d="M8.25 4.5l7.5 7.5-7.5 7.5"
+											/>
+										</svg>
+									</button>
+
+									<div
+										class="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1 z-10"
+									>
+										{#each popupData.image as _, i}
+											<div
+												class="w-1.5 h-1.5 rounded-full transition-colors {i ===
+												currentImageIndex
+													? 'bg-white'
+													: 'bg-white/50'}"
+											></div>
+										{/each}
+									</div>
+								{/if}
+							{:else}
+								<img
+									src={popupData.image}
+									alt={popupData.title}
+									class="w-full h-32 object-cover transition-transform duration-700 group-hover:scale-110"
+								/>
+							{/if}
 							<div
-								class="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+								class="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
 							></div>
 						</div>
 					{/if}
