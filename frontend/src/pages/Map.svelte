@@ -6,11 +6,9 @@
 		GeoJSONSource,
 		FillLayer,
 		SymbolLayer,
-		RasterLayer,
 		Popup,
 	} from "svelte-maplibre-gl";
 	import type { FeatureCollection } from "geojson";
-	import type { MapLayerMouseEvent } from "maplibre-gl";
 	import pulchowk from "./pulchowk.json";
 	import { fade, fly } from "svelte/transition";
 	import LoadingSpinner from "../components/LoadingSpinner.svelte";
@@ -148,8 +146,12 @@
 
 	let currentImageIndex = $state(0);
 	let showOutsideMessage = $state(false);
+	let geolocateControl: any = $state();
 
 	function handleGeolocate(e: any) {
+		console.log("Geolocate event:", e);
+		if (!e?.coords) return;
+
 		const { coords } = e;
 		const { longitude, latitude } = coords;
 
@@ -164,6 +166,13 @@
 			latitude > maxLat
 		) {
 			showOutsideMessage = true;
+
+			// Stop the geolocate control from "spinning" or "tracking"
+			// calling trigger() when it is tracking will stop it
+			if (geolocateControl) {
+				geolocateControl.trigger();
+			}
+
 			setTimeout(() => {
 				showOutsideMessage = false;
 			}, 4000);
@@ -707,10 +716,7 @@
 			navigator.clipboard.writeText(`[${longitude}, ${latitude}]`);
 		}}
 		onload={loadIcons}
-		maxBounds={[
-			[85.31217093201366, 27.678215308346253],
-			[85.329947502668, 27.686583278518555],
-		]}
+		maxBounds={PULCHOWK_BOUNDS as any}
 	>
 		<GeoJSONSource data={pulchowkData} maxzoom={22}>
 			<FillLayer
@@ -935,12 +941,15 @@
 		</Popup>
 
 		<GeolocateControl
+			bind:control={geolocateControl}
 			position="top-right"
 			positionOptions={{ enableHighAccuracy: true }}
 			trackUserLocation={true}
 			showAccuracyCircle={true}
 			fitBoundsOptions={{ zoom: 18 }}
 			ongeolocate={handleGeolocate}
+			onoutofmaxbounds={handleGeolocate}
+			onerror={(e) => console.error("Geolocate error:", e)}
 		/>
 
 		<FullScreenControl position="top-right" />
