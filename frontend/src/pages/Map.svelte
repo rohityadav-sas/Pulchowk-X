@@ -7,8 +7,10 @@
 		FillLayer,
 		SymbolLayer,
 		RasterLayer,
+		Popup,
 	} from "svelte-maplibre-gl";
 	import type { FeatureCollection } from "geojson";
+	import type { MapLayerMouseEvent } from "maplibre-gl";
 	import pulchowk from "./pulchowk.json";
 	import { fade, fly } from "svelte/transition";
 	import LoadingSpinner from "../components/LoadingSpinner.svelte";
@@ -131,6 +133,16 @@
 	let map: any = $state();
 
 	let isLoaded = $state(false);
+	let popupOpen = $state(false);
+	let popupLngLat = $state<[number, number] | { lng: number; lat: number }>({
+		lng: 0,
+		lat: 0,
+	});
+	let popupData = $state<{
+		title: string;
+		description: string;
+		image?: string;
+	}>({ title: "", description: "" });
 
 	const icons = [
 		{
@@ -625,23 +637,108 @@
 					"fill-outline-color": "#333",
 				}}
 			/>
-			<SymbolLayer
-				layout={{
-					"icon-image": ["get", "icon"],
-					"icon-size": 1,
-					"text-field": "{description}",
-					"text-size": 10,
-					"text-anchor": "top",
-					"text-offset": [0, 1.4],
-					"text-justify": "center",
-					"text-max-width": 5,
-				}}
-				paint={{
-					"text-color": isSatellite ? "#ffffff" : "green",
-				}}
-				filter={["has", "description"]}
-			/>
+			{#if isLoaded}
+				<SymbolLayer
+					layout={{
+						"icon-image": ["get", "icon"],
+						"icon-size": 1,
+						"text-field": "{description}",
+						"text-size": 10,
+						"text-anchor": "top",
+						"text-offset": [0, 1.4],
+						"text-justify": "center",
+						"text-max-width": 5,
+					}}
+					paint={{
+						"text-color": isSatellite ? "#ffffff" : "green",
+					}}
+					filter={["has", "description"]}
+					onclick={(e: any) => {
+						console.log("Symbol clicked", e);
+						if (e.features && e.features[0]) {
+							const feature = e.features[0];
+							const props = feature.properties || {};
+
+							// Calculate center based on geometry type to snap popup to the icon/feature location
+							let centerLngLat = e.lngLat;
+
+							if (feature.geometry.type === "Point") {
+								const coords = feature.geometry.coordinates;
+								centerLngLat = {
+									lng: coords[0],
+									lat: coords[1],
+								};
+							} else if (feature.geometry.type === "Polygon") {
+								const coordinates =
+									feature.geometry.coordinates[0];
+								const centroid = coordinates.reduce(
+									(acc: any, coord: any) => {
+										acc[0] += coord[0];
+										acc[1] += coord[1];
+										return acc;
+									},
+									[0, 0],
+								);
+								centroid[0] /= coordinates.length;
+								centroid[1] /= coordinates.length;
+								centerLngLat = {
+									lng: centroid[0],
+									lat: centroid[1],
+								};
+							}
+
+							popupLngLat = centerLngLat;
+							popupData = {
+								title:
+									props.title ||
+									props.description ||
+									"Unknown Location",
+								description: props.about || "",
+								image: props.image || undefined,
+							};
+							popupOpen = true;
+						}
+					}}
+					onmouseenter={() =>
+						(map.getCanvas().style.cursor = "pointer")}
+					onmouseleave={() => (map.getCanvas().style.cursor = "")}
+				/>
+			{/if}
 		</GeoJSONSource>
+
+		<Popup
+			bind:open={popupOpen}
+			lnglat={popupLngLat}
+			closeButton={true}
+			closeOnClick={true}
+		>
+			{#key popupData.title}
+				<div class="max-w-xs popup-content">
+					{#if popupData.image}
+						<div
+							class="overflow-hidden rounded-t-lg mb-2 relative group"
+						>
+							<img
+								src={popupData.image}
+								alt={popupData.title}
+								class="w-full h-32 object-cover transition-transform duration-700 group-hover:scale-110"
+							/>
+							<div
+								class="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+							></div>
+						</div>
+					{/if}
+					<div class="px-2 pb-2">
+						<h3 class="font-bold text-lg mb-1 text-gray-800">
+							{popupData.title}
+						</h3>
+						<p class="text-sm text-gray-600 leading-relaxed">
+							{popupData.description}
+						</p>
+					</div>
+				</div>
+			{/key}
+		</Popup>
 
 		<GeolocateControl
 			position="top-right"
@@ -654,3 +751,45 @@
 		<FullScreenControl position="top-right" />
 	</MapLibre>
 </div>
+
+<style>
+	:global(.maplibregl-popup-content) {
+		padding: 0;
+		border-radius: 0.5rem;
+		box-shadow:
+			0 10px 15px -3px rgb(0 0 0 / 0.1),
+			0 4px 6px -2px rgb(0 0 0 / 0.1);
+		overflow: hidden;
+	}
+
+	:global(.maplibregl-popup-close-button) {
+		font-size: 1.5rem;
+		color: white;
+		text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+		z-index: 10;
+		padding: 0 8px;
+		right: 0;
+		top: 0;
+	}
+
+	:global(.maplibregl-popup-close-button:hover) {
+		background-color: transparent;
+		color: #ef4444;
+	}
+
+	.popup-content {
+		animation: pop-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		opacity: 0;
+	}
+
+	@keyframes pop-in {
+		0% {
+			opacity: 0;
+			transform: translateY(10px) scale(0.95);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+</style>

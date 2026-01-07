@@ -55,19 +55,19 @@
                             27.681998
                         ],
                         [
-                            85.317670,
+                            85.31767,
                             27.681511
                         ],
                         [
-                            85.317550,
+                            85.31755,
                             27.681249
                         ],
                         [
-                            85.317410,
+                            85.31741,
                             27.680886
                         ],
                         [
-                            85.317250,
+                            85.31725,
                             27.680475
                         ],
                         [
@@ -75,27 +75,27 @@
                             27.680253
                         ],
                         [
-                            85.319300,
+                            85.3193,
                             27.679745
                         ],
                         [
                             85.319659,
-                            27.679620
+                            27.67962
                         ],
                         [
-                            85.320490,
-                            27.679340
+                            85.32049,
+                            27.67934
                         ],
                         [
                             85.320518,
                             27.679834
                         ],
                         [
-                            85.320520,
+                            85.32052,
                             27.680234
                         ],
                         [
-                            85.32050,
+                            85.3205,
                             27.68047
                         ],
                         [
@@ -103,7 +103,7 @@
                             27.68072
                         ],
                         [
-                            85.32040,
+                            85.3204,
                             27.68084
                         ],
                         [
@@ -111,7 +111,7 @@
                             27.68109
                         ],
                         [
-                            85.320070,
+                            85.32007,
                             27.681474
                         ],
                         [
@@ -576,10 +576,10 @@
                         ],
                         [
                             85.320864,
-                            27.684240
+                            27.68424
                         ],
                         [
-                            85.320830,
+                            85.32083,
                             27.684154
                         ],
                         [
@@ -588,7 +588,7 @@
                         ],
                         [
                             85.320679,
-                            27.684040
+                            27.68404
                         ],
                         [
                             85.32063950342518,
@@ -619,12 +619,12 @@
                             27.683214
                         ],
                         [
-                            85.319180,
+                            85.31918,
                             27.683102
                         ],
                         [
                             85.319062,
-                            27.683050
+                            27.68305
                         ],
                         [
                             85.318952,
@@ -657,7 +657,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "ICTC Building"
+                "description": "ICTC Building",
+                "title": "ICTC Building",
+                "about": "This is the location for ICTC Building.",
+                "image": "https://media.istockphoto.com/id/523460307/photo/little-girl-at-the-library-picking-a-book.jpg?s=612x612&w=0&k=20&c=aIdRKhvYwbC9hR-tnFP-AuONm2pqb5pv3UrSuoYW-Fo="
             },
             "geometry": {
                 "type": "Point",
@@ -670,7 +673,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Campus Mess"
+                "description": "Campus Mess",
+                "title": "Campus Mess",
+                "about": "This is the location for Campus Mess.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -683,7 +689,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Dean Office"
+                "description": "Dean Office",
+                "title": "Dean Office",
+                "about": "This is the location for Dean Office.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -696,7 +705,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Department of Architecture"
+                "description": "Department of Architecture",
+                "title": "Department of Architecture",
+                "about": "This is the location for Department of Architecture.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -709,7 +721,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "ASA Office"
+                "description": "ASA Office",
+                "title": "ASA Office",
+                "about": "This is the location for ASA Office.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -722,7 +737,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "MSC Hostel"
+                "description": "MSC Hostel",
+                "title": "MSC Hostel",
+                "about": "This is the location for MSC Hostel.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -735,7 +753,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Hydro Lab"
+                "description": "Hydro Lab",
+                "title": "Hydro Lab",
+                "about": "This is the location for Hydro Lab.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -748,7 +769,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Department of Roads"
+                "description": "Department of Roads",
+                "title": "Department of Roads",
+                "about": "This is the location for Department of Roads.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -761,7 +785,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Locus Office"
+                "description": "Locus Office",
+                "title": "Locus Office",
+                "about": "This is the location for Locus Office.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -774,7 +801,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Department of Electrical, Electronics and Computer Engineering"
+                "description": "Department of Electrical, Electronics and Computer Engineering",
+                "title": "Department of Electrical, Electronics and Computer Engineering",
+                "about": "This is the location for Department of Electrical, Electronics and Computer Engineering.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -787,7 +817,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Robotics Club"
+                "description": "Robotics Club",
+                "title": "Robotics Club",
+                "about": "This is the location for Robotics Club.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -800,7 +833,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Continuing Education Center"
+                "description": "Continuing Education Center",
+                "title": "Continuing Education Center",
+                "about": "This is the location for Continuing Education Center.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -813,7 +849,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Pulchowk Library"
+                "description": "Pulchowk Library",
+                "title": "Pulchowk Library",
+                "about": "This is the location for Pulchowk Library.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -826,7 +865,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Electrical Club"
+                "description": "Electrical Club",
+                "title": "Electrical Club",
+                "about": "This is the location for Electrical Club.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -839,7 +881,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Block C"
+                "description": "Block C",
+                "title": "Block C",
+                "about": "This is the location for Block C.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -852,7 +897,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "ICT Building"
+                "description": "ICT Building",
+                "title": "ICT Building",
+                "about": "This is the location for ICT Building.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -865,7 +913,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Embark College"
+                "description": "Embark College",
+                "title": "Embark College",
+                "about": "This is the location for Embark College.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -878,7 +929,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Nabil Bank ATM"
+                "description": "Nabil Bank ATM",
+                "title": "Nabil Bank ATM",
+                "about": "This is the location for Nabil Bank ATM.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -891,7 +945,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Siddhartha Bank ATM"
+                "description": "Siddhartha Bank ATM",
+                "title": "Siddhartha Bank ATM",
+                "about": "This is the location for Siddhartha Bank ATM.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -904,7 +961,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Heavy Lab"
+                "description": "Heavy Lab",
+                "title": "Heavy Lab",
+                "about": "This is the location for Heavy Lab.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -917,7 +977,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Parking"
+                "description": "Parking",
+                "title": "Parking",
+                "about": "This is the location for Parking.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -930,7 +993,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Helicopter Parking"
+                "description": "Helicopter Parking",
+                "title": "Helicopter Parking",
+                "about": "This is the location for Helicopter Parking.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -943,7 +1009,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "PI Chautari"
+                "description": "PI Chautari",
+                "title": "PI Chautari",
+                "about": "This is the location for PI Chautari.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -956,7 +1025,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Department of Mechanical and Aerospace Engineering"
+                "description": "Department of Mechanical and Aerospace Engineering",
+                "title": "Department of Mechanical and Aerospace Engineering",
+                "about": "This is the location for Department of Mechanical and Aerospace Engineering.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -969,7 +1041,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Saraswati Mandir"
+                "description": "Saraswati Mandir",
+                "title": "Saraswati Mandir",
+                "about": "This is the location for Saraswati Mandir.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -982,7 +1057,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Department of Civil Engineering"
+                "description": "Department of Civil Engineering",
+                "title": "Department of Civil Engineering",
+                "about": "This is the location for Department of Civil Engineering.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -995,7 +1073,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "F Block"
+                "description": "F Block",
+                "title": "F Block",
+                "about": "This is the location for F Block.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1008,7 +1089,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Department of Mechanical and Aerospace Engineering"
+                "description": "Department of Mechanical and Aerospace Engineering",
+                "title": "Department of Mechanical and Aerospace Engineering",
+                "about": "This is the location for Department of Mechanical and Aerospace Engineering.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1021,7 +1105,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "The Helm of IOE Pulchowk"
+                "description": "The Helm of IOE Pulchowk",
+                "title": "The Helm of IOE Pulchowk",
+                "about": "This is the location for The Helm of IOE Pulchowk.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1034,7 +1121,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "FSU Office"
+                "description": "FSU Office",
+                "title": "FSU Office",
+                "about": "This is the location for FSU Office.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1047,7 +1137,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "NTBNS"
+                "description": "NTBNS",
+                "title": "NTBNS",
+                "about": "This is the location for NTBNS.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1060,7 +1153,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Department of Applied Sciences and Chemical Engineering"
+                "description": "Department of Applied Sciences and Chemical Engineering",
+                "title": "Department of Applied Sciences and Chemical Engineering",
+                "about": "This is the location for Department of Applied Sciences and Chemical Engineering.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1073,7 +1169,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Department of Applied Sciences and chemical engineering"
+                "description": "Department of Applied Sciences and chemical engineering",
+                "title": "Department of Applied Sciences and chemical engineering",
+                "about": "This is the location for Department of Applied Sciences and chemical engineering.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1086,7 +1185,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "G Block"
+                "description": "G Block",
+                "title": "G Block",
+                "about": "This is the location for G Block.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1099,7 +1201,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "CIDS"
+                "description": "CIDS",
+                "title": "CIDS",
+                "about": "This is the location for CIDS.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1112,7 +1217,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Department of Science and Humanities"
+                "description": "Department of Science and Humanities",
+                "title": "Department of Science and Humanities",
+                "about": "This is the location for Department of Science and Humanities.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1125,7 +1233,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Main Entrance"
+                "description": "Main Entrance",
+                "title": "Main Entrance",
+                "about": "This is the location for Main Entrance.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1138,7 +1249,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "First Entrance"
+                "description": "First Entrance",
+                "title": "First Entrance",
+                "about": "This is the location for First Entrance.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1151,7 +1265,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Second Entrance"
+                "description": "Second Entrance",
+                "title": "Second Entrance",
+                "about": "This is the location for Second Entrance.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1164,7 +1281,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Hydropower Testing Lab"
+                "description": "Hydropower Testing Lab",
+                "title": "Hydropower Testing Lab",
+                "about": "This is the location for Hydropower Testing Lab.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1177,7 +1297,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "SEDS Pulchowk"
+                "description": "SEDS Pulchowk",
+                "title": "SEDS Pulchowk",
+                "about": "This is the location for SEDS Pulchowk.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1190,7 +1313,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Center for Energy Studies"
+                "description": "Center for Energy Studies",
+                "title": "Center for Energy Studies",
+                "about": "This is the location for Center for Energy Studies.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1203,7 +1329,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Pulchowk Cricket Ground"
+                "description": "Pulchowk Cricket Ground",
+                "title": "Pulchowk Cricket Ground",
+                "about": "This is the location for Pulchowk Cricket Ground.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1216,7 +1345,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Pulchowk Football Ground"
+                "description": "Pulchowk Football Ground",
+                "title": "Pulchowk Football Ground",
+                "about": "This is the location for Pulchowk Football Ground.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1229,7 +1361,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Pulchowk Volleyball Court"
+                "description": "Pulchowk Volleyball Court",
+                "title": "Pulchowk Volleyball Court",
+                "about": "This is the location for Pulchowk Volleyball Court.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1242,7 +1377,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Cricket Practice Pitch"
+                "description": "Cricket Practice Pitch",
+                "title": "Cricket Practice Pitch",
+                "about": "This is the location for Cricket Practice Pitch.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1255,7 +1393,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Basketball Court"
+                "description": "Basketball Court",
+                "title": "Basketball Court",
+                "about": "This is the location for Basketball Court.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1268,7 +1409,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Block A Pulchowk Boys Hostel"
+                "description": "Block A Pulchowk Boys Hostel",
+                "title": "Block A Pulchowk Boys Hostel",
+                "about": "This is the location for Block A Pulchowk Boys Hostel.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1281,7 +1425,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Block B Pulchowk Boys Hostel"
+                "description": "Block B Pulchowk Boys Hostel",
+                "title": "Block B Pulchowk Boys Hostel",
+                "about": "This is the location for Block B Pulchowk Boys Hostel.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1294,7 +1441,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Block C Pulchowk Boys Hostel"
+                "description": "Block C Pulchowk Boys Hostel",
+                "title": "Block C Pulchowk Boys Hostel",
+                "about": "This is the location for Block C Pulchowk Boys Hostel.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1307,7 +1457,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Niraula Stores"
+                "description": "Niraula Stores",
+                "title": "Niraula Stores",
+                "about": "This is the location for Niraula Stores.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1320,7 +1473,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Calisthenics park, Outdoor Gym"
+                "description": "Calisthenics park, Outdoor Gym",
+                "title": "Calisthenics park, Outdoor Gym",
+                "about": "This is the location for Calisthenics park, Outdoor Gym.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1333,7 +1489,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Chemical Engineering Lab"
+                "description": "Chemical Engineering Lab",
+                "title": "Chemical Engineering Lab",
+                "about": "This is the location for Chemical Engineering Lab.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1346,7 +1505,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Pulchowk Gym Hall"
+                "description": "Pulchowk Gym Hall",
+                "title": "Pulchowk Gym Hall",
+                "about": "This is the location for Pulchowk Gym Hall.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1359,7 +1521,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Campus Canteen"
+                "description": "Campus Canteen",
+                "title": "Campus Canteen",
+                "about": "This is the location for Campus Canteen.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1372,7 +1537,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Pulchowk Music Club"
+                "description": "Pulchowk Music Club",
+                "title": "Pulchowk Music Club",
+                "about": "This is the location for Pulchowk Music Club.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1385,7 +1553,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Pulchowk Girls Hostel"
+                "description": "Pulchowk Girls Hostel",
+                "title": "Pulchowk Girls Hostel",
+                "about": "This is the location for Pulchowk Girls Hostel.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1398,7 +1569,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Pulchowk Teacher's Quarter"
+                "description": "Pulchowk Teacher's Quarter",
+                "title": "Pulchowk Teacher's Quarter",
+                "about": "This is the location for Pulchowk Teacher's Quarter.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1411,7 +1585,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Staff Quarter"
+                "description": "Staff Quarter",
+                "title": "Staff Quarter",
+                "about": "This is the location for Staff Quarter.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1424,7 +1601,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Exam Control Office, IOE"
+                "description": "Exam Control Office, IOE",
+                "title": "Exam Control Office, IOE",
+                "about": "This is the location for Exam Control Office, IOE.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1437,7 +1617,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Om Stationery Store"
+                "description": "Om Stationery Store",
+                "title": "Om Stationery Store",
+                "about": "This is the location for Om Stationery Store.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1450,7 +1633,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "E Block"
+                "description": "E Block",
+                "title": "E Block",
+                "about": "This is the location for E Block.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1463,7 +1649,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "D Block"
+                "description": "D Block",
+                "title": "D Block",
+                "about": "This is the location for D Block.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1476,7 +1665,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "FSU Clinic"
+                "description": "FSU Clinic",
+                "title": "FSU Clinic",
+                "about": "This is the location for FSU Clinic.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
@@ -1489,7 +1681,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Badminton Court"
+                "description": "Badminton Court",
+                "title": "Badminton Court",
+                "about": "This is the location for Badminton Court.",
+                "image": ""
             },
             "geometry": {
                 "type": "Point",
