@@ -507,6 +507,7 @@
 							<li>
 								<button
 									data-suggestion-index={index}
+									onmousedown={(e) => e.preventDefault()}
 									onclick={() =>
 										suggestion.properties?.description &&
 										selectSuggestion(
