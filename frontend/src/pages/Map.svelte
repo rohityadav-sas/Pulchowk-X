@@ -1217,20 +1217,40 @@
 
 				{#if !isNavMinimized}
 					<div
-						class="flex flex-col gap-3 relative overflow-hidden"
+						class="flex flex-col gap-3 relative"
 						transition:slide={{ duration: 350, easing: quintOut }}
 					>
-						<div class="relative flex flex-col gap-3">
-							<!-- Start Input -->
-							<div class="relative group">
+						<div
+							class="relative bg-white rounded-lg border border-gray-300 shadow-sm ring-1 ring-gray-900/5 transition-all focus-within:shadow-md focus-within:border-blue-300 isolate"
+						>
+							<!-- Connector -->
+							<div
+								class="absolute top-4.5 bottom-4.5 left-3.75 z-10 flex flex-col items-center justify-between pointer-events-none w-4"
+							>
+								<!-- Start Icon -->
 								<div
-									class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-gray-400"
+									class="w-3 h-3 rounded-full border-2 border-gray-400 bg-white shrink-0"
 								></div>
+
+								<!-- Dotted Line -->
+								<div
+									class="w-0.5 grow my-1 border-l-2 border-dotted border-gray-300"
+								></div>
+
+								<!-- End Icon -->
+								<div
+									class="w-3 h-3 rounded-full bg-red-500 shrink-0"
+								></div>
+							</div>
+
+							<!-- Start Input Row -->
+							<div class="relative">
 								<input
 									bind:value={navStartSearch}
 									type="text"
+									name="navStart"
 									placeholder="Choose starting point"
-									class="w-full pl-10 pr-10 py-3 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm font-medium"
+									class="w-full h-11 pl-10 pr-10 bg-transparent border-none text-sm font-medium text-gray-700 placeholder:text-gray-400 rounded-t-lg"
 									onfocus={() => {
 										showNavStartSuggestions = true;
 										showNavEndSuggestions = false;
@@ -1241,7 +1261,7 @@
 								/>
 								{#if navStartSearch || showNavStartSuggestions}
 									<button
-										class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-200 transition-colors"
+										class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
 										onclick={(e) => {
 											e.preventDefault();
 											e.stopPropagation();
@@ -1268,7 +1288,7 @@
 								{/if}
 								{#if showNavStartSuggestions}
 									<div
-										class="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20 max-h-60 overflow-y-auto"
+										class="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-30 max-h-60 overflow-y-auto"
 									>
 										<button
 											class="w-full px-4 py-3 text-left hover:bg-blue-50 text-blue-600 font-medium flex items-center gap-2"
@@ -1325,21 +1345,17 @@
 								{/if}
 							</div>
 
-							<!-- Connecting Line -->
-							<div
-								class="absolute left-4.5 top-10 bottom-10 w-0.5 bg-gray-300 border-l border-dashed border-gray-300 pointer-events-none"
-							></div>
+							<!-- Divider -->
+							<div class="mx-10 h-px bg-gray-100"></div>
 
-							<!-- End Input -->
-							<div class="relative group">
-								<div
-									class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-red-500"
-								></div>
+							<!-- End Input Row -->
+							<div class="relative">
 								<input
 									bind:value={navEndSearch}
 									type="text"
+									name="navEnd"
 									placeholder="Choose destination"
-									class="w-full pl-10 pr-10 py-3 rounded-xl bg-gray-50 border-gray-200 text-gray-800 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+									class="w-full h-11 pl-10 pr-10 bg-transparent border-none text-sm font-semibold text-gray-900 placeholder:text-gray-400 rounded-b-lg"
 									onfocus={() => {
 										showNavEndSuggestions = true;
 										showNavStartSuggestions = false;
@@ -1350,7 +1366,7 @@
 								/>
 								{#if navEndSearch || showNavEndSuggestions}
 									<button
-										class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-200 transition-colors"
+										class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
 										onclick={(e) => {
 											e.preventDefault();
 											e.stopPropagation();
@@ -1377,7 +1393,7 @@
 								{/if}
 								{#if showNavEndSuggestions}
 									<div
-										class="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20 max-h-60 overflow-y-auto"
+										class="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-30 max-h-60 overflow-y-auto"
 									>
 										{#each filteredNavEndSuggestions as suggestion}
 											<button
@@ -1406,18 +1422,18 @@
 
 						{#if isCalculatingRoute}
 							<div
-								class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between"
+								class="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between shadow-sm"
 							>
 								<div class="flex flex-col gap-2">
 									<div
-										class="h-7 w-24 bg-gray-200 rounded animate-pulse"
+										class="h-6 w-24 bg-gray-100 rounded animate-pulse"
 									></div>
 									<div
-										class="h-3 w-32 bg-gray-100 rounded animate-pulse"
+										class="h-3 w-32 bg-gray-50 rounded animate-pulse"
 									></div>
 								</div>
 								<div
-									class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center"
+									class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center"
 								>
 									<LoadingSpinner size="sm" />
 								</div>
@@ -1426,12 +1442,12 @@
 
 						{#if routeDuration}
 							<div
-								class="mt-4 p-4 border-t border-gray-100 flex items-center justify-between"
+								class="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between shadow-sm"
 							>
 								<div>
 									<div class="flex items-baseline gap-2">
 										<span
-											class="text-2xl font-bold text-blue-600"
+											class="text-2xl font-bold text-gray-900"
 											>{routeDuration}</span
 										>
 										<span
@@ -1439,14 +1455,16 @@
 											>({routeDistance})</span
 										>
 									</div>
-									<div class="text-xs text-gray-400 mt-0.5">
+									<div class="text-xs text-gray-500 mt-0.5">
 										{isDirectFallback
 											? "Straight line (Internal paths not mapped)"
 											: "Walking via campus paths"}
 									</div>
 								</div>
-								<div
-									class="size-10 bg-blue-600 text-white rounded-full flex items-center justify-center filter drop-shadow-lg drop-shadow-gray-600"
+								<button
+									aria-label="Get directions"
+									class="size-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-600/20 transition-all hover:scale-105 active:scale-95"
+									onclick={getDirections}
 								>
 									<svg
 										class="w-5 h-5"
@@ -1461,7 +1479,7 @@
 											d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
 										/>
 									</svg>
-								</div>
+								</button>
 							</div>
 						{/if}
 					</div>
@@ -1489,6 +1507,25 @@
 				/>
 			</svg>
 			You are outside the Pulchowk Campus area
+			<button
+				onclick={() => (showOutsideMessage = false)}
+				class="ml-2 hover:bg-white/20 rounded-full p-1 transition-colors"
+				aria-label="Close"
+			>
+				<svg
+					class="w-4 h-4"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
+				</svg>
+			</button>
 		</div>
 	{/if}
 
