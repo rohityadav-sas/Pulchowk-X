@@ -200,11 +200,7 @@
 		) {
 			showOutsideMessage = true;
 
-			// Stop the geolocate control from "spinning" or "tracking"
-			// calling trigger() when it is tracking will stop it
-			if (geolocateControl) {
-				geolocateControl.trigger();
-			}
+			if (geolocateControl) geolocateControl.trigger();
 
 			setTimeout(() => {
 				showOutsideMessage = false;
