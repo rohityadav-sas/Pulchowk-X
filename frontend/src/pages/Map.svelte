@@ -433,18 +433,13 @@
 		};
 		navEndSearch = destName;
 
-		if (userLocation) {
-			startPoint = {
-				coords: userLocation,
-				name: "Your Location",
-				feature: null,
-			};
-			navStartSearch = "Your Location";
-			getDirections();
-		} else {
-			startPoint = null;
-			navStartSearch = "";
-		}
+		// Clear start point to allow user to select it
+		startPoint = null;
+		navStartSearch = "";
+		routeGeoJSON = null;
+		routeDuration = "";
+		routeDistance = "";
+		focusedInput = "start";
 	}
 
 	async function getDirections() {
@@ -622,6 +617,21 @@
 
 	function useUserLocation() {
 		if (userLocation) {
+			const [sw, ne] = PULCHOWK_BOUNDS;
+			const isInside =
+				userLocation[0] >= sw[0] &&
+				userLocation[0] <= ne[0] &&
+				userLocation[1] >= sw[1] &&
+				userLocation[1] <= ne[1];
+
+			if (!isInside) {
+				showOutsideMessage = true;
+				setTimeout(() => {
+					showOutsideMessage = false;
+				}, 4000);
+				return;
+			}
+
 			startPoint = {
 				coords: userLocation,
 				name: "Your Location",
