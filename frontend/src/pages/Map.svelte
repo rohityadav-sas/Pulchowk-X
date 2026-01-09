@@ -245,6 +245,7 @@
 
 	// Navigation State
 	let isNavigating = $state(false);
+	let isCalculatingRoute = $state(false);
 	let startPoint = $state<{
 		coords: [number, number];
 		name: string;
@@ -470,6 +471,9 @@
 		// Use radiuses=200 to allow snapping to roads that are slightly further away
 		const url = `https://router.project-osrm.org/route/v1/foot/${query}?overview=full&geometries=geojson&radiuses=200;200`;
 
+		isCalculatingRoute = true;
+		routeDuration = null;
+
 		try {
 			const res = await fetch(url);
 			const data = await res.json();
@@ -505,6 +509,7 @@
 						endCoords,
 						straightDistance,
 					);
+					isCalculatingRoute = false;
 					return;
 				}
 
@@ -540,6 +545,7 @@
 				routeDistance = distance;
 
 				fitBoundsToRoute(route.geometry.coordinates);
+				isCalculatingRoute = false;
 			} else {
 				// No route found, fallback
 				createStraightLineRoute(
@@ -547,11 +553,13 @@
 					endCoords,
 					straightDistance,
 				);
+				isCalculatingRoute = false;
 			}
 		} catch (e) {
 			console.error("Error fetching directions:", e);
 			// Fallback on error
 			createStraightLineRoute(startCoords, endCoords, straightDistance);
+			isCalculatingRoute = false;
 		}
 	}
 
@@ -1334,10 +1342,31 @@
 						</div>
 					</div>
 
+					{#if isCalculatingRoute}
+						<div
+							class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between"
+							transition:slide
+						>
+							<div class="flex flex-col gap-2">
+								<div
+									class="h-7 w-24 bg-gray-200 rounded animate-pulse"
+								></div>
+								<div
+									class="h-3 w-32 bg-gray-100 rounded animate-pulse"
+								></div>
+							</div>
+							<div
+								class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center"
+							>
+								<LoadingSpinner size="sm" />
+							</div>
+						</div>
+					{/if}
+
 					{#if routeDuration}
 						<div
 							class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between"
-							transition:fade
+							transition:slide
 						>
 							<div>
 								<div class="flex items-baseline gap-2">
