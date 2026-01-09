@@ -986,10 +986,10 @@
         {
             "type": "Feature",
             "properties": {
-                "description": "Heavy Lab",
-                "title": "Heavy Lab",
-                "about": "This is the location for Heavy Lab.",
-                "image": ""
+                "description": "Heavy Lab Block",
+                "title": "Heavy Lab Block",
+                "about": "This is the location for Heavy Lab Block.",
+                "image": "https://i.imageupload.app/575f003d6aa36f80d6a3.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -1002,10 +1002,47 @@
         {
             "type": "Feature",
             "properties": {
+                "description": "Heavy Lab",
+                "title": "Heavy Lab",
+                "about": "This is the location for Heavy Lab.",
+                "image": "https://i.imageupload.app/b6862e30c9e529c84325.jpeg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.32050399856865,
+                    27.682214022253916
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Hydraulic Lab",
+                "title": "Hydraulic Lab",
+                "about": "This is the location for Hydraulic Lab.",
+                "image": [
+                    "https://i.imageupload.app/dc83c93080d20e386e10.jpeg",
+                    "https://i.imageupload.app/9f043c5d254326482655.jpeg",
+                    "https://i.imageupload.app/e63ebebf30681d10c5c7.jpeg",
+                    "https://i.imageupload.app/d1ccc4673921579ffd3f.jpeg"
+                ]
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.3203413798231,
+                    27.68216722059954
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
                 "description": "Parking",
                 "title": "Parking",
                 "about": "Parking for the vehicles",
-                "image": ""
+                "image": "https://i.imageupload.app/7631a9eed0f76db484bc.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -1021,7 +1058,7 @@
                 "description": "Helicopter Parking",
                 "title": "Helicopter Parking",
                 "about": "The iconic Helicopter Parking.",
-                "image": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSxSkd9lRuEJ7ODBWNpD70ZhYOHPUyvXYxAXwG5NKa3PP8hPipTLZ3YNgeuM2JE8-cO1onResJjfSEAcJR4sWXS9S0DZk5wZbR6YV9qnYU3-RvTzgmiBXs79tX60o2Q8NjIM8fjNkITfR_HT=s0"
+                "image": "https://i.imageupload.app/aa36557e54f04fd4c2b7.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -1037,7 +1074,10 @@
                 "description": "PI Chautari",
                 "title": "PI Chautari",
                 "about": "This is the location for PI Chautari.",
-                "image": ""
+                "image": [
+                    "https://i.imageupload.app/c130c782c05a00f00dc6.jpeg",
+                    "https://i.imageupload.app/afcf404c3a65642de799.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
@@ -1072,7 +1112,11 @@
                 "description": "Saraswati Mandir",
                 "title": "Saraswati Mandir",
                 "about": "This is Saraswati Mandir to worship.",
-                "image": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSx7wypYKOcn127tTAnZrnvvtRNp-PWjw9vQ2prmBf2ywpQDf3_oItdgezFNmoy2tvYChS-FkUZm6wm-T2FRgzPl-W2tUTUWP9J1SzNYHKAuy_qRjCmUDabINl66ebJliAFMzeQG8Q=s4000"
+                "image": [
+                    "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSx7wypYKOcn127tTAnZrnvvtRNp-PWjw9vQ2prmBf2ywpQDf3_oItdgezFNmoy2tvYChS-FkUZm6wm-T2FRgzPl-W2tUTUWP9J1SzNYHKAuy_qRjCmUDabINl66ebJliAFMzeQG8Q=s4000",
+                    "https://i.imageupload.app/0e13fedc81f23c13412d.jpeg",
+                    "https://i.imageupload.app/75f287835a439c22eeee.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
@@ -1125,8 +1169,8 @@
                 "title": "Department of Mechanical and Aerospace Engineering",
                 "about": "This is the location for Department of Mechanical and Aerospace Engineering.",
                 "image": [
-                    "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSy57X7F1U1HldC9-kK8aozkm4SJAm_RIGy4R09eliY36RFG3Fx_qpMvfoCu-v7NXrfiCI5jctGss-YJZt2cdlgY0h0PhXP4Gz8RieLsmywf3YN5c-bitDv8sW3hGM2ERsuXiBli=s0",
-                    "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSxMUqAflGq52AKLFxjHukIxgaMvYoLvTPBSEKmfxmOG0ywjmMnPDJpOvigCUWRwAy8g13fLFF5BIf0Z9av5lrEpKqFcEEnoKedS-8tY9A51P7P9HVLxWlQcDpvNg_nUhqOqHLReIA=s0"
+                    "https://i.imageupload.app/9ba01ed76debb8515be6.jpeg",
+                    "https://i.imageupload.app/36cfb68a7870538d650e.jpeg"
                 ]
             },
             "geometry": {
@@ -1143,7 +1187,7 @@
                 "description": "The Helm of IOE Pulchowk",
                 "title": "The Helm of IOE Pulchowk",
                 "about": "This is the location for The Helm of IOE Pulchowk.",
-                "image": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSzc8vR9eZA5mQAVhm3F77-HNUSBA4zV8JQWGyyYkdvUJFx7x1HqsAmzlXxj2K0hidmfx0Z3IocmCmBhxOSouXWlMnXxuAn0pO79eIONJArw7-dqH8TH_d5LlFtSTQcTfMxQkj0=w408-h544-k-no"
+                "image": "https://i.imageupload.app/d504e434b4a7eeb3a4ad.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -1159,13 +1203,13 @@
                 "description": "FSU Office",
                 "title": "FSU Office",
                 "about": "This is the location for FSU Office.",
-                "image": ""
+                "image": "https://i.imageupload.app/fcb9107e741cc93e9c07.jpeg"
             },
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    85.3207254626837,
-                    27.682902435847012
+                    85.32075560082757,
+                    27.682847709268373
                 ]
             }
         },
@@ -1175,13 +1219,29 @@
                 "description": "NTBNS",
                 "title": "NTBNS",
                 "about": "This is the location for NTBNS.",
-                "image": ""
+                "image": "https://i.imageupload.app/4196f6c89da06431860a.jpeg"
             },
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    85.32070525005736,
-                    27.683007442872864
+                    85.32070194666937,
+                    27.68301615325798
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Pulchowk Girls",
+                "title": "Pulchowk Girls",
+                "about": "This is the location for Pulchowk Girls.",
+                "image": "https://i.imageupload.app/4ca588aa5c97d0b6ca7d.jpeg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.3206748356111,
+                    27.682918543955225
                 ]
             }
         },
@@ -1306,7 +1366,7 @@
                 "description": "Second Entrance",
                 "title": "Second Entrance",
                 "about": "This is the Entrance for Block D, F and G.",
-                "image": ""
+                "image": "https://i.imageupload.app/4e94d012793008140001.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -1370,7 +1430,7 @@
                 "description": "Pulchowk Cricket Ground",
                 "title": "Pulchowk Cricket Ground",
                 "about": "This is the location for Pulchowk Cricket Ground.",
-                "image": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyP2d7VaiQ-MAzjieotInFvQfg0CCPojYmS9Cowpxw9W7v8pXfqTQGOyQop3NTtws7POlmIDjY2vp0AQCAI70Dz6Ki19qwVV_qAGS2JQqxoHkqeyGY_cKOGNwIiAyY0fpxG5nvs=w408-h306-k-no"
+                "image": "https://i.imageupload.app/0dfccd73292c9a01934a.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -1386,7 +1446,7 @@
                 "description": "Pulchowk Football Ground",
                 "title": "Pulchowk Football Ground",
                 "about": "This is the location for Pulchowk Football Ground.",
-                "image": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwRBA8JDJs6EX2KVvQP7FK62qSlPVaCo_iqZBzxX4DAX799KybMnlSmbsdQpQloYJ1WMtQdXhQ0Jd6LOeX7ZoiJXtZzwlwVvnR0fd7XuG_DjDDpkCFrTrhYoWL6GoriA5wrydbRuyCOWKpb=w408-h544-k-no"
+                "image": "https://i.imageupload.app/d2aa167241903a0edf2d.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -1402,7 +1462,7 @@
                 "description": "Pulchowk Volleyball Court",
                 "title": "Pulchowk Volleyball Court",
                 "about": "This is the location for Pulchowk Volleyball Court.",
-                "image": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyWUIaxPra4ERqsV5dvEBdzrN1NxKIlZ-OIeYUYa3BWcG4bvFkf-uwOcYbmL5TODFCI9vqdSn7xAx0mvG28cyoJFJowkVCVdtPf8XmLwScv53prdPaI1ogWgHBCfx4YBUe31JxC=w408-h725-k-no"
+                "image": "https://i.imageupload.app/c6f41e67e20f9e8f42af.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -1418,7 +1478,7 @@
                 "description": "Cricket Practice Pitch",
                 "title": "Cricket Practice Pitch",
                 "about": "This is the location for Cricket Practice Pitch.",
-                "image": ""
+                "image": "https://i.imageupload.app/0b64cb1743860cf5df53.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -1450,7 +1510,10 @@
                 "description": "Block A Pulchowk Boys Hostel",
                 "title": "Block A Pulchowk Boys Hostel",
                 "about": "This is the location for Block A Pulchowk Boys Hostel.",
-                "image": ""
+                "image": [
+                    "https://i.imageupload.app/225b30ab0b72debe11eb.jpeg",
+                    "https://i.imageupload.app/dc332493009ca6201cfa.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
@@ -1466,7 +1529,10 @@
                 "description": "Block B Pulchowk Boys Hostel",
                 "title": "Block B Pulchowk Boys Hostel",
                 "about": "This is the location for Block B Pulchowk Boys Hostel.",
-                "image": ""
+                "image": [
+                    "https://i.imageupload.app/225b30ab0b72debe11eb.jpeg",
+                    "https://i.imageupload.app/dc332493009ca6201cfa.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
@@ -1482,7 +1548,10 @@
                 "description": "Block C Pulchowk Boys Hostel",
                 "title": "Block C Pulchowk Boys Hostel",
                 "about": "This is the location for Block C Pulchowk Boys Hostel.",
-                "image": ""
+                "image": [
+                    "https://i.imageupload.app/225b30ab0b72debe11eb.jpeg",
+                    "https://i.imageupload.app/dc332493009ca6201cfa.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
@@ -1530,7 +1599,7 @@
                 "description": "Chemical Engineering Lab",
                 "title": "Chemical Engineering Lab",
                 "about": "This is the location for Chemical Engineering Lab.",
-                "image": ""
+                "image": "https://i.imageupload.app/0e902a8de97b15838f5a.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -1546,13 +1615,16 @@
                 "description": "Pulchowk Gym Hall",
                 "title": "Pulchowk Gym Hall",
                 "about": "Gym for students. Open from 9 AM to 6 PM.",
-                "image": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSz95SXqwaOong86nhfvpzTeyPKRYu8_NBUZaqTnUBGkJtXCLhdGYzG6PEY5dVy90bi0pHjlj13tY7dUADMnVe96yZtLpWgk3o6pLwPsP1hR8ke2edxEz0wn5fT3K8QBIo0hvTeu1ztLREg=w408-h408-k-no"
+                "image": [
+                    "https://i.imageupload.app/694ab492094fc3094b65.jpeg",
+                    "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSz95SXqwaOong86nhfvpzTeyPKRYu8_NBUZaqTnUBGkJtXCLhdGYzG6PEY5dVy90bi0pHjlj13tY7dUADMnVe96yZtLpWgk3o6pLwPsP1hR8ke2edxEz0wn5fT3K8QBIo0hvTeu1ztLREg=w408-h408-k-no"
+                ]
             },
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    85.32348549458561,
-                    27.68144851050316
+                    85.32348793354589,
+                    27.681514289414693
                 ]
             }
         },
@@ -1578,7 +1650,7 @@
                 "description": "Pulchowk Music Club",
                 "title": "Pulchowk Music Club",
                 "about": "This is the location for Pulchowk Music Club.",
-                "image": ""
+                "image": "https://i.imageupload.app/2e9d7a1264d3f9b4c79e.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -1594,13 +1666,13 @@
                 "description": "Pulchowk Girls Hostel",
                 "title": "Pulchowk Girls Hostel",
                 "about": "This is the location for Pulchowk Girls Hostel.",
-                "image": ""
+                "image": "https://i.imageupload.app/f794fc7a2584769f73b0.jpeg"
             },
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    85.32406486163234,
-                    27.68302579317897
+                    85.32406172989181,
+                    27.68307449361768
                 ]
             }
         },
@@ -1610,7 +1682,12 @@
                 "description": "Pulchowk Teacher's Quarter",
                 "title": "Pulchowk Teacher's Quarter",
                 "about": "This is the location for Pulchowk Teacher's Quarter.",
-                "image": ""
+                "image": [
+                    "https://i.imageupload.app/a550dff0c0182f0ffc86.jpeg",
+                    "https://i.imageupload.app/60d13632cc66f62a3b19.jpeg",
+                    "https://i.imageupload.app/c678e1ee0160da32f7f9.jpeg",
+                    "https://i.imageupload.app/73566251e6eba1e89799.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
@@ -1626,7 +1703,10 @@
                 "description": "Staff Quarter",
                 "title": "Staff Quarter",
                 "about": "This is the location for Staff Quarter.",
-                "image": ""
+                "image": [
+                    "https://i.imageupload.app/1f358f5991fff22b80b0.jpeg",
+                    "https://i.imageupload.app/dedfab6cbf1539734115.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
@@ -1658,7 +1738,7 @@
                 "description": "Om Stationery Store",
                 "title": "Om Stationery Store",
                 "about": "Place for printing and stationery items.",
-                "image": ""
+                "image": "https://i.imageupload.app/554c87f7ae29a76ac688.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -1950,6 +2030,113 @@
                 "coordinates": [
                     85.31962706669509,
                     27.68185543970918
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Badminton Court",
+                "title": "Badminton Court",
+                "about": "This is the location for Badminton Court.",
+                "image": [
+                    "https://i.imageupload.app/7e74755e5b96bb3f2777.jpeg",
+                    "https://i.imageupload.app/a61519f628caddba150b.jpeg"
+                ]
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.32354890743278,
+                    27.68178302016902
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Garden Area",
+                "title": "Garden Area",
+                "about": "This is the location for Garden Area.",
+                "image": "https://i.imageupload.app/d429a23f6d926673af5d.jpeg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.32366555744233,
+                    27.681687524653015
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Paraphet",
+                "title": "Paraphet",
+                "about": "This is the location for Paraphet.",
+                "image": "https://i.imageupload.app/a4efa30fd6f3f0d9ff61.jpeg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.32149154665098,
+                    27.682909787818645
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Changing Room and Toilet",
+                "title": "Changing Room and Toilet",
+                "about": "This is the location for Changing Room and Toilet.",
+                "image": [
+                    "https://i.imageupload.app/dd1e491988cf51f5956d.jpeg",
+                    "https:i.imageupload.app/0d03baeb0edf6606ea42.jpeg"
+                ]
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.32170295101872,
+                    27.682637979662985
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Parking",
+                "title": "Parking",
+                "about": "This is the location for Parking.",
+                "image": [
+                    "https://i.imageupload.app/a7ab0b6555a6787c3def.jpeg"
+                ]
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.32092042329674,
+                    27.68277752595847
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Suspension Bridge",
+                "title": "Suspension Bridge",
+                "about": "This is the location for Suspension Bridge.",
+                "image": [
+                    "https://i.imageupload.app/01fe9ff9766ee15e9bfe.jpeg",
+                    "https://i.imageupload.app/ac7b55922920924ceaab.jpeg"
+                ]
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.32131159196621,
+                    27.682608301646283
                 ]
             }
         }
