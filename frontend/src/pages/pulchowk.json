@@ -695,7 +695,10 @@
                 "description": "Dean Office",
                 "title": "Dean Office",
                 "about": "This is the location for Dean Office.",
-                "image": ""
+                "image": [
+                    "https://i.imageupload.app/c29c75aabe8395ef3972.jpeg",
+                    "https://i.imageupload.app/ab6b8746f0397c5e6bd1.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
@@ -711,7 +714,9 @@
                 "description": "Department of Architecture",
                 "title": "Department of Architecture",
                 "about": "This is the location for Department of Architecture.",
-                "image": ""
+                "image": [
+                    "https://i.imageupload.app/94c8a6cb627b4d29415e.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
@@ -780,8 +785,8 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    85.31990450135862,
-                    27.68073700031121
+                    85.31987423799086,
+                    27.680752787168743
                 ]
             }
         },
@@ -791,7 +796,7 @@
                 "description": "Locus Office",
                 "title": "Locus Office",
                 "about": "This is the location for Locus Office.",
-                "image": ""
+                "image": "https://i.imageupload.app/16c6f4436ab30f8770c5.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -807,7 +812,10 @@
                 "description": "Department of Electrical, Electronics and Computer Engineering",
                 "title": "Department of Electrical, Electronics and Computer Engineering",
                 "about": "This is the location for Department of Electrical, Electronics and Computer Engineering.",
-                "image": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyQO0Ixjez50rAffC5EumXDzxnVjKR0w_AYYrtSXLh9Ge3geV1CUUOud8tstlp0GnWQRHooxLoiewU-14hBNsfrIR96yGi7qFMWygeFYQDgwfp6r-O8z5CIr7tMd6RfIGoL1Uqnrw=s0"
+                "image": [
+                    "https://i.imageupload.app/df60e34d608189b1eec0.jpeg",
+                    "https://i.imageupload.app/577b7492ac230083e987.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
@@ -828,8 +836,8 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    85.31901450533206,
-                    27.68136224565515
+                    85.3190521926656,
+                    27.681470604000538
                 ]
             }
         },
@@ -839,7 +847,11 @@
                 "description": "Continuing Education Center",
                 "title": "Continuing Education Center",
                 "about": "This is the location for Continuing Education Center.",
-                "image": ""
+                "image": [
+                    "https://i.imageupload.app/888d37bdf1f73fdf0d3d.jpeg",
+                    "https://i.imageupload.app/38b5b50bb2346a286a8d.jpeg",
+                    "https://i.imageupload.app/a45729c1dd74b49198dc.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
@@ -855,13 +867,17 @@
                 "description": "Pulchowk Library",
                 "title": "Pulchowk Library",
                 "about": "This is the location for Pulchowk Library.",
-                "image": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSw22S7oiJwDzIbqS3LhcVv8hTOd1VZsF4cC_kCYzmTheQBkXEO22eQmWW2aayWSLEXvpBqcA4JomqKqD_e23H4K4OmKv2urf51JWyikIJX3EITJzXsa0JczF1nAXk_3p-LXGYCW=s0"
+                "image": [
+                    "https://i.imageupload.app/e65054690fa0e14b565a.jpeg",
+                    "https://i.imageupload.app/4a8f875e3d20f0af9263.jpeg",
+                    "https://i.imageupload.app/2e8246580d6eb8f4b325.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    85.31944424082258,
-                    27.681616524851407
+                    85.3194349446735,
+                    27.681579366803874
                 ]
             }
         },
@@ -871,7 +887,7 @@
                 "description": "Electrical Club",
                 "title": "Electrical Club",
                 "about": "This is the location for Electrical Club.",
-                "image": ""
+                "image": "https://i.imageupload.app/a3040e599637be7f7c17.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -903,7 +919,10 @@
                 "description": "ICT Building",
                 "title": "ICT Building",
                 "about": "This is the location for ICT Building.",
-                "image": ""
+                "image": [
+                    "https://i.imageupload.app/554d81fe37e15e94fc60.jpeg",
+                    "https://i.imageupload.app/499c26c422739e1565e4.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
@@ -1088,7 +1107,6 @@
                 "image": [
                     "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSx8HiL_SL_epEpzepLpOspwuOSeOgUWqz3MEfc6cBvMTCCAQhYWrACkzrVwKz5aXiyzzieSd1gHR2H4GyeRHbouhWmyOIrpoCeaYxBlknlC0UiJxRr6DPcr75BMzHi__QjSJN--UQ=s0",
                     "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSx9OmbBii3by02nQKjvSrKXTEPbO1acKQNk4tF6WfgU8Ojn0CDJ4TYcefJoExhDmFlrHKXcZ3KsozQZspYDPy2Hs1ZthxhrIA42zp2_ExFNqI1B3zp-K3nrKYB4EEEraBKNHHDi=w408-h544-k-no",
-                    "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwbet-_55NLQKtaubpTrm54FyptlSDGUpoaRym1fM-soNB-peeuWCv8at5qFj0KYDw-KpsUFkOcHHKHpb6s_KP3x3b8h3I1KVGLkRk9v6oKuVfQYcEkR1Xe7ohV8xbog9WfgZwG=s0",
                     "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwULJ3WSdju8qjjm3v9oxVSorgq1f0DyblyQo_hIao58Qdob0Jqd-7yV2ULqza5XDXZgZYcygafI5GZPJKMJad-q9FUgdBm6q3goYGXoJLl9FwlKZX5x8haWr1Pb8bWGl3yd6IiC5_Xrsc=s0"
                 ]
             },
@@ -1253,7 +1271,10 @@
                 "description": "Main Entrance",
                 "title": "Main Entrance",
                 "about": "This is the location for Main Entrance.",
-                "image": ""
+                "image": [
+                    "https://i.imageupload.app/662d59819c48fa131738.jpeg",
+                    "https://i.imageupload.app/94047dc912b8e68b170c.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
@@ -1653,7 +1674,7 @@
                 "description": "E Block",
                 "title": "E Block",
                 "about": "This is the location for E Block.",
-                "image": ""
+                "image": "https://i.imageupload.app/d60a388b187d9058c42e.jpeg"
             },
             "geometry": {
                 "type": "Point",
@@ -1685,13 +1706,16 @@
                 "description": "FSU Clinic",
                 "title": "FSU Clinic",
                 "about": "This is the location for FSU Clinic.",
-                "image": ""
+                "image": [
+                    "https://i.imageupload.app/2db16f144f106851348a.jpeg",
+                    "https://i.imageupload.app/3f3a8deb1cc70544f7d6.jpeg"
+                ]
             },
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    85.31924168355874,
-                    27.681570244524437
+                    85.3192558536719,
+                    27.681596676189187
                 ]
             }
         },
@@ -1701,13 +1725,231 @@
                 "description": "Badminton Court",
                 "title": "Badminton Court",
                 "about": "This is the location for Badminton Court.",
-                "image": ""
+                "image": "https://i.imageupload.app/ec68fb8f53311cce59ef.jpeg"
             },
             "geometry": {
                 "type": "Point",
                 "coordinates": [
                     85.31850453478063,
                     27.68195320004999
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Central Material Testing Laboratory",
+                "title": "Central Material Testing Laboratory",
+                "about": "This is the location for Central Material Testing Laboratory.",
+                "image": [
+                    "https://i.imageupload.app/34a78b41ff36ed2ab6ab.jpeg",
+                    "https://i.imageupload.app/7afddecdcaaa438aaecd.jpeg"
+                ]
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.31862939361366,
+                    27.682452614638663
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Badminton Court",
+                "title": "Badminton Court",
+                "about": "This is the location for Badminton Court.",
+                "image": "https://i.imageupload.app/85c94fb86c9e7227a4a4.jpeg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.3187278522779,
+                    27.68049264560473
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Cave",
+                "title": "Cave",
+                "about": "There is a hidden treasure in this cave. Find it if you can!",
+                "image": "https://i.imageupload.app/5da52e1c7f0ddfb5ec47.jpeg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.31794947683699,
+                    27.680847307223573
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Fountain",
+                "title": "Fountain",
+                "about": "This is the location for Fountain.",
+                "image": "https://i.imageupload.app/614903d792e09af4e7ec.jpeg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.31887941661347,
+                    27.68235589280647
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Workshop Area",
+                "title": "Workshop Area",
+                "about": "This is the location for Workshop Area.",
+                "image": ""
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.31950279900741,
+                    27.68124302750384
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "High Voltage Lab",
+                "title": "High Voltage Lab",
+                "about": "This is the location for High Voltage Lab.",
+                "image": "https://i.imageupload.app/ff552f57d017829aaeff.jpeg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.31934978609263,
+                    27.6809369819715
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Machine Workshop",
+                "title": "Machine Workshop",
+                "about": "This is the location for Machine Workshop.",
+                "image": "https://i.imageupload.app/daf8166314cf9efad4e0.jpeg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.31906537040504,
+                    27.681269249391733
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Water Vending Machine",
+                "title": "Water Vending Machine",
+                "about": "This is the location for Water Vending Machine.",
+                "image": [
+                    "https://i.imageupload.app/16467e87e31dcc004d85.jpeg",
+                    "https://i.imageupload.app/2c97209de3cb21239fd0.jpeg"
+                ]
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.31950605845594,
+                    27.681725654706653
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Saheed Shukra Park",
+                "title": "Saheed Shukra Park",
+                "about": "This is the location for Saheed Shukra Park.",
+                "image": [
+                    "https://i.imageupload.app/0623811f4a239c8a54d6.jpeg",
+                    "https://i.imageupload.app/0bd2e2ef072d41c86ed1.jpeg",
+                    "https://i.imageupload.app/eb3272d3fc17b8f367ad.jpeg"
+                ]
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.31886558617163,
+                    27.683175191488672
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Toilet",
+                "title": "Toilet",
+                "about": "This is the location for Toilet.",
+                "image": ""
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.31981281262972,
+                    27.681596180356692
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Parking",
+                "title": "Parking",
+                "about": "This is the location for Parking.",
+                "image": "https://i.imageupload.app/e971d631d17b9427c6f5.jpeg"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.31866212805386,
+                    27.68219940335537
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Parking",
+                "title": "Parking",
+                "about": "This is the location for Parking.",
+                "image": ""
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.31945116821976,
+                    27.681456757347078
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "description": "Water Tap",
+                "title": "Water Tap",
+                "about": "This is the location for Water Tap.",
+                "image": ""
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    85.31962706669509,
+                    27.68185543970918
                 ]
             }
         }
