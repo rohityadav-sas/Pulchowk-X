@@ -31,8 +31,6 @@ export const auth = betterAuth({
 			if (ctx.path !== "/callback/:id") return;
 			const session = ctx.context.newSession;
 			if (!session?.user?.email?.endsWith("@pcampus.edu.np")) {
-				console.log("Unauthorized domain:", session?.user?.email);
-
 				// // Delete the session first
 				await ctx.context.internalAdapter.deleteSession(session.session.token);
 
@@ -40,7 +38,7 @@ export const auth = betterAuth({
 				// await ctx.context.internalAdapter.deleteUser(session.user.id);
 
 				// Redirect to frontend with error
-				throw ctx.redirect("http://localhost:5173?error=unauthorized_domain");
+				throw ctx.redirect("/?error=unauthorized_domain");
 			}
 		})
 	}

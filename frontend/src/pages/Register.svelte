@@ -9,9 +9,7 @@
 		try {
 			await authClient.signIn.social({
 				provider: "google",
-				callbackURL: import.meta.env.DEV
-					? "http://localhost:5173/dashboard"
-					: "/",
+				callbackURL: `/dashboard`,
 			});
 		} catch (err: any) {
 			error = err.message;

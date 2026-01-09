@@ -288,25 +288,6 @@
 			useUserLocation();
 			waitingForLocation = false;
 		}
-
-		const [sw, ne] = PULCHOWK_BOUNDS;
-		const [minLng, minLat] = sw;
-		const [maxLng, maxLat] = ne;
-
-		if (
-			longitude < minLng ||
-			longitude > maxLng ||
-			latitude < minLat ||
-			latitude > maxLat
-		) {
-			showOutsideMessage = true;
-
-			if (geolocateControl) geolocateControl.trigger();
-
-			setTimeout(() => {
-				showOutsideMessage = false;
-			}, 4000);
-		}
 	}
 
 	function getCentroid(feature: any): [number, number] {
@@ -427,6 +408,27 @@
 		isNavigating = true;
 		popupOpen = false;
 
+		// Silent pre-fetch of user location to speed up "Your Location" selection later
+		if (navigator.geolocation && !userLocation) {
+			navigator.geolocation.getCurrentPosition(
+				(position) => {
+					userLocation = [
+						position.coords.longitude,
+						position.coords.latitude,
+					];
+				},
+				(error) => {
+					// Just ignore errors for silent pre-fetch
+					console.debug("Silent location pre-fetch failed:", error);
+				},
+				{
+					enableHighAccuracy: true,
+					maximumAge: 30000,
+					timeout: 10000,
+				},
+			);
+		}
+
 		const destName =
 			destinationFeature.properties?.description || "Destination";
 		const destCoords = getCentroid(destinationFeature);
@@ -439,18 +441,13 @@
 		};
 		navEndSearch = destName;
 
-		if (userLocation) {
-			startPoint = {
-				coords: userLocation,
-				name: "Your Location",
-				feature: null,
-			};
-			navStartSearch = "Your Location";
-			getDirections();
-		} else {
-			startPoint = null;
-			navStartSearch = "";
-		}
+		// Clear start point to allow user to select it
+		startPoint = null;
+		navStartSearch = "";
+		routeGeoJSON = null;
+		routeDuration = "";
+		routeDistance = "";
+		focusedInput = "start";
 	}
 
 	async function getDirections() {
@@ -628,6 +625,21 @@
 
 	function useUserLocation() {
 		if (userLocation) {
+			const [sw, ne] = PULCHOWK_BOUNDS;
+			const isInside =
+				userLocation[0] >= sw[0] &&
+				userLocation[0] <= ne[0] &&
+				userLocation[1] >= sw[1] &&
+				userLocation[1] <= ne[1];
+
+			if (!isInside) {
+				showOutsideMessage = true;
+				setTimeout(() => {
+					showOutsideMessage = false;
+				}, 4000);
+				return;
+			}
+
 			startPoint = {
 				coords: userLocation,
 				name: "Your Location",
