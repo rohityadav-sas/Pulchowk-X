@@ -1869,14 +1869,14 @@
 											imagesLoaded[i] = true;
 											fullyLoadedUrls.add(img);
 										}}
-										class="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 ease-in-out {imagesLoaded[
+										class="high-quality-img absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 ease-in-out {imagesLoaded[
 											i
 										]
 											? 'opacity-100'
 											: 'opacity-0'}"
 										style="transform: translateX({(i -
 											currentImageIndex) *
-											100}%)"
+											100}%) translateZ(0)"
 									/>
 								{/each}
 
@@ -1996,7 +1996,7 @@
 											popupData.image as string,
 										);
 									}}
-									class="w-full h-32 object-cover transition-transform duration-700 group-hover:scale-110 {imagesLoaded[0]
+									class="high-quality-img w-full h-32 object-cover transition-transform duration-700 group-hover:scale-110 {imagesLoaded[0]
 										? 'opacity-100'
 										: 'opacity-0'}"
 								/>
@@ -2247,6 +2247,8 @@
 			0 10px 15px -3px rgb(0 0 0 / 0.1),
 			0 4px 6px -2px rgb(0 0 0 / 0.1);
 		overflow: hidden;
+		backface-visibility: hidden; /* Fixes rounding issues */
+		transform: translateZ(0); /* Fixes rounding issues */
 	}
 
 	:global(.maplibregl-popup-close-button) {
@@ -2278,5 +2280,11 @@
 			opacity: 1;
 			transform: translateY(0) scale(1);
 		}
+	}
+
+	.high-quality-img {
+		image-rendering: -webkit-optimize-contrast;
+		image-rendering: high-quality;
+		transform: translateZ(0);
 	}
 </style>
