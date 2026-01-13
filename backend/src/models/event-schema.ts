@@ -89,7 +89,11 @@ export const events = pgTable("events", {
 
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
-});
+}, (table) => [
+  index("events_club_id_idx").on(table.clubId),
+  index("events_status_idx").on(table.status),
+  index("events_start_time_idx").on(table.eventStartTime),
+]);
 
 export const eventRegistrations = pgTable(
   "event_registrations",

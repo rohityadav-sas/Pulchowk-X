@@ -50,6 +50,13 @@
       "when": 1768330611916,
       "tag": "0006_cuddly_red_ghost",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1768332225563,
+      "tag": "0007_nasty_night_thrasher",
+      "breakpoints": true
     }
   ]
 }

@@ -11,12 +11,12 @@
   const query = createQuery(() => ({
     queryKey: ["enrollments", $session.data?.user?.id],
     queryFn: async () => {
-      if (!$session.data?.user?.id) return null;
+      if (!$session.data?.user?.id) return [];
       const result = await getEnrollments($session.data.user.id);
-      if (result.success && result.registration) {
-        return result.registration;
+      if (result.success && result.registrations) {
+        return result.registrations;
       }
-      return null;
+      return [];
     },
     enabled: !!$session.data?.user?.id,
   }));
@@ -196,46 +196,23 @@
                   ></div>
                 </div>
               </div>
-            {:else if query.data}
-              <a
-                href="/clubs/{query.data.event?.clubId}/events/{query.data
-                  .eventId}"
-                use:route
-                class="block p-4 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors group"
-              >
-                <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <div
-                    class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white shrink-0"
+            {:else if query.data && query.data.length > 0}
+              <div class="space-y-4">
+                {#each query.data as registration}
+                  <a
+                    href="/clubs/{registration.event
+                      ?.clubId}/events/{registration.eventId}"
+                    use:route
+                    class="block p-4 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors group"
                   >
-                    <svg
-                      class="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      ></path>
-                    </svg>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <h3
-                      class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors"
-                    >
-                      {query.data.event?.title || "Event"}
-                    </h3>
-                    <p class="text-sm text-gray-600">
-                      {query.data.event?.club?.name || "Club"}
-                    </p>
                     <div
-                      class="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500"
+                      class="flex flex-col sm:flex-row sm:items-center gap-4"
                     >
-                      <span class="flex items-center gap-1">
+                      <div
+                        class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white shrink-0"
+                      >
                         <svg
-                          class="w-3.5 h-3.5"
+                          class="w-6 h-6"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -247,50 +224,79 @@
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                           ></path>
                         </svg>
-                        {query.data.event?.eventStartTime
-                          ? formatDate(query.data.event.eventStartTime)
-                          : "TBD"}
-                      </span>
-                      {#if query.data.event?.venue}
-                        <span class="flex items-center gap-1">
-                          <svg
-                            class="w-3.5 h-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <h3
+                          class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors"
+                        >
+                          {registration.event?.title || "Event"}
+                        </h3>
+                        <p class="text-sm text-gray-600">
+                          {registration.event?.club?.name || "Club"}
+                        </p>
+                        <div
+                          class="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500"
+                        >
+                          <span class="flex items-center gap-1">
+                            <svg
+                              class="w-3.5 h-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              ></path>
+                            </svg>
+                            {registration.event?.eventStartTime
+                              ? formatDate(registration.event.eventStartTime)
+                              : "TBA"}
+                          </span>
+                          {#if registration.event?.venue}
+                            <span class="flex items-center gap-1">
+                              <svg
+                                class="w-3.5 h-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                ></path>
+                              </svg>
+                              {registration.event.venue}
+                            </span>
+                          {/if}
+                          <span
+                            class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium"
                           >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                            ></path>
-                          </svg>
-                          {query.data.event.venue}
-                        </span>
-                      {/if}
-                      <span
-                        class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium"
+                            {registration.status}
+                          </span>
+                        </div>
+                      </div>
+                      <svg
+                        class="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all hidden sm:block"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
-                        {query.data.status}
-                      </span>
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        ></path>
+                      </svg>
                     </div>
-                  </div>
-                  <svg
-                    class="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all hidden sm:block"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 5l7 7-7 7"
-                    ></path>
-                  </svg>
-                </div>
-              </a>
+                  </a>
+                {/each}
+              </div>
             {:else}
               <div class="text-center py-8">
                 <div

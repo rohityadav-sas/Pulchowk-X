@@ -103,8 +103,10 @@
 
     try {
       const result = await getEnrollments(userId);
-      if (result.success && result.registration) {
-        isRegistered = result.registration.eventId === parseInt(eventId);
+      if (result.success && result.registrations) {
+        isRegistered = result.registrations.some(
+          (reg) => reg.eventId === parseInt(eventId)
+        );
       }
     } catch (err) {
       console.error("Error checking registration status:", err);

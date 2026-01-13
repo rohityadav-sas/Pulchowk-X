@@ -155,7 +155,7 @@ export async function getClubById(clubId: number) {
                 createdAt: clubs.createdAt,
                 upcomingEvents: sql <number>`
                     COUNT(DISTINCT CASE
-                    WHEN ${events.status} = 'draft' 
+                    WHEN ${events.status} = 'published' 
                     AND ${events.eventStartTime} > NOW()
                     THEN ${events.id}
                     END)`,
@@ -196,16 +196,17 @@ export async function getClubById(clubId: number) {
 export async function getClubEvents(clubId: number) {
 
     try {
-        const club = await db.query.clubs.findFirst({
+        const clubExists = await db.query.clubs.findFirst({
             where: eq(clubs.id, clubId),
+            columns: { id: true }
         });
 
-        if (!club) {
+        if (!clubExists) {
             throw new Error('Club not found');
         }
 
         const clubEvents = await db.query.events.findMany({
-            where: eq(events.clubId, club.id),
+            where: eq(events.clubId, clubId),
             orderBy: [desc(events.eventStartTime)]
         });
 
@@ -243,7 +244,13 @@ export async function getUpcomingevents() {
                 eq(events.isRegistrationOpen, true)
             ),
             with: {
-                club: true,
+                club: {
+                    columns: {
+                        name: true,
+                        logoUrl: true,
+                        id: true
+                    }
+                },
             },
             orderBy: [events.eventStartTime],
             limit: 20
@@ -273,7 +280,13 @@ export async function getAllEvents() {
     try {
         const allEvents = await db.query.events.findMany({
             with: {
-                club: true,
+                club: {
+                    columns: {
+                        name: true,
+                        logoUrl: true,
+                        id: true // needed for links 
+                    }
+                },
             },
             orderBy: [desc(events.eventStartTime)],
             limit: 100

@@ -9,6 +9,13 @@ export async function registerStudentForEvent(registerData: registerStudentForEv
     try {
         const event = await db.query.events.findFirst({
             where: eq(events.id, eventId),
+            columns: {
+                id: true,
+                isRegistrationOpen: true,
+                maxParticipants: true,
+                currentParticipants: true,
+                registrationDeadline: true
+            }
         })
 
         if (!event) {
@@ -84,7 +91,13 @@ export async function getEventRegistrations(eventId: number) {
     const registrations = await db.query.eventRegistrations.findMany({
         where: eq(eventRegistrations.eventId, eventId),
         with: {
-            user: true,
+            user: {
+                columns: {
+                    id: true,
+                    name: true,
+                    email: true
+                }
+            },
         },
         orderBy: [desc(eventRegistrations.registeredAt)],
     });
@@ -149,30 +162,42 @@ export async function cancelEventRegistration(registerData: registerStudentForEv
 
 export async function getStudentActiveRegistration(authStudentId: string) {
     try {
-        const registration = await db.query.eventRegistrations.findFirst({
+        const registrations = await db.query.eventRegistrations.findMany({
             where: and(
                 eq(eventRegistrations.userId, authStudentId),
                 eq(eventRegistrations.status, 'registered')
             ),
             with: {
                 event: {
+                    columns: {
+                        id: true,
+                        title: true,
+                        clubId: true,
+                        eventStartTime: true,
+                        venue: true,
+                    },
                     with: {
-                        club: true,
+                        club: {
+                            columns: {
+                                name: true
+                            }
+                        },
                     },
                 },
             },
         });
 
-        if (!registration) {
+        if (registrations.length === 0) {
             return {
-                success: false,
+                success: true, // Changed to true so frontend doesn't error out
                 message: 'No active registration found for this student',
+                registrations: []
             };
         }
 
         return {
             success: true,
-            registration,
+            registrations, // Return array
         };
 
     } catch (error) {

@@ -252,7 +252,7 @@ export async function cancelRegistration(authStudentId: string, eventId: number)
 }
 
 
-export async function getEnrollments(authStudentId: string): Promise<{ success: boolean; registration?: Registration; message?: string }> {
+export async function getEnrollments(authStudentId: string): Promise<{ success: boolean; registrations?: any[]; message?: string }> {
     const res = await fetch(`${API_BASE}/enrollment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -12,6 +12,11 @@ export async function createEvent(userId: string, clubId: number, eventInput: Cr
     try {
         const club = await db.query.clubs.findFirst({
             where: eq(clubs.id, clubId),
+            columns: {
+                id: true,
+                isActive: true,
+                authClubId: true
+            }
         });
 
         if (!club) {
