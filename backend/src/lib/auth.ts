@@ -30,6 +30,7 @@ export const auth = betterAuth({
 			prompt: "select_account",
 			clientId: ENV.GOOGLE_CLIENT_ID,
 			clientSecret: ENV.GOOGLE_CLIENT_SECRET,
+			redirectURI: `${process.env.BETTER_AUTH_URL}/api/auth/callback/google`,
 			// hd: "pcampus.edu.np",
 			scope: ['email']
 		}
