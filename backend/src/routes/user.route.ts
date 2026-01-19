@@ -56,13 +56,28 @@ router.post("/sync-user", async (req, res) => {
         });
 
         if (existingUserByEmail) {
-            // Email exists with different ID - this could be a web user
-            // We could either reject or link the accounts
-            res.status(409).json({
+            // Email exists with different ID - link the accounts
+            // Return the existing web user's ID so the app uses it for API calls
+            await db
+                .update(user)
+                .set({
+                    name: name,
+                    image: image || existingUserByEmail.image,
+                    updatedAt: new Date(),
+                })
+                .where(eq(user.id, existingUserByEmail.id));
+
+            res.json({
                 data: {
-                    success: false,
-                    message: "Email already registered with a different account",
-                    existingUserId: existingUserByEmail.id,
+                    success: true,
+                    message: "Account linked with existing web user",
+                    user: {
+                        id: existingUserByEmail.id,  // Return web user's ID!
+                        email,
+                        name
+                    },
+                    linkedFrom: "firebase",
+                    firebaseUid: authStudentId
                 },
             });
             return;
