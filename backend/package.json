@@ -6,9 +6,9 @@
 		"dev": "nodemon --exec tsx src/index.ts",
 		"dev:prod": "npm run build:frontend && npm run dev",
 		"start": "tsx src/index.ts",
-		"db:generate": "drizzle-kit generate",
-		"db:migrate": "drizzle-kit migrate",
-		"db:studio": "drizzle-kit studio"
+		"db:generate": "tsx node_modules/drizzle-kit/bin.cjs generate",
+		"db:migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate",
+		"db:studio": "tsx node_modules/drizzle-kit/bin.cjs studio"
 	},
 	"dependencies": {
 		"@better-auth/expo": "^1.4.15",
