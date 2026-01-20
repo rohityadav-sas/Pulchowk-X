@@ -1,12 +1,8 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
+    "target": "ESNext",
+    "module": "NodeNext",
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
-    "types": [
-      "node"
-    ]
   },
   "exclude": [
     "node_modules"
