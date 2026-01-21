@@ -1,20 +1,41 @@
 import { fromNodeHeaders } from "better-auth/node";
 import { auth } from "../lib/auth.js";
 import { Request, Response, NextFunction } from "express";
+import { db } from "../lib/db.js";
+import { user } from "../models/auth-schema.js";
+import { eq } from "drizzle-orm";
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     const session = await auth.api.getSession({
         headers: fromNodeHeaders(req.headers),
     });
 
-    if (!session) {
-        return res.status(401).json({ message: "Unauthorized" });
+    if (session) {
+        (req as any).user = session.user;
+        (req as any).session = session.session;
+        return next();
     }
 
-    (req as any).user = session.user;
-    (req as any).session = session.session;
+    // Fallback for Mobile App: Check Authorization header for User ID
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const userId = authHeader.split(' ')[1];
+        try {
+            const dbUser = await db.query.user.findFirst({
+                where: eq(user.id, userId),
+            });
 
-    next();
+            if (dbUser) {
+                (req as any).user = dbUser;
+                (req as any).session = { userId: dbUser.id }; // Mock session
+                return next();
+            }
+        } catch (error) {
+            console.error("Auth middleware error:", error);
+        }
+    }
+
+    return res.status(401).json({ message: "Unauthorized" });
 };
 
 export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
