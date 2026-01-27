@@ -85,6 +85,13 @@
       "when": 1768999172233,
       "tag": "0011_perpetual_mentor",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1769530758869,
+      "tag": "0012_legal_black_panther",
+      "breakpoints": true
     }
   ]
 }

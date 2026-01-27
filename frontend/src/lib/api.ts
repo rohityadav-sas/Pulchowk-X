@@ -1,5 +1,6 @@
 const API_EVENTS = '/api/events';
 const API_CLUBS = '/api/clubs';
+const API_BOOKS = '/api/books';
 
 export interface Club {
     id: number;
@@ -537,6 +538,295 @@ export async function chatBot(query: string) {
 
         console.log(data);
         return { success: true, ...data };
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+
+export interface BookListing {
+    id: number;
+    sellerId: string;
+    title: string;
+    author: string;
+    isbn: string | null;
+    edition: string | null;
+    publisher: string | null;
+    publicationYear: number | null;
+    condition: 'new' | 'like_new' | 'good' | 'fair' | 'poor';
+    description: string | null;
+    price: string;
+    status: 'available' | 'pending' | 'sold' | 'removed';
+    courseCode: string | null;
+    categoryId: number | null;
+    viewCount: number;
+    createdAt: string;
+    updatedAt: string;
+    soldAt: string | null;
+    seller?: {
+        id: string;
+        name: string;
+        email?: string;
+        image: string | null;
+    };
+    images?: BookImage[];
+    category?: BookCategory;
+    isSaved?: boolean;
+    isOwner?: boolean;
+}
+
+export interface BookImage {
+    id: number;
+    listingId: number;
+    imageUrl: string;
+    imagePublicId: string | null;
+    createdAt: string;
+}
+
+export interface BookCategory {
+    id: number;
+    name: string;
+    description: string | null;
+    parentCategoryId: number | null;
+    createdAt: string;
+    updatedAt: string;
+    parentCategory?: BookCategory;
+    subcategories?: BookCategory[];
+}
+
+export interface SavedBook {
+    id: number;
+    userId: string;
+    listingId: number;
+    notes: string | null;
+    createdAt: string;
+    updatedAt: string;
+    listing?: BookListing;
+}
+
+export interface BookListingsResponse {
+    success: boolean;
+    data?: {
+        listings: BookListing[];
+        pagination: {
+            page: number;
+            limit: number;
+            totalCount: number;
+            totalPages: number;
+        };
+    };
+    message?: string;
+}
+
+export interface BookFilters {
+    search?: string;
+    author?: string;
+    isbn?: string;
+    categoryId?: number;
+    condition?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    status?: string;
+    sortBy?: 'price_asc' | 'price_desc' | 'newest' | 'oldest';
+    page?: number;
+    limit?: number;
+}
+
+export async function getBookListings(filters: BookFilters = {}): Promise<BookListingsResponse> {
+    try {
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== '') {
+                params.append(key, String(value));
+            }
+        });
+        const queryString = params.toString();
+        const url = queryString ? `${API_BOOKS}?${queryString}` : API_BOOKS;
+
+        const res = await fetch(url, { credentials: 'include' });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+export async function getBookListingById(id: number): Promise<{ success: boolean; data?: BookListing; message?: string }> {
+    try {
+        const res = await fetch(`${API_BOOKS}/listings/${id}`, { credentials: 'include' });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+export async function createBookListing(data: {
+    title: string;
+    author: string;
+    isbn?: string;
+    edition?: string;
+    publisher?: string;
+    publicationYear?: number;
+    condition: 'new' | 'like_new' | 'good' | 'fair' | 'poor';
+    description?: string;
+    price: string;
+    courseCode?: string;
+    categoryId?: number;
+}): Promise<{ success: boolean; data?: BookListing; message?: string }> {
+    try {
+        const res = await fetch(API_BOOKS, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(data),
+        });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+export async function updateBookListing(id: number, data: Partial<{
+    title: string;
+    author: string;
+    isbn: string;
+    edition: string;
+    publisher: string;
+    publicationYear: number;
+    condition: 'new' | 'like_new' | 'good' | 'fair' | 'poor';
+    description: string;
+    price: string;
+    courseCode: string;
+    categoryId: number;
+}>): Promise<{ success: boolean; data?: BookListing; message?: string }> {
+    try {
+        const res = await fetch(`${API_BOOKS}/listings/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(data),
+        });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+export async function deleteBookListing(id: number): Promise<{ success: boolean; message?: string }> {
+    try {
+        const res = await fetch(`${API_BOOKS}/listings/${id}`, {
+            method: 'DELETE',
+            credentials: 'include',
+        });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+export async function getMyBookListings(): Promise<{ success: boolean; data?: BookListing[]; message?: string }> {
+    try {
+        const res = await fetch(`${API_BOOKS}/my-listings`, { credentials: 'include' });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+export async function markBookAsSold(id: number): Promise<{ success: boolean; data?: BookListing; message?: string }> {
+    try {
+        const res = await fetch(`${API_BOOKS}/listings/${id}/mark-sold`, {
+            method: 'PUT',
+            credentials: 'include',
+        });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+export async function uploadBookImage(listingId: number, image: File): Promise<{ success: boolean; data?: BookImage; message?: string }> {
+    try {
+        const formData = new FormData();
+        formData.append('image', image);
+
+        const res = await fetch(`${API_BOOKS}/listings/${listingId}/images`, {
+            method: 'POST',
+            credentials: 'include',
+            body: formData,
+        });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+export async function deleteBookImage(listingId: number, imageId: number): Promise<{ success: boolean; message?: string }> {
+    try {
+        const res = await fetch(`${API_BOOKS}/listings/${listingId}/images/${imageId}`, {
+            method: 'DELETE',
+            credentials: 'include',
+        });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+
+export async function getSavedBooks(): Promise<{ success: boolean; data?: SavedBook[]; message?: string }> {
+    try {
+        const res = await fetch(`${API_BOOKS}/saved`, { credentials: 'include' });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+export async function saveBook(listingId: number, notes?: string): Promise<{ success: boolean; data?: SavedBook; message?: string }> {
+    try {
+        const res = await fetch(`${API_BOOKS}/listings/${listingId}/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ listingId, notes }),
+        });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+export async function unsaveBook(listingId: number): Promise<{ success: boolean; message?: string }> {
+    try {
+        const res = await fetch(`${API_BOOKS}/listings/${listingId}/save`, {
+            method: 'DELETE',
+            credentials: 'include',
+        });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+export async function updateSavedBookNotes(listingId: number, notes: string): Promise<{ success: boolean; message?: string }> {
+    try {
+        const res = await fetch(`${API_BOOKS}/saved/${listingId}/notes`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ notes }),
+        });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+// Book Categories
+export async function getBookCategories(): Promise<{ success: boolean; data?: BookCategory[]; message?: string }> {
+    try {
+        const res = await fetch(`${API_BOOKS}/categories`, { credentials: 'include' });
+        return await res.json();
     } catch (error: any) {
         return { success: false, message: error.message };
     }

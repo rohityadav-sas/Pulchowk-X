@@ -24,6 +24,10 @@
   import CreateEvent from "./pages/CreateEvent.svelte";
   import CreateClub from "./pages/CreateClub.svelte";
   import MapPlaceholder from "./pages/MapPlaceholder.svelte";
+  import BookMarketplace from "./pages/BookMarketplace.svelte";
+  import BookDetails from "./pages/BookDetails.svelte";
+  import SellBook from "./pages/SellBook.svelte";
+  import MyBooks from "./pages/MyBooks.svelte";
   import { onMount, type Component } from "svelte";
 
   let MapComponent: Component | any = $state(null);
@@ -51,10 +55,9 @@
   const error = query("message");
   let showError = $state(error === "unauthorized_domain");
 
-    if (error === "unauthorized_domain") {
-      goto("/");
-    }
- 
+  if (error === "unauthorized_domain") {
+    goto("/");
+  }
 
   const routes: RouteConfig[] = [
     {
@@ -104,6 +107,23 @@
       path: /^\/clubs\/?$/,
       component: Clubs,
     },
+    // Book Marketplace Routes
+    {
+      path: /^\/books\/?$/,
+      component: BookMarketplace,
+    },
+    {
+      path: /^\/books\/sell\/?$/,
+      component: SellBook,
+    },
+    {
+      path: /^\/books\/my-books\/?$/,
+      component: MyBooks,
+    },
+    {
+      path: /^\/books\/(?<bookId>\d+)\/?$/,
+      component: BookDetails,
+    },
   ];
 </script>
 
@@ -142,6 +162,12 @@
             href="/events"
             class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
             >Events</a
+          >
+          <a
+            use:route
+            href="/books"
+            class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
+            >Books</a
           >
           <a
             use:route
