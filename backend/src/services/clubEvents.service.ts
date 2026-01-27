@@ -384,7 +384,7 @@ export async function handleCLubLogoFileUpload(
 
         const buffer = file.buffer;
         const base64 = buffer.toString('base64');
-        const dataUri = `data: ${file.mimetype}; base64, ${base64} `;
+        const dataUri = `data:${file.mimetype};base64,${base64}`;
 
         const uploadResult = await uploadClubLogoToCloudinary(clubId, dataUri);
 
