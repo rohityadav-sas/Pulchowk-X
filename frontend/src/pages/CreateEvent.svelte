@@ -273,7 +273,7 @@
         error = result.message || "Failed to create event";
       }
     } catch (err: any) {
-      error = err.message + "An error occurred";
+      error = err.message || "An error occurred";
     } finally {
       submitting = false;
     }
@@ -442,7 +442,9 @@
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onclick={() => (isAddingExtraDetails = true) && (showExtraDetailsPrompt = false)}
+                onclick={() =>
+                  (isAddingExtraDetails = true) &&
+                  (showExtraDetailsPrompt = false)}
                 class="px-10 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
               >
                 Yes, Add Details
@@ -462,7 +464,9 @@
                 <h2 class="text-3xl font-black text-gray-900 tracking-tight">
                   Extra Event Details
                 </h2>
-                <p class="text-gray-500 font-medium">Add more context to your event (Optional)</p>
+                <p class="text-gray-500 font-medium">
+                  Add more context to your event (Optional)
+                </p>
               </div>
               <button
                 onclick={skipExtraDetails}
@@ -475,7 +479,9 @@
             <form onsubmit={handleExtraDetailsSubmit} class="space-y-6">
               <div class="grid md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="block text-black font-bold mb-2">Full Description</label>
+                  <label class="block text-black font-bold mb-2"
+                    >Full Description</label
+                  >
                   <textarea
                     bind:value={fullDescription}
                     placeholder="Provide a detailed overview of the event..."
@@ -484,7 +490,9 @@
                   ></textarea>
                 </div>
                 <div class="space-y-2">
-                  <label class="block text-black font-bold mb-2">Objectives</label>
+                  <label class="block text-black font-bold mb-2"
+                    >Objectives</label
+                  >
                   <textarea
                     bind:value={objectives}
                     placeholder="What are the goals of this event?"
@@ -496,7 +504,9 @@
 
               <div class="grid md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="block text-black font-bold mb-2">Target Audience</label>
+                  <label class="block text-black font-bold mb-2"
+                    >Target Audience</label
+                  >
                   <textarea
                     bind:value={targetAudience}
                     placeholder="Who should attend? (e.g., Energetic students, Tech enthusiasts...)"
@@ -505,7 +515,9 @@
                   ></textarea>
                 </div>
                 <div class="space-y-2">
-                  <label class="block text-black font-bold mb-2">Prerequisites</label>
+                  <label class="block text-black font-bold mb-2"
+                    >Prerequisites</label
+                  >
                   <textarea
                     bind:value={prerequisites}
                     placeholder="Any requirements or skills needed? (e.g., Basic Python, Enthusiasm...)"
@@ -517,7 +529,9 @@
 
               <div class="grid md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="block text-black font-bold mb-2">Event Rules</label>
+                  <label class="block text-black font-bold mb-2"
+                    >Event Rules</label
+                  >
                   <textarea
                     bind:value={rules}
                     placeholder="List the do's and don'ts..."
@@ -526,7 +540,9 @@
                   ></textarea>
                 </div>
                 <div class="space-y-2">
-                  <label class="block text-black font-bold mb-2">Judging Criteria</label>
+                  <label class="block text-black font-bold mb-2"
+                    >Judging Criteria</label
+                  >
                   <textarea
                     bind:value={judgingCriteria}
                     placeholder="How will participants be evaluated?"
@@ -537,7 +553,9 @@
               </div>
 
               {#if error}
-                <div class="p-4 bg-red-50 text-red-600 rounded-2xl font-semibold text-sm border border-red-100">
+                <div
+                  class="p-4 bg-red-50 text-red-600 rounded-2xl font-semibold text-sm border border-red-100"
+                >
                   {error}
                 </div>
               {/if}
@@ -557,7 +575,9 @@
                 >
                   {#if extraSubmitting}
                     <div class="flex items-center gap-2">
-                      <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <div
+                        class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                      ></div>
                       <span>Saving Details...</span>
                     </div>
                   {:else}
@@ -590,12 +610,19 @@
               All Set!
             </h2>
             <p class="text-gray-500 text-lg mb-8 leading-relaxed">
-              Your event is fully documented. Redirecting you to the events page...
+              Your event is fully documented. Redirecting you to the events
+              page...
             </p>
             <div class="flex gap-2 justify-center">
-              <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
-              <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-              <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+              <div
+                class="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
+              ></div>
+              <div
+                class="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:0.2s]"
+              ></div>
+              <div
+                class="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:0.4s]"
+              ></div>
             </div>
           </div>
         {/if}
