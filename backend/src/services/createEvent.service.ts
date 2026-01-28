@@ -6,9 +6,6 @@ import { clubs, events, clubAdmins } from "../models/event-schema.js";
 
 
 export async function createEvent(userId: string, clubId: number, eventInput: CreateEventInput) {
-
-    console.log('eventInput:', JSON.stringify(eventInput, null, 2));
-
     try {
         const club = await db.query.clubs.findFirst({
             where: eq(clubs.id, clubId),
@@ -87,7 +84,6 @@ export async function createEvent(userId: string, clubId: number, eventInput: Cr
 
         const [event] = await db.insert(events).values(insertData).returning();
 
-        console.log('Event created successfully:', event);
 
         return {
             success: true,

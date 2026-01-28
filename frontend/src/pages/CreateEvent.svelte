@@ -1,7 +1,13 @@
 <script lang="ts">
   import { route as routeAction, goto } from "@mateothegreat/svelte5-router";
   import { authClient } from "../lib/auth-client";
-  import { createEvent, getClub, type Club, getClubAdmins } from "../lib/api";
+  import {
+    createEvent,
+    getClub,
+    type Club,
+    getClubAdmins,
+    uploadEventBanner,
+  } from "../lib/api";
   import LoadingSpinner from "../components/LoadingSpinner.svelte";
   import { fade, fly, slide } from "svelte/transition";
   import { Datepicker, Input, Label, Timepicker } from "flowbite-svelte";
@@ -36,6 +42,10 @@
   let regTime = $state("");
 
   let bannerUrl = $state("");
+  let bannerFile = $state<File | null>(null);
+  let bannerPreview = $state<string | null>(null);
+  let bannerSource = $state<"url" | "local">("url");
+  let isUploadingBanner = $state(false);
 
   // Derived ISO Strings
   const eventStartTime = $derived(
@@ -131,6 +141,19 @@
     }
   }
 
+  function handleFileChange(e: Event) {
+    const input = e.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      bannerFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        bannerPreview = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   async function handleSubmit(e: Event) {
     e.preventDefault();
 
@@ -164,6 +187,21 @@
     error = null;
 
     try {
+      let finalBannerUrl = bannerUrl;
+
+      if (bannerSource === "local" && bannerFile) {
+        isUploadingBanner = true;
+        const uploadRes = await uploadEventBanner(bannerFile);
+        isUploadingBanner = false;
+        if (uploadRes.success && uploadRes.data) {
+          finalBannerUrl = uploadRes.data.url;
+        } else {
+          error = uploadRes.message || "Failed to upload banner image";
+          submitting = false;
+          return;
+        }
+      }
+
       const result = await createEvent(
         $session.data.user.id,
         parseInt(clubId),
@@ -176,7 +214,7 @@
           registrationDeadline: registrationDeadline,
           eventStartTime: eventStartTime,
           eventEndTime: eventEndTime,
-          bannerUrl: bannerUrl || undefined,
+          bannerUrl: finalBannerUrl || undefined,
         },
       );
 
@@ -511,46 +549,156 @@
 
             <!-- Media Section -->
             <div class="space-y-6">
-              <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">
-                Media
-              </h3>
+              <div class="flex items-center justify-between border-b pb-2">
+                <h3 class="text-lg font-semibold text-gray-900">Media</h3>
+                <div class="flex bg-gray-100 p-1 rounded-lg">
+                  <button
+                    type="button"
+                    class="px-4 py-1.5 text-sm font-medium rounded-md transition-all {bannerSource ===
+                    'url'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'}"
+                    onclick={() => (bannerSource = "url")}
+                  >
+                    Image URL
+                  </button>
+                  <button
+                    type="button"
+                    class="px-4 py-1.5 text-sm font-medium rounded-md transition-all {bannerSource ===
+                    'local'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'}"
+                    onclick={() => (bannerSource = "local")}
+                  >
+                    Upload Image
+                  </button>
+                </div>
+              </div>
 
               <div>
-                <label
-                  for="bannerUrl"
-                  class="block text-sm font-semibold text-gray-700 mb-2"
-                >
-                  Banner Image URL
-                </label>
-                <div class="flex gap-4 items-start">
-                  <div class="flex-1">
-                    <input
-                      type="url"
-                      id="bannerUrl"
-                      bind:value={bannerUrl}
-                      placeholder="https://example.com/image.jpg"
-                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none rounded-r-none placeholder:text-gray-400"
-                    />
-                    <p class="text-xs text-gray-500 mt-2">
-                      Paste a direct link to an image to be displayed on the
-                      event card.
-                    </p>
-                  </div>
-                  {#if bannerUrl}
-                    <div
-                      class="w-24 h-24 rounded-lg border border-gray-200 overflow-hidden bg-gray-50 shrink-0"
+                {#if bannerSource === "url"}
+                  <div in:fade>
+                    <label
+                      for="bannerUrl"
+                      class="block text-sm font-semibold text-gray-700 mb-2"
                     >
-                      <img
-                        src={bannerUrl}
-                        alt="Preview"
-                        class="w-full h-full object-cover"
-                        onerror={(e) =>
-                          ((e.currentTarget as HTMLImageElement).style.display =
-                            "none")}
-                      />
+                      Banner Image URL
+                    </label>
+                    <div class="flex gap-6 items-start">
+                      <div class="flex-1">
+                        <input
+                          type="url"
+                          id="bannerUrl"
+                          bind:value={bannerUrl}
+                          placeholder="https://example.com/image.jpg"
+                          class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-400"
+                        />
+                        <p class="text-xs text-gray-500 mt-2">
+                          Paste a direct link to an image to be displayed on the
+                          event card.
+                        </p>
+                      </div>
+                      {#if bannerUrl}
+                        <div
+                          class="w-40 h-24 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden bg-gray-50 shrink-0 shadow-inner group relative"
+                        >
+                          <img
+                            src={bannerUrl}
+                            alt="Preview"
+                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            onerror={(e) =>
+                              ((
+                                e.currentTarget as HTMLImageElement
+                              ).style.display = "none")}
+                          />
+                          <div
+                            class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                          >
+                            <span class="text-white text-xs font-bold"
+                              >URL Preview</span
+                            >
+                          </div>
+                        </div>
+                      {/if}
                     </div>
-                  {/if}
-                </div>
+                  </div>
+                {:else}
+                  <div in:fade>
+                    <label
+                      for="bannerFile"
+                      class="block text-sm font-semibold text-gray-700 mb-2"
+                    >
+                      Upload Event Banner
+                    </label>
+                    <div class="flex gap-6 items-start">
+                      <div class="flex-1">
+                        <div
+                          class="relative group cursor-pointer border-2 border-dashed border-gray-300 rounded-2xl p-6 hover:border-blue-500 hover:bg-blue-50/30 transition-all duration-300"
+                        >
+                          <input
+                            type="file"
+                            id="bannerFile"
+                            accept="image/*"
+                            onchange={handleFileChange}
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                          />
+                          <div class="text-center">
+                            <svg
+                              class="mx-auto h-12 w-12 text-gray-400 group-hover:text-blue-500 transition-colors"
+                              stroke="currentColor"
+                              fill="none"
+                              viewBox="0 0 48 48"
+                              aria-hidden="true"
+                            >
+                              <path
+                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              />
+                            </svg>
+                            <div
+                              class="mt-4 flex text-sm text-gray-600 justify-center"
+                            >
+                              <span
+                                class="font-semibold text-blue-600 hover:text-blue-500"
+                                >Upload a file</span
+                              >
+                              <p class="pl-1 text-gray-500">or drag and drop</p>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">
+                              PNG, JPG, GIF up to 10MB
+                            </p>
+                          </div>
+                        </div>
+                        {#if bannerFile}
+                          <p class="text-sm font-medium text-blue-600 mt-2">
+                            Selected: {bannerFile.name}
+                          </p>
+                        {/if}
+                      </div>
+
+                      {#if bannerPreview}
+                        <div
+                          class="w-40 h-24 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden bg-gray-50 shrink-0 shadow-inner group relative"
+                        >
+                          <img
+                            src={bannerPreview}
+                            alt="Local Preview"
+                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                          <div
+                            class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                          >
+                            <span class="text-white text-xs font-bold"
+                              >Local Preview</span
+                            >
+                          </div>
+                        </div>
+                      {/if}
+                    </div>
+                  </div>
+                {/if}
               </div>
             </div>
           </div>
@@ -582,10 +730,21 @@
           >
             <button
               type="submit"
-              disabled={submitting}
-              class="flex-1 sm:flex-none px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-blue-500/30"
+              disabled={submitting || isUploadingBanner}
+              class="flex-1 sm:flex-none px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-blue-500/30 min-w-[160px]"
             >
-              {submitting ? "Creating..." : "Create Event"}
+              {#if submitting || isUploadingBanner}
+                <div class="flex items-center justify-center gap-2">
+                  <div
+                    class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                  ></div>
+                  <span
+                    >{isUploadingBanner ? "Uploading..." : "Creating..."}</span
+                  >
+                </div>
+              {:else}
+                Create Event
+              {/if}
             </button>
             <a
               href="/clubs/{clubId}/events"

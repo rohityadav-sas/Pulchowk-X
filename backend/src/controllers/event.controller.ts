@@ -236,7 +236,6 @@ export async function CreateEvent(req: Request, res: Response) {
     try {
         const { authId, clubId, ...eventData } = req.body;
 
-        console.log(eventData);
         if (!authId || !clubId || !eventData) {
             throw Error("Id, ClubId and Data are needed");
         }

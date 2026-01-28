@@ -473,6 +473,22 @@ export async function uploadClubLogo(clubId: number, logo: File | string): Promi
     }
 }
 
+export async function uploadEventBanner(file: File): Promise<{ success: boolean; data?: { url: string; publicId: string }; message?: string }> {
+    try {
+        const formData = new FormData();
+        formData.append('banner', file);
+
+        const res = await fetch(`${API_EVENTS}/upload-banner`, {
+            method: 'POST',
+            credentials: 'include',
+            body: formData
+        });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
 export async function deleteClubLogo(clubId: number): Promise<{ success: boolean; message?: string }> {
     try {
         const res = await fetch(`${API_CLUBS}/${clubId}/upload-logo`, {
