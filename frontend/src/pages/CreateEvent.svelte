@@ -9,8 +9,9 @@
     uploadEventBanner,
   } from "../lib/api";
   import LoadingSpinner from "../components/LoadingSpinner.svelte";
-  import { fade, fly, slide } from "svelte/transition";
-  import { Datepicker, Input, Label, Timepicker } from "flowbite-svelte";
+  import { fade, fly, slide, scale } from "svelte/transition";
+  import { cubicOut } from "svelte/easing";
+  import { Datepicker, Input, Label, Timepicker, Badge } from "flowbite-svelte";
 
   const { route } = $props();
   const clubId = $derived(route.result.path.params.clubId);
@@ -25,22 +26,26 @@
   let success = $state(false);
   let isAuthorized = $state<boolean | null>(null);
 
+  // Form Steps
+  let currentStep = $state(1);
+  const totalSteps = 3;
+
+  // Form State
   let title = $state("");
   let description = $state("");
   let eventType = $state("workshop");
   let venue = $state("");
-  let maxParticipants = $state<number | null>(null);
+  let maxParticipants = $state<number | undefined>(undefined);
 
   // Date/Time States
   let startDate = $state<Date | undefined>(undefined);
   let startTime = $state("");
-
   let endDate = $state<Date | undefined>(undefined);
   let endTime = $state("");
-
   let regDate = $state<Date | undefined>(undefined);
   let regTime = $state("");
 
+  // Media State
   let bannerUrl = $state("");
   let bannerFile = $state<File | null>(null);
   let bannerPreview = $state<string | null>(null);
@@ -120,11 +125,9 @@
   async function checkPermissions() {
     if (!club || !userId) return;
 
-    // Check if owner
     if (club.authClubId === userId) {
       isAuthorized = true;
     } else {
-      // Check if admin
       try {
         const adminRes = await getClubAdmins(parseInt(clubId));
         if (adminRes.success && adminRes.admins) {
@@ -135,7 +138,6 @@
           isAuthorized = false;
         }
       } catch (e) {
-        console.error("Failed to check admin status", e);
         isAuthorized = false;
       }
     }
@@ -154,6 +156,33 @@
     }
   }
 
+  function nextStep() {
+    if (currentStep === 1) {
+      if (!title || !eventType) {
+        error = "Title and Type are required";
+        return;
+      }
+    } else if (currentStep === 2) {
+      if (!eventStartTime || !eventEndTime) {
+        error = "Start and End times are required";
+        return;
+      }
+      const start = new Date(eventStartTime);
+      const end = new Date(eventEndTime);
+      if (end <= start) {
+        error = "Event end time must be after start time";
+        return;
+      }
+    }
+    error = null;
+    currentStep++;
+  }
+
+  function prevStep() {
+    error = null;
+    currentStep--;
+  }
+
   async function handleSubmit(e: Event) {
     e.preventDefault();
 
@@ -164,6 +193,11 @@
 
     if (!title || !eventType || !eventStartTime || !eventEndTime) {
       error = "Please fill in all required fields";
+      return;
+    }
+
+    if (!registrationDeadline) {
+      error = "registration date is required";
       return;
     }
 
@@ -220,10 +254,9 @@
 
       if (result.success) {
         success = true;
-        // Redirect to club events page after 1 seconds
         setTimeout(() => {
           goto(`/clubs/${clubId}/events`);
-        }, 1000);
+        }, 1500);
       } else {
         error = result.message || "Failed to create event";
       }
@@ -233,66 +266,72 @@
       submitting = false;
     }
   }
+
+  const stepTitles = ["Basic Information", "Date & Venue", "Media & Finalize"];
+
+  // Formatter for preview
+  const formatDate = (date: Date | undefined) => {
+    if (!date) return "TBD";
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  // Custom shake transition
+  function shake(node: HTMLElement, { duration = 400 } = {}) {
+    return {
+      duration,
+      css: (t: number) => {
+        const factor = (1 - t) * 10;
+        const x = Math.sin(t * Math.PI * 10) * factor;
+        return `transform: translateX(${x}px);`;
+      },
+    };
+  }
 </script>
 
-<div class="min-h-[calc(100vh-4rem)] bg-gray-50/30 px-4 py-8 sm:px-6 lg:px-8">
-  <div class="max-w-3xl mx-auto">
+<div
+  class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-purple-50 px-4 py-8 sm:px-6 lg:px-8"
+>
+  <div class="max-w-6xl mx-auto">
     <!-- Breadcrumb -->
     <nav class="flex items-center gap-2 text-sm text-gray-500 mb-8" in:fade>
       <a
         href="/clubs"
         use:routeAction
-        class="hover:text-blue-600 transition-colors hover:underline">Clubs</a
+        class="hover:text-blue-600 transition-colors">Clubs</a
       >
-      <svg
-        class="w-4 h-4 text-gray-300"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 5l7 7-7 7"
-        ></path>
-      </svg>
+      <span class="text-gray-300">/</span>
       <a
         href="/clubs/{clubId}/events"
         use:routeAction
-        class="hover:text-blue-600 transition-colors hover:underline"
-        >{club?.name || "Club"}</a
+        class="hover:text-blue-600 transition-colors"
       >
-      <svg
-        class="w-4 h-4 text-gray-300"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 5l7 7-7 7"
-        ></path>
-      </svg>
-      <span class="text-gray-900 font-medium">Create Event</span>
+        {club?.name || "Club"}
+      </a>
+      <span class="text-gray-300">/</span>
+      <span class="text-gray-900 font-semibold">Create Event</span>
     </nav>
 
-    {#if loading || $session.isPending || isAuthorized === null}
-      <div class="flex items-center justify-center py-20" in:fade>
-        <LoadingSpinner size="lg" text="Checking permissions..." />
+    {#if loading || isAuthorized === null}
+      <div class="flex flex-col items-center justify-center py-32" in:fade>
+        <LoadingSpinner size="xl" color="blue" />
+        <p class="mt-4 text-gray-500 font-medium animate-pulse">
+          Preparing your workspace...
+        </p>
       </div>
     {:else if !isAuthorized}
       <div
-        class="max-w-md mx-auto p-8 bg-white border border-red-100 rounded-3xl shadow-lg text-center"
-        in:fly={{ y: 20, duration: 400 }}
+        class="max-w-md mx-auto p-12 bg-white/80 backdrop-blur-xl border border-white shadow-2xl rounded-[2rem] text-center"
+        in:fly={{ y: 20, duration: 600 }}
       >
         <div
-          class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6"
+          class="w-20 h-20 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner rotate-3"
         >
           <svg
-            class="w-10 h-10 text-red-500"
+            class="w-10 h-10"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -302,31 +341,30 @@
               stroke-linejoin="round"
               stroke-width="2"
               d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-            ></path>
+            />
           </svg>
         </div>
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
-        <p class="text-red-600 mb-6 font-medium">
-          {error || "You are not authorized to create events for this club"}
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">Access Denied</h2>
+        <p class="text-gray-500 mb-8 leading-relaxed">
+          {error || "Only club authorized personnel can create events here."}
         </p>
-        <a
-          href="/clubs/{clubId}/events"
-          use:routeAction
-          class="inline-block px-6 py-3 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-800 transition-colors shadow-sm"
+        <button
+          onclick={() => goto(`/clubs/${clubId}/events`)}
+          class="w-full py-4 bg-gray-900 text-white font-bold rounded-2xl hover:bg-black transition-all shadow-xl active:scale-95"
         >
-          Back to Events
-        </a>
+          Return to Events
+        </button>
       </div>
     {:else if success}
       <div
-        class="max-w-md mx-auto p-12 bg-white border border-green-100 rounded-3xl shadow-lg text-center"
-        in:fly={{ y: 20, duration: 400 }}
+        class="max-w-md mx-auto p-12 bg-white/80 backdrop-blur-xl border border-white shadow-2xl rounded-[2rem] text-center"
+        in:fly={{ y: 20, duration: 600 }}
       >
         <div
-          class="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6"
+          class="w-24 h-24 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner shadow-green-100/50"
         >
           <svg
-            class="w-12 h-12 text-green-500"
+            class="w-12 h-12"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -336,426 +374,509 @@
               stroke-linejoin="round"
               stroke-width="2"
               d="M5 13l4 4L19 7"
-            ></path>
+            />
           </svg>
         </div>
-        <h2 class="text-3xl font-bold text-gray-900 mb-4">Event Created!</h2>
-        <p class="text-gray-600 text-lg">
-          Redirecting you to the event list...
+        <h2 class="text-4xl font-black text-gray-900 mb-4 tracking-tight">
+          Success!
+        </h2>
+        <p class="text-gray-500 text-lg">
+          Your event "{title}" has been launched.
         </p>
+        <div class="mt-8 flex gap-2 justify-center">
+          <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+          <div
+            class="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:0.2s]"
+          ></div>
+          <div
+            class="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:0.4s]"
+          ></div>
+        </div>
       </div>
     {:else}
-      <div
-        class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden"
-        in:fly={{ y: 20, duration: 600 }}
-      >
+      <div class="grid lg:grid-cols-[1fr_400px] gap-8 items-start">
+        <!-- Main Form Area -->
         <div
-          class="p-8 border-b border-gray-100 bg-linear-to-r from-blue-50/50 to-purple-50/50"
+          class="bg-white/70 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-white/50 overflow-hidden relative"
+          in:fly={{ x: -20, duration: 800 }}
         >
-          <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-            Create New Event
-          </h1>
-          <p class="text-gray-600 mt-2 text-lg">
-            Fill in the details to create a new event for <span
-              class="font-semibold text-blue-600">{club?.name}</span
-            >
-          </p>
-        </div>
-
-        <form onsubmit={handleSubmit} class="p-8 space-y-8">
-          <div class="grid gap-8">
-            <!-- Basic Info Section -->
-            <div class="space-y-6">
-              <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">
-                Basic Information
-              </h3>
-
-              <div class="grid sm:grid-cols-2 gap-6">
-                <div class="col-span-2">
-                  <label
-                    for="title"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                  >
-                    Event Title <span class="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    bind:value={title}
-                    placeholder="e.g., Annual Tech Symposium 2024"
-                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-400"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label
-                    for="eventType"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                  >
-                    Event Type <span class="text-red-500">*</span>
-                  </label>
-                  <div class="relative">
-                    <select
-                      id="eventType"
-                      bind:value={eventType}
-                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none appearance-none bg-white"
-                      required
-                    >
-                      {#each eventTypes as type}
-                        <option value={type}
-                          >{type.charAt(0).toUpperCase() +
-                            type.slice(1)}</option
-                        >
-                      {/each}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    for="venue"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                  >
-                    Venue
-                  </label>
-                  <input
-                    type="text"
-                    id="venue"
-                    bind:value={venue}
-                    placeholder="e.g., Block A, Room 101"
-                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-400"
-                  />
-                </div>
-              </div>
-
+          <!-- Stepper Header -->
+          <div class="px-8 pt-10 pb-6 border-b border-gray-100 bg-white/50">
+            <div class="flex justify-between items-center mb-8">
               <div>
-                <label
-                  for="description"
-                  class="block text-sm font-semibold text-gray-700 mb-2"
+                <h1 class="text-3xl font-black text-gray-900 tracking-tight">
+                  Design Your Event
+                </h1>
+                <p class="text-gray-500 font-medium">
+                  Step {currentStep} of {totalSteps}: {stepTitles[
+                    currentStep - 1
+                  ]}
+                </p>
+              </div>
+              <Badge
+                color="blue"
+                class="px-4 py-1 rounded-full text-sm font-bold shadow-sm"
+              >
+                Draft
+              </Badge>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="relative h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                class="absolute left-0 top-0 h-full bg-linear-to-r from-blue-600 to-indigo-600 transition-all duration-700 ease-out rounded-full shadow-[0_0_12px_rgba(37,99,235,0.4)]"
+                style="width: {(currentStep / totalSteps) * 100}%"
+              ></div>
+            </div>
+          </div>
+
+          <form onsubmit={handleSubmit} class="p-8">
+            <div class="min-h-[400px] relative">
+              {#if currentStep === 1}
+                <div
+                  in:fly={{ x: 20, duration: 400, delay: 200 }}
+                  out:fly={{ x: -20, duration: 400 }}
                 >
-                  Description
-                </label>
-                <textarea
-                  id="description"
-                  bind:value={description}
-                  placeholder="Describe what your event is about..."
-                  rows="4"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none resize-y placeholder:text-gray-400"
-                ></textarea>
-              </div>
-            </div>
-
-            <!-- Logistics Section -->
-            <div class="space-y-6">
-              <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">
-                Date & Logistics
-              </h3>
-
-              <div class="grid sm:grid-cols-2 gap-6">
-                <div>
-                  <Label class="mb-2 block text-sm font-semibold text-gray-700"
-                    >Start Date & Time <span class="text-red-500">*</span
-                    ></Label
-                  >
-                  <div class="flex gap-2">
-                    <div class="grow">
-                      <Datepicker
-                        bind:value={startDate}
+                  <div class="space-y-6">
+                    <div>
+                      <!-- svelte-ignore a11y_label_has_associated_control -->
+                      <label class="block text-black font-bold mb-2"
+                        >Event Title <span class="text-red-500">*</span></label
+                      >
+                      <Input
+                        bind:value={title}
+                        placeholder="What's the big announcement?"
+                        class="bg-white/50 border-gray-200 focus:ring-blue-500/20 rounded-2xl py-4 shadow-sm"
                         required
-                        class="w-72"
-                        monthBtnSelected="bg-blue-600 text-white"
-                        placeholder="Select Date"
-                        inputClass="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-gray-600 placeholder:text-gray-400"
                       />
                     </div>
-                    <div class="w-32">
-                      <Timepicker
-                        bind:value={startTime}
-                        required
-                        inputClass="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-gray-600 placeholder:text-gray-400"
-                      />
+                    <div>
+                      <!-- svelte-ignore a11y_label_has_associated_control -->
+                      <label class="block text-black font-bold mb-2"
+                        >Event Category <span class="text-red-500">*</span
+                        ></label
+                      >
+                      <select
+                        bind:value={eventType}
+                        class="w-full bg-white/50 border border-gray-200 hover:border-blue-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl py-4 px-4 transition-all appearance-none outline-none shadow-sm"
+                      >
+                        {#each eventTypes as type}
+                          <option value={type}>{type.toUpperCase()}</option>
+                        {/each}
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-black font-bold mb-2"
+                        >Description</label
+                      >
+                      <textarea
+                        bind:value={description}
+                        placeholder="Tell us everything. The mission, the vibe, the impact..."
+                        rows="6"
+                        class="w-full bg-white/50 border border-gray-200 hover:border-blue-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl p-4 transition-all outline-none resize-none shadow-sm"
+                      ></textarea>
                     </div>
                   </div>
                 </div>
-                <div>
-                  <Label class="mb-2 block text-sm font-semibold text-gray-700"
-                    >End Date & Time <span class="text-red-500">*</span></Label
-                  >
-                  <div class="flex gap-2">
-                    <div class="grow">
-                      <Datepicker
-                        bind:value={endDate}
-                        required
-                        class="w-72"
-                        monthBtnSelected="bg-blue-600 text-white"
-                        placeholder="Select Date"
-                        inputClass="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-gray-600 placeholder:text-gray-400"
-                      />
-                    </div>
-                    <div class="w-32">
-                      <Timepicker
-                        bind:value={endTime}
-                        required
-                        inputClass="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-gray-600 placeholder:text-gray-400"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <Label class="mb-2 block text-sm font-semibold text-gray-700"
-                    >Registration Deadline</Label
-                  >
-                  <div class="flex gap-2">
-                    <div class="grow">
-                      <Datepicker
-                        bind:value={regDate}
-                        required
-                        class="w-72"
-                        monthBtnSelected="bg-blue-600 text-white"
-                        placeholder="Select Date"
-                        inputClass="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-gray-600 placeholder:text-gray-400"
-                      />
-                    </div>
-                    <div class="w-32">
-                      <Timepicker
-                        bind:value={regTime}
-                        required
-                        inputClass="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-gray-600 placeholder:text-gray-400"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    for="maxParticipants"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                  >
-                    Max Participants
-                  </label>
-                  <input
-                    type="number"
-                    id="maxParticipants"
-                    bind:value={maxParticipants}
-                    placeholder="No limit"
-                    min="1"
-                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-400"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <!-- Media Section -->
-            <div class="space-y-6">
-              <div class="flex items-center justify-between border-b pb-2">
-                <h3 class="text-lg font-semibold text-gray-900">Media</h3>
-                <div class="flex bg-gray-100 p-1 rounded-lg">
-                  <button
-                    type="button"
-                    class="px-4 py-1.5 text-sm font-medium rounded-md transition-all {bannerSource ===
-                    'url'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'}"
-                    onclick={() => (bannerSource = "url")}
-                  >
-                    Image URL
-                  </button>
-                  <button
-                    type="button"
-                    class="px-4 py-1.5 text-sm font-medium rounded-md transition-all {bannerSource ===
-                    'local'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'}"
-                    onclick={() => (bannerSource = "local")}
-                  >
-                    Upload Image
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                {#if bannerSource === "url"}
-                  <div in:fade>
-                    <label
-                      for="bannerUrl"
-                      class="block text-sm font-semibold text-gray-700 mb-2"
-                    >
-                      Banner Image URL
-                    </label>
-                    <div class="flex gap-6 items-start">
-                      <div class="flex-1">
-                        <input
-                          type="url"
-                          id="bannerUrl"
-                          bind:value={bannerUrl}
-                          placeholder="https://example.com/image.jpg"
-                          class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-400"
-                        />
-                        <p class="text-xs text-gray-500 mt-2">
-                          Paste a direct link to an image to be displayed on the
-                          event card.
-                        </p>
-                      </div>
-                      {#if bannerUrl}
-                        <div
-                          class="w-40 h-24 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden bg-gray-50 shrink-0 shadow-inner group relative"
+              {:else if currentStep === 2}
+                <div
+                  in:fly={{ x: 20, duration: 400, delay: 200 }}
+                  out:fly={{ x: -20, duration: 400 }}
+                >
+                  <div class="space-y-8">
+                    <div class="grid sm:grid-cols-2 gap-6">
+                      <div class="space-y-2">
+                        <label class="block text-black font-bold mb-2"
+                          >Start Schedule <span class="text-red-500">*</span
+                          ></label
                         >
-                          <img
-                            src={bannerUrl}
-                            alt="Preview"
-                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                            onerror={(e) =>
-                              ((
-                                e.currentTarget as HTMLImageElement
-                              ).style.display = "none")}
+                        <div class="flex gap-2">
+                          <Datepicker
+                            bind:value={startDate}
+                            required
+                            class="rounded-2xl flex-1 shadow-sm"
                           />
-                          <div
-                            class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                          >
-                            <span class="text-white text-xs font-bold"
-                              >URL Preview</span
-                            >
+                          <div class="w-32 shadow-sm">
+                            <Timepicker
+                              bind:value={startTime}
+                              required
+                              inputClass="rounded-2xl"
+                            />
                           </div>
                         </div>
-                      {/if}
+                      </div>
+                      <div class="space-y-2">
+                        <label class="block text-black font-bold mb-2"
+                          >End Schedule <span class="text-red-500">*</span
+                          ></label
+                        >
+                        <div class="flex gap-2">
+                          <Datepicker
+                            bind:value={endDate}
+                            required
+                            class="rounded-2xl flex-1 shadow-sm"
+                          />
+                          <div class="w-32 shadow-sm">
+                            <Timepicker
+                              bind:value={endTime}
+                              required
+                              inputClass="rounded-2xl"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-6">
+                      <div>
+                        <label class="block text-black font-bold mb-2"
+                          >Location / Venue</label
+                        >
+                        <Input
+                          bind:value={venue}
+                          placeholder="Where is it happening?"
+                          class="bg-white/50 border-gray-200 rounded-2xl py-4 shadow-sm"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-black font-bold mb-2">Capacity</label>
+                        <Input
+                          type="number"
+                          bind:value={maxParticipants}
+                          placeholder="Seats available (Optional)"
+                          class="bg-white/50 border-gray-200 rounded-2xl py-4 shadow-sm"
+                        />
+                      </div>
                     </div>
                   </div>
-                {:else}
-                  <div in:fade>
-                    <label
-                      for="bannerFile"
-                      class="block text-sm font-semibold text-gray-700 mb-2"
-                    >
-                      Upload Event Banner
-                    </label>
-                    <div class="flex gap-6 items-start">
-                      <div class="flex-1">
+                </div>
+              {:else if currentStep === 3}
+                <div
+                  in:fly={{ x: 20, duration: 400, delay: 200 }}
+                  out:fly={{ x: -20, duration: 400 }}
+                >
+                  <div class="space-y-8">
+                    <div class="space-y-4">
+                      <div class="flex items-center justify-between">
+                        <label class="block text-black font-bold mb-2">Feature Image</label>
                         <div
-                          class="relative group cursor-pointer border-2 border-dashed border-gray-300 rounded-2xl p-6 hover:border-blue-500 hover:bg-blue-50/30 transition-all duration-300"
+                          class="bg-gray-100 p-1 rounded-xl flex gap-1 shadow-inner"
+                        >
+                          <button
+                            type="button"
+                            class="px-4 py-1.5 text-xs font-black rounded-lg transition-all {bannerSource ===
+                            'url'
+                              ? 'bg-white text-blue-600 shadow-sm'
+                              : 'text-gray-400 hover:text-gray-600'}"
+                            onclick={() => (bannerSource = "url")}>URL</button
+                          >
+                          <button
+                            type="button"
+                            class="px-4 py-1.5 text-xs font-black rounded-lg transition-all {bannerSource ===
+                            'local'
+                              ? 'bg-white text-blue-600 shadow-sm'
+                              : 'text-gray-400 hover:text-gray-600'}"
+                            onclick={() => (bannerSource = "local")}
+                            >UPLOAD</button
+                          >
+                        </div>
+                      </div>
+
+                      {#if bannerSource === "url"}
+                        <Input
+                          type="url"
+                          bind:value={bannerUrl}
+                          placeholder="https://example.com/banner.png"
+                          class="bg-white/50 border-gray-200 rounded-2xl py-4 shadow-sm"
+                        />
+                      {:else}
+                        <div
+                          class="relative group border-2 border-dashed border-gray-200 rounded-2xl p-10 hover:border-blue-500 hover:bg-blue-50/50 transition-all text-center"
                         >
                           <input
                             type="file"
-                            id="bannerFile"
-                            accept="image/*"
                             onchange={handleFileChange}
-                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            accept="image/*"
+                            class="absolute inset-0 opacity-0 cursor-pointer z-10"
                           />
-                          <div class="text-center">
-                            <svg
-                              class="mx-auto h-12 w-12 text-gray-400 group-hover:text-blue-500 transition-colors"
-                              stroke="currentColor"
-                              fill="none"
-                              viewBox="0 0 48 48"
-                              aria-hidden="true"
-                            >
-                              <path
-                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              />
-                            </svg>
-                            <div
-                              class="mt-4 flex text-sm text-gray-600 justify-center"
-                            >
-                              <span
-                                class="font-semibold text-blue-600 hover:text-blue-500"
-                                >Upload a file</span
-                              >
-                              <p class="pl-1 text-gray-500">or drag and drop</p>
-                            </div>
-                            <p class="mt-1 text-xs text-gray-500">
-                              PNG, JPG, GIF up to 10MB
-                            </p>
-                          </div>
-                        </div>
-                        {#if bannerFile}
-                          <p class="text-sm font-medium text-blue-600 mt-2">
-                            Selected: {bannerFile.name}
-                          </p>
-                        {/if}
-                      </div>
-
-                      {#if bannerPreview}
-                        <div
-                          class="w-40 h-24 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden bg-gray-50 shrink-0 shadow-inner group relative"
-                        >
-                          <img
-                            src={bannerPreview}
-                            alt="Local Preview"
-                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
-                          <div
-                            class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                          <svg
+                            class="mx-auto w-10 h-10 text-gray-300 group-hover:text-blue-500 mb-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
                           >
-                            <span class="text-white text-xs font-bold"
-                              >Local Preview</span
-                            >
-                          </div>
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                          <p class="text-gray-500 font-bold">
+                            Drop your masterpiece here
+                          </p>
+                          <p class="text-xs text-gray-400 mt-1">
+                            High resolution assets preferred
+                          </p>
                         </div>
                       {/if}
                     </div>
+
+                    <div>
+                      <label class="block text-black font-bold mb-2"
+                        >Registration Closes On <span class="text-red-500"
+                          >*</span
+                        ></label
+                      >
+                      <div class="flex gap-2">
+                        <Datepicker
+                          bind:value={regDate}
+                          class="rounded-2xl flex-1 shadow-sm"
+                        />
+                        <div class="w-32 shadow-sm">
+                          <Timepicker
+                            bind:value={regTime}
+                            inputClass="rounded-2xl"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                {/if}
+                </div>
+              {/if}
+            </div>
+
+            {#if error}
+              <div
+                class="mt-6 p-4 bg-red-50 text-red-600 border border-red-100 rounded-2xl flex items-center gap-3 font-semibold text-sm shadow-sm"
+                in:shake
+              >
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+                {error}
+              </div>
+            {/if}
+
+            <div
+              class="flex items-center gap-4 mt-12 pt-8 border-t border-gray-100"
+            >
+              {#if currentStep > 1}
+                <button
+                  type="button"
+                  onclick={prevStep}
+                  class="px-8 py-4 text-gray-400 font-bold hover:text-gray-600 transition-colors"
+                >
+                  Back
+                </button>
+              {/if}
+
+              <div class="flex-1"></div>
+
+              {#if currentStep < totalSteps}
+                <button
+                  type="button"
+                  onclick={nextStep}
+                  class="px-10 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
+                >
+                  Continue
+                </button>
+              {:else}
+                <button
+                  type="submit"
+                  disabled={submitting || isUploadingBanner}
+                  class="px-10 py-4 bg-gray-900 text-white font-black rounded-2xl hover:bg-black shadow-2xl active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[180px]"
+                >
+                  {#if submitting || isUploadingBanner}
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                      ></div>
+                      <span
+                        >{isUploadingBanner
+                          ? "Uploading..."
+                          : "Launching..."}</span
+                      >
+                    </div>
+                  {:else}
+                    Launch Event
+                  {/if}
+                </button>
+              {/if}
+            </div>
+          </form>
+        </div>
+
+        <!-- Sidebar Preview -->
+        <aside class="sticky top-8 space-y-6">
+          <h3
+            class="text-sm font-black text-gray-400 uppercase tracking-widest px-2"
+          >
+            Live Preview
+          </h3>
+
+          <div
+            class="bg-white rounded-[2rem] shadow-2xl border border-white overflow-hidden group hover:shadow-blue-500/10 transition-all duration-500"
+            style="transform: scale(1.02)"
+          >
+            <!-- Preview Banner -->
+            <div class="relative h-48 bg-gray-100 overflow-hidden">
+              {#if bannerSource === "url" && bannerUrl}
+                <img
+                  src={bannerUrl}
+                  alt="Preview"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              {:else if bannerSource === "local" && bannerPreview}
+                <img
+                  src={bannerPreview}
+                  alt="Preview"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              {:else}
+                <div
+                  class="w-full h-full flex flex-col items-center justify-center text-gray-300 gap-2"
+                >
+                  <svg
+                    class="w-12 h-12 opacity-20"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <span class="text-xs font-bold uppercase tracking-tighter"
+                    >Event image is empty</span
+                  >
+                </div>
+              {/if}
+              <div class="absolute top-4 right-4">
+                <Badge
+                  color="gray"
+                  class="rounded-lg backdrop-blur-md bg-black/50 border-none text-white font-black px-3 py-1"
+                >
+                  {eventType.toUpperCase()}
+                </Badge>
+              </div>
+            </div>
+
+            <!-- Preview Content -->
+            <div class="p-6 space-y-4">
+              <div class="space-y-1">
+                <h4 class="text-xl font-black text-gray-900 leading-tight">
+                  {title || "Untitled Event"}
+                </h4>
+                <div
+                  class="flex items-center gap-2 text-blue-600 text-xs font-bold"
+                >
+                  <svg
+                    class="w-3.5 h-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                  </svg>
+                  {venue || "Venue"}
+                </div>
+              </div>
+
+              <p class="text-gray-500 text-sm line-clamp-2 leading-relaxed">
+                {description ||
+                  "Join us for an experience that's unlike anything you've seen before. Innovation meets community."}
+              </p>
+
+              <div
+                class="pt-4 flex items-center justify-between border-t border-gray-50 mt-4"
+              >
+                <div class="space-y-0.5">
+                  <p
+                    class="text-[10px] font-black text-gray-400 uppercase tracking-tighter"
+                  >
+                    Going Live On
+                  </p>
+                  <p class="text-xs font-bold text-gray-900">
+                    {formatDate(startDate)}
+                  </p>
+                </div>
+                <div class="text-right space-y-0.5">
+                  <p
+                    class="text-[10px] font-black text-gray-400 uppercase tracking-tighter"
+                  >
+                    Open Seats
+                  </p>
+                  <p class="text-xs font-bold text-gray-900">
+                    {maxParticipants || "∞"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-          {#if error}
-            <div
-              class="p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 animate-pulse"
-              in:slide
-            >
-              <svg
-                class="w-5 h-5 text-red-500 shrink-0 mt-0.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
-              </svg>
-              <p class="text-red-600 font-medium">{error}</p>
-            </div>
-          {/if}
 
-          <!-- Submit Button -->
+          <!-- Tips Card -->
           <div
-            class="flex items-center gap-4 pt-8 border-t border-gray-100 mt-8"
+            class="bg-blue-600 rounded-[2rem] p-8 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden"
           >
-            <button
-              type="submit"
-              disabled={submitting || isUploadingBanner}
-              class="flex-1 sm:flex-none px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-blue-500/30 min-w-[160px]"
+            <svg
+              class="absolute -right-4 -bottom-4 w-32 h-32 opacity-10"
+              fill="white"
+              viewBox="0 0 24 24"
             >
-              {#if submitting || isUploadingBanner}
-                <div class="flex items-center justify-center gap-2">
-                  <div
-                    class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
-                  ></div>
-                  <span
-                    >{isUploadingBanner ? "Uploading..." : "Creating..."}</span
-                  >
-                </div>
-              {:else}
-                Create Event
-              {/if}
-            </button>
-            <a
-              href="/clubs/{clubId}/events"
-              use:routeAction
-              class="px-8 py-3.5 border border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </a>
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+            <h5 class="text-lg font-black mb-2 relative z-10">Pro Tip</h5>
+            <p class="text-blue-100 text-sm leading-relaxed relative z-10">
+              Events with high resolution banners and clear descriptions see <span
+                class="text-white font-bold">45% higher</span
+              > engagement.
+            </p>
           </div>
-        </form>
+        </aside>
       </div>
     {/if}
   </div>
 </div>
+
+<style>
+  :global(.datepicker) {
+    --tw-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+      0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
+  }
+
+  /* Custom animation for error transition */
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-4px);
+    }
+    75% {
+      transform: translateX(4px);
+    }
+  }
+
+  div[in\:shake] {
+    animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+</style>
