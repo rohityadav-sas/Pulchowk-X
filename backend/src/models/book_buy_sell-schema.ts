@@ -149,6 +149,7 @@ export const bookPurchaseRequests = pgTable(
         status: transactionStatusEnum("status").default("requested").notNull(),
         message: text("message"),
         createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+        updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
         respondedAt: timestamp("responded_at", { mode: "date" }),
     },
     (table) => [

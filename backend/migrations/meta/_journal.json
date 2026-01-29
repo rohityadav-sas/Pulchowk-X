@@ -127,6 +127,13 @@
       "when": 1769683400700,
       "tag": "0017_strange_kate_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1769686063708,
+      "tag": "0018_stiff_klaw",
+      "breakpoints": true
     }
   ]
 }

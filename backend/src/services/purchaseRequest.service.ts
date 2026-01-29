@@ -101,6 +101,18 @@ export const getPurchaseRequestsForListing = async (
                         image: true,
                     },
                 },
+                listing: {
+                    with: {
+                        images: { limit: 1 },
+                        seller: {
+                            columns: {
+                                id: true,
+                                name: true,
+                                image: true,
+                            },
+                        },
+                    },
+                },
             },
             orderBy: desc(bookPurchaseRequests.createdAt),
         });
@@ -173,6 +185,7 @@ export const respondToPurchaseRequest = async (
             .set({
                 status: newStatus,
                 respondedAt: new Date(),
+                updatedAt: new Date(),
             })
             .where(eq(bookPurchaseRequests.id, requestId))
             .returning();

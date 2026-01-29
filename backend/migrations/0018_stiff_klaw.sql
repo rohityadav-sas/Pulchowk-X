@@ -1,0 +1,1 @@
+ALTER TABLE "book_purchase_requests" ADD COLUMN "updated_at" timestamp DEFAULT now() NOT NULL;
