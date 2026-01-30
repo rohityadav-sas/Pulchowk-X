@@ -2,6 +2,12 @@ import { db } from "../lib/db.js";
 import { eq, desc, isNull } from "drizzle-orm";
 import { bookCategories } from "../models/book_buy_sell-schema.js";
 
+const DEFAULT_CATEGORIES = [
+    { name: "Insights", description: "Exam-oriented engineering insights and guides" },
+    { name: "Manual", description: "Lab manuals and practical guides" },
+    { name: "Text Book", description: "Standard engineering textbooks" },
+];
+
 export const createCategory = async (data: {
     name: string;
     description?: string;
@@ -48,7 +54,7 @@ export const createCategory = async (data: {
 
 export const getAllCategories = async () => {
     try {
-        const categories = await db.query.bookCategories
+        let categories = await db.query.bookCategories
             .findMany({
                 orderBy: [bookCategories.name],
                 with: {
@@ -56,6 +62,25 @@ export const getAllCategories = async () => {
                     subcategories: true,
                 },
             });
+
+   
+        if (categories.length === 0) {
+            for (const cat of DEFAULT_CATEGORIES) {
+                await db.insert(bookCategories).values({
+                    name: cat.name,
+                    description: cat.description,
+                });
+            }
+      
+            categories = await db.query.bookCategories
+                .findMany({
+                    orderBy: [bookCategories.name],
+                    with: {
+                        parentCategory: true,
+                        subcategories: true,
+                    },
+                });
+        }
 
         return {
             success: true,

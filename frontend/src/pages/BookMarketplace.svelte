@@ -30,13 +30,40 @@
         | { label: string; value: number | undefined; type: "price" }
         | { label: string; value: BookFilters["sortBy"]; type: "sort" };
 
-    const quickFilters: QuickFilter[] = [
-        { label: "All", value: undefined, type: "category" },
-        { label: "Insights", value: 1, type: "category" },
-        { label: "Manual", value: 2, type: "category" },
-        { label: "Price < 500", value: 500, type: "price" },
-        { label: "Newest", value: "newest", type: "sort" },
-    ];
+    const quickFilters = $derived.by(() => {
+        const categories = categoriesQuery.data || [];
+        const insights = categories.find((c) => c.name === "Insights");
+        const manual = categories.find((c) => c.name === "Manual");
+        const textbook = categories.find((c) => c.name === "Text Book");
+
+        const filters: QuickFilter[] = [
+            { label: "All", value: undefined, type: "category" },
+        ];
+
+        if (textbook)
+            filters.push({
+                label: "Text Books",
+                value: textbook.id,
+                type: "category",
+            });
+        if (insights)
+            filters.push({
+                label: "Insights",
+                value: insights.id,
+                type: "category",
+            });
+        if (manual)
+            filters.push({
+                label: "Manuals",
+                value: manual.id,
+                type: "category",
+            });
+
+        filters.push({ label: "Under 500", value: 500, type: "price" });
+        filters.push({ label: "Newest", value: "newest", type: "sort" });
+
+        return filters;
+    });
 
     $effect(() => {
         if (!$session.isPending && !$session.error && !$session.data?.user) {
@@ -297,7 +324,14 @@
                                 class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg border border-slate-200 flex items-center gap-2 hover:bg-slate-200 transition-colors"
                             >
                                 Search: {searchQuery}
-                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg>
+                                <svg
+                                    class="w-3 h-3"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                    ><path
+                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                    /></svg
+                                >
                             </button>
                         {/if}
 
@@ -307,7 +341,14 @@
                                 class="px-3 py-1 bg-violet-50 text-violet-600 text-xs font-bold rounded-lg border border-violet-100 flex items-center gap-2 hover:bg-violet-100 transition-colors"
                             >
                                 Author: {authorFilter}
-                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg>
+                                <svg
+                                    class="w-3 h-3"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                    ><path
+                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                    /></svg
+                                >
                             </button>
                         {/if}
 
@@ -317,7 +358,14 @@
                                 class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-lg border border-indigo-100 flex items-center gap-2 hover:bg-indigo-100 transition-colors"
                             >
                                 ISBN: {isbnFilter}
-                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg>
+                                <svg
+                                    class="w-3 h-3"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                    ><path
+                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                    /></svg
+                                >
                             </button>
                         {/if}
 
@@ -398,12 +446,27 @@
                         <div class="space-y-6">
                             <div class="space-y-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center text-violet-600">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    <div
+                                        class="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center text-violet-600"
+                                    >
+                                        <svg
+                                            class="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2.5"
+                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                            />
                                         </svg>
                                     </div>
-                                    <label class="text-sm font-black text-slate-900 uppercase tracking-widest">Book Meta</label>
+                                    <label
+                                        class="text-sm font-black text-slate-900 uppercase tracking-widest"
+                                        >Book Meta</label
+                                    >
                                 </div>
                                 <div class="space-y-2">
                                     <input
@@ -763,8 +826,8 @@
                 <p
                     class="text-slate-500 mb-10 font-medium leading-relaxed px-6"
                 >
-                    Be the first to list a book for sale in your
-                    campus community!
+                    Be the first to list a book for sale in your campus
+                    community!
                 </p>
                 <button
                     onclick={clearFilters}
@@ -935,8 +998,13 @@
     }
 
     @keyframes bounceSubtle {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-3px); }
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-3px);
+        }
     }
 
     .animate-bounce-subtle {
