@@ -141,6 +141,13 @@
       "when": 1769879521699,
       "tag": "0019_simple_hardball",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1769884233796,
+      "tag": "0020_minor_captain_stacy",
+      "breakpoints": true
     }
   ]
 }
