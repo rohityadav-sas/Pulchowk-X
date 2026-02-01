@@ -22,7 +22,7 @@ export const SendMessage = async (req: Request, res: Response) => {
             });
         }
 
-        const { listingId, content } = req.body;
+        const { listingId, content, buyerId } = req.body;
 
         if (!listingId || !content) {
             return res.status(400).json({
@@ -31,7 +31,7 @@ export const SendMessage = async (req: Request, res: Response) => {
             });
         }
 
-        const result = await sendMessage(userId, listingId, content);
+        const result = await sendMessage(userId, listingId, content, buyerId);
 
         if (!result.success) {
             return res.status(400).json(result);

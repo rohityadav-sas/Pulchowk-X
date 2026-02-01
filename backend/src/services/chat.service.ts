@@ -5,7 +5,7 @@ import { bookListings, bookPurchaseRequests } from "../models/book_buy_sell-sche
 import { eq, and, or, desc, sql } from "drizzle-orm";
 import { sendToUser } from "./notification.service.js";
 
-export const sendMessage = async (senderId: string, listingId: number, content: string) => {
+export const sendMessage = async (senderId: string, listingId: number, content: string, buyerId?: string) => {
     try {
         // 1. Get the listing to find the seller
         const listing = await db.query.bookListings.findFirst({
@@ -17,12 +17,20 @@ export const sendMessage = async (senderId: string, listingId: number, content: 
         }
 
         const sellerId = listing.sellerId;
+        const targetBuyerId = buyerId || (senderId === sellerId ? null : senderId);
+
+        if (!targetBuyerId) {
+            return {
+                success: false,
+                message: "Recipient (buyer) must be specified when the seller sends a message."
+            };
+        }
 
         if (senderId !== sellerId) {
             const acceptedRequest = await db.query.bookPurchaseRequests.findFirst({
                 where: and(
                     eq(bookPurchaseRequests.listingId, listingId),
-                    eq(bookPurchaseRequests.buyerId, senderId),
+                    eq(bookPurchaseRequests.buyerId, targetBuyerId),
                     eq(bookPurchaseRequests.status, "accepted")
                 ),
             });
@@ -39,14 +47,14 @@ export const sendMessage = async (senderId: string, listingId: number, content: 
         let conversation = await db.query.conversations.findFirst({
             where: and(
                 eq(conversations.listingId, listingId),
-                eq(conversations.buyerId, senderId)
+                eq(conversations.buyerId, targetBuyerId)
             ),
         });
 
         if (!conversation) {
             const [newConversation] = await db.insert(conversations).values({
                 listingId,
-                buyerId: senderId,
+                buyerId: targetBuyerId,
                 sellerId: sellerId,
             }).returning();
             conversation = newConversation;
