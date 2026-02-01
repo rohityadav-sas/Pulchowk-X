@@ -116,7 +116,6 @@
       path: /^\/clubs\/?$/,
       component: Clubs,
     },
-    // Book Marketplace Routes
     {
       path: /^\/books\/?$/,
       component: BookMarketplace,
@@ -198,12 +197,6 @@
                 ></div>
               </div>
             {:else if $session.data?.user}
-              <a
-                use:route
-                href="/messages"
-                class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
-                >Messages</a
-              >
               <a
                 use:route
                 href="/dashboard"

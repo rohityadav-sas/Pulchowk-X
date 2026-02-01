@@ -2,6 +2,7 @@ const API_EVENTS = '/api/events';
 const API_CLUBS = '/api/clubs';
 const API_BOOKS = '/api/books';
 const API_CLASSROOM = '/api/classroom';
+const API_CHAT = '/api/chat';
 
 export interface Club {
     id: number;
@@ -1224,8 +1225,19 @@ export async function cancelPurchaseRequest(
     }
 }
 
-
-const API_CHAT = '/api/chat';
+export async function deletePurchaseRequest(
+    requestId: number
+): Promise<{ success: boolean; message?: string }> {
+    try {
+        const res = await fetch(`${API_BOOKS}/requests/${requestId}/delete`, {
+            method: 'DELETE',
+            credentials: 'include',
+        });
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
 
 export interface ChatUser {
     id: string;
