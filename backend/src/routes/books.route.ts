@@ -48,6 +48,7 @@ import {
     RespondToRequest,
     GetRequestStatus,
     CancelRequest,
+    DeleteRequest,
 } from "../controllers/purchaseRequest.controller.js";
 
 const router = express.Router();
@@ -85,6 +86,7 @@ router.get("/listings/:id/request-status", requireAuth, GetRequestStatus);
 router.get("/my-requests", requireAuth, GetMyRequests);
 router.put("/requests/:requestId/respond", requireAuth, RespondToRequest);
 router.delete("/requests/:requestId", requireAuth, CancelRequest);
+router.delete("/requests/:requestId/delete", requireAuth, DeleteRequest);
 
 router.get("/categories", GetAllCategories);
 router.get("/categories/:id", GetCategoriesById);

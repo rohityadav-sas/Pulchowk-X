@@ -6,6 +6,7 @@ import {
     respondToPurchaseRequest,
     getPurchaseRequestStatus,
     cancelPurchaseRequest,
+    deletePurchaseRequest,
 } from "../services/purchaseRequest.service.js";
 
 const getUserId = (req: Request): string | null => {
@@ -163,6 +164,32 @@ export const CancelRequest = async (req: Request, res: Response) => {
         return res.json(result);
     } catch (error) {
         console.error("Error in CancelRequest:", error);
+        return res.status(500).json({ success: false, message: "An error occurred." });
+    }
+};
+
+export const DeleteRequest = async (req: Request, res: Response) => {
+    try {
+        const userId = getUserId(req);
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Authentication required." });
+        }
+
+        const requestId = parseInt(req.params.requestId);
+        if (isNaN(requestId)) {
+            return res.status(400).json({ success: false, message: "Valid request ID required." });
+        }
+
+        const result = await deletePurchaseRequest(requestId, userId);
+
+        if (!result.success) {
+            const status = result.message?.includes("not authorized") ? 403 : 400;
+            return res.status(status).json(result);
+        }
+
+        return res.json(result);
+    } catch (error) {
+        console.error("Error in DeleteRequest:", error);
         return res.status(500).json({ success: false, message: "An error occurred." });
     }
 };

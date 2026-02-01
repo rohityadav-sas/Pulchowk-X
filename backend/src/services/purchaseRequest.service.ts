@@ -256,3 +256,32 @@ export const cancelPurchaseRequest = async (requestId: number, buyerId: string) 
         return { success: false, message: "Failed to cancel request." };
     }
 };
+
+export const deletePurchaseRequest = async (requestId: number, userId: string) => {
+    try {
+        const request = await db.query.bookPurchaseRequests.findFirst({
+            where: eq(bookPurchaseRequests.id, requestId),
+            with: {
+                listing: true,
+            },
+        });
+
+        if (!request) {
+            return { success: false, message: "Request not found." };
+        }
+
+        // Allow both buyer and seller to delete/cancel
+        if (request.buyerId !== userId && request.listing.sellerId !== userId) {
+            return { success: false, message: "You are not authorized to delete this request." };
+        }
+
+        // Remove the restriction that only pending requests can be cancelled/deleted
+        // to allow users to clear their history.
+        await db.delete(bookPurchaseRequests).where(eq(bookPurchaseRequests.id, requestId));
+
+        return { success: true, message: "Request deleted." };
+    } catch (error) {
+        console.error("Error deleting purchase request:", error);
+        return { success: false, message: "Failed to delete request." };
+    }
+};
