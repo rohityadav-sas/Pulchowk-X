@@ -558,7 +558,7 @@
                         {/if}
 
                         <!-- Seller Info -->
-                        {#if book.seller}
+                        {#if book.seller && book.status !== "sold"}
                             <div class="p-4 bg-gray-50 rounded-xl mb-6">
                                 <h3
                                     class="text-sm font-medium text-gray-500 mb-3"
@@ -597,95 +597,201 @@
                         {/if}
 
                         <!-- Action Buttons -->
-                        <div class="flex flex-col sm:flex-row gap-3">
+                        <div class="flex flex-col gap-4">
                             {#if book.isOwner}
                                 <!-- Owner Actions -->
-                                <a
-                                    href="/books/sell?edit={book.id}"
-                                    use:routeAction
-                                    class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-center transition-all"
-                                >
-                                    Edit Listing
-                                </a>
-                                {#if book.status === "available"}
-                                    <button
-                                        onclick={handleMarkSold}
-                                        disabled={markingSold}
-                                        class="flex-1 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-all disabled:opacity-50"
-                                    >
-                                        {markingSold
-                                            ? "Marking..."
-                                            : "Mark as Sold"}
-                                    </button>
-                                {/if}
-                                <button
-                                    onclick={handleDelete}
-                                    disabled={deletingBook}
-                                    class="px-6 py-3 border border-red-200 text-red-600 hover:bg-red-50 font-medium rounded-xl transition-all disabled:opacity-50"
-                                >
-                                    {deletingBook ? "Deleting..." : "Delete"}
-                                </button>
-                            {:else if $session.data?.user && book.status === "available"}
-                                <!-- Buyer Actions -->
-                                <button
-                                    onclick={handleSaveBook}
-                                    disabled={savingBook}
-                                    class="px-6 py-3 h-fit self-start {isSavedState
-                                        ? 'bg-rose-50 text-rose-600 border-rose-200'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-medium rounded-xl border transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 group"
-                                >
-                                    <svg
-                                        class="w-5 h-5 transition-transform group-active:scale-125"
-                                        fill={isSavedState ? "#e11d48" : "none"}
-                                        stroke={isSavedState
-                                            ? "#e11d48"
-                                            : "currentColor"}
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                        />
-                                    </svg>
-                                    {savingBook
-                                        ? "Updating..."
-                                        : isSavedState
-                                          ? "Saved to Wishlist"
-                                          : "Save to Wishlist"}
-                                </button>
-
-                                <!-- Request Status Based Actions -->
-                                {#if requestStatusQuery.isLoading}
+                                {#if book.status === "sold"}
                                     <div
-                                        class="flex-1 px-6 py-3 bg-gray-100 rounded-xl flex items-center justify-center"
+                                        class="w-full bg-emerald-50 border border-emerald-100 rounded-2xl p-6 flex flex-col items-center text-center animate-in fade-in slide-in-from-bottom-2 duration-500"
                                     >
                                         <div
-                                            class="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"
-                                        ></div>
-                                    </div>
-                                {:else if requestStatusQuery.data?.status === "requested"}
-                                    <div class="flex-1 flex flex-col gap-2">
-                                        <div
-                                            class="px-6 py-3 bg-amber-50 border border-amber-200 text-amber-700 font-medium rounded-xl text-center flex items-center justify-center gap-2"
+                                            class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-3"
                                         >
-                                            <span
-                                                class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"
-                                            ></span>
-                                            Request Pending
+                                            <svg
+                                                class="w-6 h-6 text-emerald-600"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2.5"
+                                                    d="M5 13l4 4L19 7"
+                                                />
+                                            </svg>
                                         </div>
-                                        <button
-                                            onclick={handleCancelRequest}
-                                            class="px-4 py-2 text-sm text-gray-500 hover:text-red-600 transition-colors"
+                                        <h3
+                                            class="text-lg font-bold text-emerald-900"
                                         >
-                                            Cancel Request
+                                            Listing Completed
+                                        </h3>
+                                        <p
+                                            class="text-sm text-emerald-600 mb-4"
+                                        >
+                                            This book has been successfully
+                                            marked as sold.
+                                        </p>
+                                        <button
+                                            onclick={handleDelete}
+                                            disabled={deletingBook}
+                                            class="text-sm font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-1.5 px-4 py-2 hover:bg-red-50 rounded-lg disabled:opacity-50"
+                                        >
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                />
+                                            </svg>
+                                            {deletingBook
+                                                ? "Deleting..."
+                                                : "Permanently Delete Listing"}
                                         </button>
                                     </div>
-                                {:else if requestStatusQuery.data?.status === "accepted"}
-                                    <div class="flex-1">
+                                {:else}
+                                    <div
+                                        class="flex flex-col sm:flex-row gap-3"
+                                    >
+                                        <a
+                                            href="/books/sell?edit={book.id}"
+                                            use:routeAction
+                                            class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-center transition-all shadow-lg shadow-blue-500/20"
+                                        >
+                                            Edit Listing
+                                        </a>
+                                        <button
+                                            onclick={handleMarkSold}
+                                            disabled={markingSold}
+                                            class="flex-1 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                                        >
+                                            {markingSold
+                                                ? "Marking..."
+                                                : "Mark as Sold"}
+                                        </button>
+                                        <button
+                                            onclick={handleDelete}
+                                            disabled={deletingBook}
+                                            class="px-6 py-3 border border-red-200 text-red-600 hover:bg-red-50 font-medium rounded-xl transition-all disabled:opacity-50"
+                                        >
+                                            {deletingBook
+                                                ? "Deleting..."
+                                                : "Delete"}
+                                        </button>
+                                    </div>
+                                {/if}
+                            {:else if $session.data?.user && book.status === "available"}
+                                <!-- Buyer Actions -->
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <button
+                                        onclick={handleSaveBook}
+                                        disabled={savingBook}
+                                        class="px-6 py-3 h-fit {isSavedState
+                                            ? 'bg-rose-50 text-rose-600 border-rose-200'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-medium rounded-xl border transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 group"
+                                    >
+                                        <svg
+                                            class="w-5 h-5 transition-transform group-active:scale-125"
+                                            fill={isSavedState
+                                                ? "#e11d48"
+                                                : "none"}
+                                            stroke={isSavedState
+                                                ? "#e11d48"
+                                                : "currentColor"}
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                            />
+                                        </svg>
+                                        {savingBook
+                                            ? "Updating..."
+                                            : isSavedState
+                                              ? "Saved"
+                                              : "Save to Wishlist"}
+                                    </button>
+
+                                    <!-- Request Status Based Actions -->
+                                    {#if requestStatusQuery.isLoading}
                                         <div
-                                            class="px-6 py-3 bg-emerald-50 border border-emerald-200 text-emerald-700 font-medium rounded-xl text-center flex items-center justify-center gap-2"
+                                            class="flex-1 px-6 py-3 bg-gray-100 rounded-xl flex items-center justify-center"
+                                        >
+                                            <div
+                                                class="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"
+                                            ></div>
+                                        </div>
+                                    {:else if requestStatusQuery.data?.status === "requested"}
+                                        <div class="flex-1 flex flex-col gap-2">
+                                            <div
+                                                class="px-6 py-3 bg-amber-50 border border-amber-200 text-amber-700 font-medium rounded-xl text-center flex items-center justify-center gap-2"
+                                            >
+                                                <span
+                                                    class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"
+                                                ></span>
+                                                Request Pending
+                                            </div>
+                                            <button
+                                                onclick={handleCancelRequest}
+                                                class="px-4 py-2 text-sm text-gray-500 hover:text-red-600 transition-colors"
+                                            >
+                                                Cancel Request
+                                            </button>
+                                        </div>
+                                    {:else if requestStatusQuery.data?.status === "accepted"}
+                                        <div class="flex-1">
+                                            <div
+                                                class="px-6 py-3 bg-emerald-50 border border-emerald-200 text-emerald-700 font-medium rounded-xl text-center flex items-center justify-center gap-2"
+                                            >
+                                                <svg
+                                                    class="w-5 h-5"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M5 13l4 4L19 7"
+                                                    />
+                                                </svg>
+                                                Request Accepted!
+                                            </div>
+                                        </div>
+                                    {:else if requestStatusQuery.data?.status === "rejected"}
+                                        <div class="flex-1 flex flex-col gap-2">
+                                            <div
+                                                class="px-6 py-3 bg-red-50 border border-red-200 text-red-700 font-medium rounded-xl text-center"
+                                            >
+                                                Request Declined
+                                            </div>
+                                            <button
+                                                onclick={() =>
+                                                    handleDeleteRequest(
+                                                        requestStatusQuery.data!
+                                                            .id,
+                                                    )}
+                                                class="px-4 py-2 text-sm text-gray-500 hover:text-red-600 transition-colors"
+                                            >
+                                                Clear from History
+                                            </button>
+                                        </div>
+                                    {:else}
+                                        <!-- No request yet - show Request to Buy button -->
+                                        <button
+                                            onclick={() =>
+                                                (showRequestModal = true)}
+                                            disabled={requestingBook}
+                                            class="flex-1 px-6 py-3 bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-200"
                                         >
                                             <svg
                                                 class="w-5 h-5"
@@ -697,54 +803,14 @@
                                                     stroke-linecap="round"
                                                     stroke-linejoin="round"
                                                     stroke-width="2"
-                                                    d="M5 13l4 4L19 7"
+                                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                                 />
                                             </svg>
-                                            Request Accepted!
-                                        </div>
-                                    </div>
-                                {:else if requestStatusQuery.data?.status === "rejected"}
-                                    <div class="flex-1 flex flex-col gap-2">
-                                        <div
-                                            class="px-6 py-3 bg-red-50 border border-red-200 text-red-700 font-medium rounded-xl text-center"
-                                        >
-                                            Request Declined
-                                        </div>
-                                        <button
-                                            onclick={() =>
-                                                handleDeleteRequest(
-                                                    requestStatusQuery.data!.id,
-                                                )}
-                                            class="px-4 py-2 text-sm text-gray-500 hover:text-red-600 transition-colors"
-                                        >
-                                            Clear from History
+                                            Request to Buy
                                         </button>
-                                    </div>
-                                {:else}
-                                    <!-- No request yet - show Request to Buy button -->
-                                    <button
-                                        onclick={() =>
-                                            (showRequestModal = true)}
-                                        disabled={requestingBook}
-                                        class="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-200"
-                                    >
-                                        <svg
-                                            class="w-5 h-5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                            />
-                                        </svg>
-                                        Request to Buy
-                                    </button>
-                                {/if}
-                            {:else if !$session.data?.user}
+                                    {/if}
+                                </div>
+                            {:else if !$session.data?.user && book.status !== "sold"}
                                 <a
                                     href="/register"
                                     use:routeAction
@@ -756,7 +822,7 @@
                         </div>
 
                         <!-- Contact Info Section - Below the buttons -->
-                        {#if requestStatusQuery.data?.status === "accepted" && (contactInfoQuery.data?.data || book.seller?.email)}
+                        {#if book.status !== "sold" && requestStatusQuery.data?.status === "accepted" && (contactInfoQuery.data?.data || book.seller?.email)}
                             <div
                                 class="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 mt-4"
                                 in:slide
@@ -1051,7 +1117,7 @@
                                 </a>
                             </div>
                         {/if}
-                        {#if book.isOwner && incomingRequestsQuery.data && incomingRequestsQuery.data.length > 0}
+                        {#if book.isOwner && book.status !== "sold" && incomingRequestsQuery.data && incomingRequestsQuery.data.length > 0}
                             <div
                                 class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100"
                                 in:slide

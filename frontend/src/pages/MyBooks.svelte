@@ -15,7 +15,7 @@
         getConversations,
         type BookListing,
         type SavedBook,
-        type PurchaseRequest
+        type PurchaseRequest,
     } from "../lib/api";
     import LoadingSpinner from "../components/LoadingSpinner.svelte";
     import ChatInterface from "../components/ChatInterface.svelte";
@@ -440,52 +440,54 @@
                                             {book.viewCount} views
                                         </span>
                                         <div
-                                            class="flex flex-wrap gap-2 pt-2 border-t border-slate-50"
+                                            class="flex items-center gap-2 pt-2 border-t border-slate-50"
                                         >
                                             {#if book.status === "available"}
                                                 <button
                                                     onclick={() =>
                                                         handleMarkSold(book.id)}
-                                                    class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl transition-all shadow-sm shadow-emerald-200 hover:shadow-md active:scale-95"
+                                                    class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl transition-all shadow-sm shadow-emerald-200 hover:shadow-md active:scale-95"
+                                                >
+                                                    Mark Sold
+                                                </button>
+                                                <a
+                                                    href="/books/sell?edit={book.id}"
+                                                    use:routeAction
+                                                    class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 rounded-xl transition-all shadow-sm shadow-blue-200 hover:shadow-md active:scale-95"
+                                                >
+                                                    Edit
+                                                </a>
+                                            {:else if book.status === "sold"}
+                                                <div
+                                                    class="flex-1 flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100"
                                                 >
                                                     <svg
                                                         class="w-3.5 h-3.5"
                                                         fill="none"
                                                         stroke="currentColor"
                                                         viewBox="0 0 24 24"
-                                                        ><path
+                                                    >
+                                                        <path
                                                             stroke-linecap="round"
                                                             stroke-linejoin="round"
-                                                            stroke-width="2.5"
+                                                            stroke-width="3"
                                                             d="M5 13l4 4L19 7"
-                                                        /></svg
+                                                        />
+                                                    </svg>
+                                                    <span
+                                                        class="text-[10px] font-bold uppercase tracking-wider"
+                                                        >Sold</span
                                                     >
-                                                    Mark Sold
-                                                </button>
+                                                </div>
                                             {/if}
-                                            <a
-                                                href="/books/sell?edit={book.id}"
-                                                use:routeAction
-                                                class="flex-1 min-w-[80px] flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 rounded-xl transition-all shadow-sm shadow-blue-200 hover:shadow-md active:scale-95"
-                                            >
-                                                <svg
-                                                    class="w-3.5 h-3.5"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                    ><path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2.5"
-                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                                    /></svg
-                                                >
-                                                Edit
-                                            </a>
+
                                             <button
                                                 onclick={() =>
                                                     handleDelete(book.id)}
-                                                class="flex-1 min-w-[90px] flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-rose-500 hover:bg-rose-600 rounded-xl transition-all shadow-sm shadow-rose-200 hover:shadow-md active:scale-95"
+                                                class="{book.status === 'sold'
+                                                    ? 'px-4'
+                                                    : 'flex-1'} flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-rose-500 hover:text-white border border-rose-100 hover:bg-rose-500 rounded-xl transition-all active:scale-95"
+                                                title="Delete listing"
                                             >
                                                 <svg
                                                     class="w-3.5 h-3.5"
