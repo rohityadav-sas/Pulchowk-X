@@ -1,15 +1,24 @@
 <script lang="ts">
-    import { route as routeAction, goto } from "@mateothegreat/svelte5-router";
+    import {
+        route as routeAction,
+        goto,
+        query as routeQuery,
+    } from "@mateothegreat/svelte5-router";
     import {
         getMyBookListings,
         getSavedBooks,
+        getMyPurchaseRequests,
         deleteBookListing,
         markBookAsSold,
         unsaveBook,
+        deletePurchaseRequest,
+        getConversations,
         type BookListing,
         type SavedBook,
+        type PurchaseRequest
     } from "../lib/api";
     import LoadingSpinner from "../components/LoadingSpinner.svelte";
+    import ChatInterface from "../components/ChatInterface.svelte";
     import { fade, fly } from "svelte/transition";
     import { authClient } from "../lib/auth-client";
     import { createQuery, useQueryClient } from "@tanstack/svelte-query";
@@ -17,7 +26,10 @@
     const session = authClient.useSession();
     const queryClient = useQueryClient();
 
-    let activeTab = $state<"listings" | "saved">("listings");
+    const initialTab = (routeQuery("tab") as any) || "listings";
+    let activeTab = $state<"listings" | "saved" | "requests" | "messages">(
+        initialTab,
+    );
 
     $effect(() => {
         if (!$session.isPending && !$session.data?.user) {
@@ -45,6 +57,27 @@
                 return result.data;
             }
             throw new Error(result.message || "Failed to load saved books");
+        },
+        enabled: !!$session.data?.user,
+    }));
+
+    const myRequestsQuery = createQuery(() => ({
+        queryKey: ["my-purchase-requests"],
+        queryFn: async () => {
+            const result = await getMyPurchaseRequests();
+            if (result.success && result.data) {
+                return result.data;
+            }
+            throw new Error(result.message || "Failed to load requests");
+        },
+        enabled: !!$session.data?.user,
+    }));
+
+    const conversationsQuery = createQuery(() => ({
+        queryKey: ["chat-conversations"],
+        queryFn: async () => {
+            const result = await getConversations();
+            return result.success ? result.data || [] : [];
         },
         enabled: !!$session.data?.user,
     }));
@@ -104,6 +137,16 @@
         const result = await unsaveBook(listingId);
         if (result.success) {
             queryClient.invalidateQueries({ queryKey: ["saved-books"] });
+        }
+    }
+
+    async function handleDeleteRequest(requestId: number) {
+        if (!confirm("Remove this request from your history?")) return;
+        const result = await deletePurchaseRequest(requestId);
+        if (result.success) {
+            queryClient.invalidateQueries({
+                queryKey: ["my-purchase-requests"],
+            });
         }
     }
 </script>
@@ -207,6 +250,44 @@
                             : 'bg-gray-100'}"
                     >
                         {savedBooksQuery.data.length}
+                    </span>
+                {/if}
+            </button>
+            <button
+                onclick={() => (activeTab = "requests")}
+                class="px-6 py-2.5 rounded-lg font-medium transition-all {activeTab ===
+                'requests'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-50'}"
+            >
+                My Requests
+                {#if myRequestsQuery.data}
+                    <span
+                        class="ml-2 px-2 py-0.5 text-xs rounded-full {activeTab ===
+                        'requests'
+                            ? 'bg-blue-500'
+                            : 'bg-gray-100'}"
+                    >
+                        {myRequestsQuery.data.length}
+                    </span>
+                {/if}
+            </button>
+            <button
+                onclick={() => (activeTab = "messages")}
+                class="px-6 py-2.5 rounded-lg font-medium transition-all {activeTab ===
+                'messages'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-50'}"
+            >
+                Messages
+                {#if conversationsQuery.data && conversationsQuery.data.length > 0}
+                    <span
+                        class="ml-2 px-2 py-0.5 text-xs rounded-full {activeTab ===
+                        'messages'
+                            ? 'bg-blue-500'
+                            : 'bg-gray-100 font-bold text-blue-600'}"
+                    >
+                        {conversationsQuery.data.length}
                     </span>
                 {/if}
             </button>
@@ -564,6 +645,283 @@
                     {/each}
                 </div>
             {/if}
+        {/if}
+
+        <!-- My Requests Tab -->
+        {#if activeTab === "requests"}
+            {#if myRequestsQuery.isLoading}
+                <div class="flex items-center justify-center py-20" in:fade>
+                    <LoadingSpinner size="lg" text="Loading your requests..." />
+                </div>
+            {:else if myRequestsQuery.error}
+                <div
+                    class="p-6 bg-white border border-red-100 rounded-2xl text-center"
+                >
+                    <p class="text-red-600 mb-4">
+                        {myRequestsQuery.error.message}
+                    </p>
+                    <button
+                        onclick={() => myRequestsQuery.refetch()}
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            {:else if !myRequestsQuery.data || myRequestsQuery.data.length === 0}
+                <div
+                    class="text-center py-16 bg-white rounded-2xl border border-gray-100"
+                    in:fade
+                >
+                    <svg
+                        class="w-16 h-16 text-gray-200 mx-auto mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.5"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">
+                        No requests yet
+                    </h3>
+                    <p class="text-gray-500 mb-6">
+                        Books you request to buy will appear here.
+                    </p>
+                    <a
+                        href="/books"
+                        use:routeAction
+                        class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors"
+                    >
+                        Browse Books
+                    </a>
+                </div>
+            {:else}
+                <div class="space-y-4" in:fade>
+                    {#each myRequestsQuery.data as request (request.id)}
+                        {#if request.listing}
+                            {@const book = request.listing}
+                            <div
+                                class="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition-all group relative overflow-hidden"
+                            >
+                                <div class="flex gap-4">
+                                    <!-- Image -->
+                                    <a
+                                        href="/books/{book.id}"
+                                        use:routeAction
+                                        class="flex-shrink-0"
+                                    >
+                                        <div
+                                            class="w-20 h-24 rounded-lg overflow-hidden bg-gray-100 relative"
+                                        >
+                                            {#if book.images && book.images.length > 0}
+                                                <img
+                                                    src={book.images[0]
+                                                        .imageUrl}
+                                                    alt=""
+                                                    class="w-full h-full object-cover"
+                                                />
+                                            {:else}
+                                                <div
+                                                    class="w-full h-full flex items-center justify-center"
+                                                >
+                                                    <svg
+                                                        class="w-8 h-8 text-gray-300"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="1.5"
+                                                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                                                        ></path>
+                                                    </svg>
+                                                </div>
+                                            {/if}
+
+                                            {#if book.status === "sold"}
+                                                <div
+                                                    class="absolute inset-0 bg-gray-900/40 flex items-center justify-center"
+                                                >
+                                                    <span
+                                                        class="text-[10px] font-bold text-white uppercase tracking-tighter"
+                                                        >Sold</span
+                                                    >
+                                                </div>
+                                            {/if}
+                                        </div>
+                                    </a>
+
+                                    <!-- Details -->
+                                    <div class="flex-1 min-w-0">
+                                        <div
+                                            class="flex items-start justify-between gap-2"
+                                        >
+                                            <div>
+                                                <a
+                                                    href="/books/{book.id}"
+                                                    use:routeAction
+                                                    class="font-medium text-gray-900 hover:text-blue-600 transition-colors line-clamp-1"
+                                                >
+                                                    {book.title}
+                                                </a>
+                                                <p
+                                                    class="text-sm text-gray-500"
+                                                >
+                                                    by {book.author}
+                                                </p>
+                                            </div>
+
+                                            <div
+                                                class="flex flex-col items-end gap-1"
+                                            >
+                                                {#if request.status === "requested"}
+                                                    <span
+                                                        class="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-100 flex items-center gap-1.5"
+                                                    >
+                                                        <span
+                                                            class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"
+                                                        ></span>
+                                                        Pending
+                                                    </span>
+                                                {:else if request.status === "accepted"}
+                                                    <span
+                                                        class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1.5"
+                                                    >
+                                                        <svg
+                                                            class="w-3 h-3"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                            ><path
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="3"
+                                                                d="M5 13l4 4L19 7"
+                                                            /></svg
+                                                        >
+                                                        Accepted
+                                                    </span>
+                                                {:else if request.status === "rejected"}
+                                                    <span
+                                                        class="px-2.5 py-1 text-xs font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-100"
+                                                    >
+                                                        Declined
+                                                    </span>
+                                                {:else}
+                                                    <span
+                                                        class="px-2.5 py-1 text-xs font-bold rounded-full bg-gray-50 text-gray-600 border border-gray-100"
+                                                    >
+                                                        {request.status
+                                                            .charAt(0)
+                                                            .toUpperCase() +
+                                                            request.status.slice(
+                                                                1,
+                                                            )}
+                                                    </span>
+                                                {/if}
+                                                <span
+                                                    class="text-[10px] text-gray-400"
+                                                >
+                                                    Requested {formatDate(
+                                                        request.createdAt,
+                                                    )}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            class="flex items-center gap-3 mt-1.5"
+                                        >
+                                            <span
+                                                class="text-lg font-bold text-blue-600"
+                                                >{formatPrice(book.price)}</span
+                                            >
+                                            <span
+                                                class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-gray-100 text-gray-600"
+                                            >
+                                                {conditionLabels[
+                                                    book.condition
+                                                ]}
+                                            </span>
+                                        </div>
+
+                                        {#if request.message}
+                                            <div
+                                                class="mt-2 p-2 bg-gray-50 rounded-lg text-xs text-gray-600 italic"
+                                            >
+                                                "{request.message}"
+                                            </div>
+                                        {/if}
+
+                                        <div
+                                            class="flex items-center justify-between mt-3"
+                                        >
+                                            {#if request.status === "accepted"}
+                                                <a
+                                                    href="/books/{book.id}"
+                                                    use:routeAction
+                                                    class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+                                                >
+                                                    <svg
+                                                        class="w-3.5 h-3.5"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                        ><path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                                        /></svg
+                                                    >
+                                                    View Contact Info
+                                                </a>
+                                            {:else}
+                                                <div></div>
+                                            {/if}
+
+                                            <button
+                                                onclick={() =>
+                                                    handleDeleteRequest(
+                                                        request.id,
+                                                    )}
+                                                class="p-2 text-gray-300 hover:text-rose-500 transition-colors rounded-lg hover:bg-rose-50 group/delete"
+                                                title="Delete from history"
+                                            >
+                                                <svg
+                                                    class="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                    ><path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                    /></svg
+                                                >
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {/if}
+                    {/each}
+                </div>
+            {/if}
+        {/if}
+
+        <!-- Messages Tab -->
+        {#if activeTab === "messages"}
+            <div in:fade={{ duration: 200 }}>
+                <ChatInterface />
+            </div>
         {/if}
     </div>
 </div>
