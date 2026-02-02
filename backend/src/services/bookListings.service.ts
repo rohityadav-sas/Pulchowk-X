@@ -69,13 +69,25 @@ export const createBookListing = async (
             })
             .returning();
 
-        // Trigger notification (non-blocking)
+        // Trigger notification (data-only for client-side filtering)
         sendToTopic('books', {
-            title: 'New Book Listed!',
-            body: `${data.title} is now available for ${data.price} NPR.`,
+            // We put title and body in data implicitly by the service if we omit them here,
+            // but the service logic I wrote: "If it's a data-only message, ensure title and body are in data"
+            // So if I pas them as title/body it MIGHT add notification block if I didn't change the interface logic slightly differently in my head.
+            // Wait, my service change was: if (payload.title && payload.body) { message.notification = ... }
+            // So to trigger data-only, I should NOT pass title/body as top-level properties if I want to avoid the notification block?
+            // Actually, I updated the service to:
+            // if (payload.title && payload.body) { message.notification = ... }
+            // So if I pass them, it WILL send a notification message.
+            // I want to send a data-only message.
+            // So I should pass them in `data` and NOT in the top level.
+            
             data: {
                 type: 'new_book',
                 bookId: listing.id.toString(),
+                sellerId: sellerId,
+                title: 'New Book Listed!',
+                body: `${data.title} is now available for ${data.price} NPR.`
             }
         }).catch(err => console.error('Failed to send book notification:', err));
 
