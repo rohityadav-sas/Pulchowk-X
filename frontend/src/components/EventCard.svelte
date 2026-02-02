@@ -6,6 +6,7 @@
     formatEventTime,
     parseEventDateTime,
   } from "../lib/event-dates";
+  import { getEventStatusLabel } from "../lib/event-status";
 
   interface Props {
     event: ClubEvent;
@@ -30,6 +31,7 @@
   function getStatusColor(status: string): string {
     switch (status) {
       case "published":
+      case "upcoming":
         return "bg-emerald-100 text-emerald-800 border-emerald-200";
       case "draft":
         return "bg-amber-100 text-amber-800 border-amber-200";
@@ -83,7 +85,7 @@
       <span
         class={`px-3 py-1 text-[10px] font-bold rounded-full shadow-sm border ${getStatusColor(event.status)} uppercase tracking-widest backdrop-blur-md bg-white/90`}
       >
-        {event.status}
+        {getEventStatusLabel(event.status)}
       </span>
     </div>
 
@@ -92,16 +94,14 @@
       class="absolute bottom-4 left-4 right-4 flex items-end justify-between"
     >
       <div
-        class="bg-white/95 backdrop-blur-sm p-3 rounded-2xl shadow-xl flex flex-col items-center min-w-15"
+        class="bg-white/95 backdrop-blur-sm px-3 py-2 rounded-2xl shadow-xl flex items-center"
       >
-        <span class="text-[10px] font-bold text-blue-600 uppercase mb-0.5"
-          >{parseEventDateTime(event.eventStartTime).toLocaleDateString("en-US", {
+        <span class="text-[11px] font-bold text-blue-600 uppercase whitespace-nowrap">
+          {parseEventDateTime(event.eventStartTime).toLocaleDateString("en-US", {
             month: "short",
-          })}</span
-        >
-        <span class="text-xl font-black text-gray-900 leading-none"
-          >{parseEventDateTime(event.eventStartTime).getDate()}</span
-        >
+            day: "numeric",
+          })}
+        </span>
       </div>
     </div>
   </div>
