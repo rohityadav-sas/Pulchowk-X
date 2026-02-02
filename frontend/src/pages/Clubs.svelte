@@ -142,9 +142,7 @@
         </p>
       </div>
     {:else}
-      <div
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
-      >
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {#each query.data as club, i (club.id)}
           <a
             href="/clubs/{club.id}"
