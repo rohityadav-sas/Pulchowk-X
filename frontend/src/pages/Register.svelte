@@ -9,13 +9,8 @@
   const toastError = query("message");
   let showError = $state(toastError === "login_required");
 
-  $effect(() => {
-    if (toastError === "login_required") {
-      goto("/register", {
-        replace: true,
-      });
-    }
-  });
+  // svelte-ignore state_referenced_locally
+  if (showError) goto("/register");
 
   const handleGoogleSignIn = async () => {
     signingIn = true;
