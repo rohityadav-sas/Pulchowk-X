@@ -86,6 +86,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 
     const token = getAuthToken(req);
     if (token) {
+        // First try Firebase token verification
         try {
             const decoded = await verifyFirebaseToken(token);
 
@@ -107,7 +108,23 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
                 }
             }
         } catch (error) {
-            console.error("Auth middleware error:", error);
+            // Firebase token verification failed, try database user ID fallback
+            console.warn("Firebase token verification failed, trying database user ID fallback");
+        }
+
+        // Fallback: treat the token as a database user ID (for mobile app backward compatibility)
+        try {
+            const dbUser = await db.query.user.findFirst({
+                where: eq(user.id, token),
+            });
+
+            if (dbUser) {
+                (req as any).user = dbUser;
+                (req as any).session = { userId: dbUser.id, authType: "database_id" };
+                return next();
+            }
+        } catch (error) {
+            console.error("Database user lookup error:", error);
         }
     }
 
@@ -126,6 +143,7 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
         const token = getAuthToken(req);
 
         if (token) {
+            // First try Firebase token verification
             try {
                 const decoded = await verifyFirebaseToken(token);
                 if (decoded) {
@@ -145,7 +163,24 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
                     }
                 }
             } catch (error) {
-                console.error("Auth middleware error:", error);
+                // Firebase token verification failed, try database user ID fallback
+                console.warn("Firebase token verification failed in optionalAuth, trying database user ID fallback");
+            }
+
+            // Fallback: treat the token as a database user ID (for mobile app backward compatibility)
+            if (!(req as any).user) {
+                try {
+                    const dbUser = await db.query.user.findFirst({
+                        where: eq(user.id, token),
+                    });
+
+                    if (dbUser) {
+                        (req as any).user = dbUser;
+                        (req as any).session = { userId: dbUser.id, authType: "database_id" };
+                    }
+                } catch (error) {
+                    console.error("Database user lookup error in optionalAuth:", error);
+                }
             }
         }
     }
