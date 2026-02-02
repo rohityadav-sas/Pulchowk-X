@@ -68,21 +68,28 @@
   let isUploadingBanner = $state(false);
 
   // Derived ISO Strings
+  const toLocalDateString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const eventStartTime = $derived(
     startDate && startTime
-      ? `${startDate.toISOString().split("T")[0]}T${startTime}`
+      ? `${toLocalDateString(startDate)}T${startTime}`
       : "",
   );
 
   const eventEndTime = $derived(
     endDate && endTime
-      ? `${endDate.toISOString().split("T")[0]}T${endTime}`
+      ? `${toLocalDateString(endDate)}T${endTime}`
       : "",
   );
 
   const registrationDeadline = $derived(
     regDate && regTime
-      ? `${regDate.toISOString().split("T")[0]}T${regTime}`
+      ? `${toLocalDateString(regDate)}T${regTime}`
       : "",
   );
 

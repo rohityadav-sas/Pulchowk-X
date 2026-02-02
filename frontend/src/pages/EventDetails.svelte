@@ -20,6 +20,11 @@
   import LoadingSpinner from "../components/LoadingSpinner.svelte";
   import { fade, fly, slide } from "svelte/transition";
   import { quintOut } from "svelte/easing";
+  import {
+    formatEventDate,
+    formatEventTime,
+    parseEventDateTime,
+  } from "../lib/event-dates";
 
   const { route } = $props();
   const clubId = $derived(route.result.path.params.clubId);
@@ -32,7 +37,7 @@
   let event = $state<ClubEvent | null>(null);
   const isUpcoming = $derived(
     event &&
-      new Date(event.eventStartTime) > new Date() &&
+      parseEventDateTime(event.eventStartTime) > new Date() &&
       event.status !== "cancelled" &&
       event.status !== "completed",
   );
@@ -477,7 +482,7 @@
   }
 
   function formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString("en-US", {
+    return formatEventDate(dateStr, {
       weekday: "long",
       month: "long",
       day: "numeric",
@@ -486,10 +491,32 @@
   }
 
   function formatTime(dateStr: string): string {
-    return new Date(dateStr).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return formatEventTime(dateStr);
+  }
+
+  function formatDateRange(startStr: string, endStr: string): string {
+    const start = parseEventDateTime(startStr);
+    const end = parseEventDateTime(endStr);
+    const sameDay = start.toDateString() === end.toDateString();
+    if (sameDay) {
+      return formatEventDate(startStr, {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+    }
+    return `${formatEventDate(startStr, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    })} - ${formatEventDate(endStr, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    })}`;
   }
 
   function getStatusColor(status: string): string {
@@ -521,7 +548,7 @@
     if (!event.isRegistrationOpen) return true;
     if (
       event.registrationDeadline &&
-      new Date() > new Date(event.registrationDeadline)
+      new Date() > parseEventDateTime(event.registrationDeadline)
     )
       return true;
     return false;
@@ -1224,7 +1251,10 @@
                   Date & Time
                 </p>
                 <p class="font-semibold text-gray-900 mt-1">
-                  {formatDate(event.eventStartTime)}
+                  {formatDateRange(
+                    event.eventStartTime,
+                    event.eventEndTime,
+                  )}
                 </p>
                 <p class="text-sm text-gray-500">
                   {formatTime(event.eventStartTime)} - {formatTime(

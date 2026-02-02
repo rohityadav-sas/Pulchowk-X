@@ -12,6 +12,7 @@
   import EventCard from "../components/EventCard.svelte";
   import { fade, fly, slide } from "svelte/transition";
   import { createQuery } from "@tanstack/svelte-query";
+  import { getEventTimeMs, parseEventDateTime } from "../lib/event-dates";
 
   const { route } = $props();
   const clubId = $derived(route.result.path.params.clubId);
@@ -74,22 +75,6 @@
     }
   });
 
-  function formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  }
-
-  function formatTime(dateStr: string): string {
-    return new Date(dateStr).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
-
   function getStatusColor(status: string): string {
     switch (status) {
       case "published":
@@ -126,14 +111,12 @@
 
       const now = new Date();
       const sorted: ClubEvent[] = [...eventsQuery.data].sort(
-        (a, b) =>
-          new Date(b.eventStartTime).getTime() -
-          new Date(a.eventStartTime).getTime(),
+        (a, b) => getEventTimeMs(b.eventStartTime) - getEventTimeMs(a.eventStartTime),
       );
 
       sorted.forEach((e) => {
-        const start = new Date(e.eventStartTime);
-        const end = new Date(e.eventEndTime);
+        const start = parseEventDateTime(e.eventStartTime);
+        const end = parseEventDateTime(e.eventEndTime);
         const status = (e.status || "").toLowerCase().trim();
 
         // Check cancelled first - cancelled events should never go to other categories

@@ -2,6 +2,10 @@
   import { route } from "@mateothegreat/svelte5-router";
   import { fly } from "svelte/transition";
   import type { ClubEvent } from "../lib/api";
+  import {
+    formatEventTime,
+    parseEventDateTime,
+  } from "../lib/event-dates";
 
   interface Props {
     event: ClubEvent;
@@ -20,10 +24,7 @@
   }: Props = $props();
 
   function formatTime(dateStr: string): string {
-    return new Date(dateStr).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return formatEventTime(dateStr);
   }
 
   function getStatusColor(status: string): string {
@@ -94,12 +95,12 @@
         class="bg-white/95 backdrop-blur-sm p-3 rounded-2xl shadow-xl flex flex-col items-center min-w-15"
       >
         <span class="text-[10px] font-bold text-blue-600 uppercase mb-0.5"
-          >{new Date(event.eventStartTime).toLocaleDateString("en-US", {
+          >{parseEventDateTime(event.eventStartTime).toLocaleDateString("en-US", {
             month: "short",
           })}</span
         >
         <span class="text-xl font-black text-gray-900 leading-none"
-          >{new Date(event.eventStartTime).getDate()}</span
+          >{parseEventDateTime(event.eventStartTime).getDate()}</span
         >
       </div>
     </div>

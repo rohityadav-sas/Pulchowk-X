@@ -3,6 +3,7 @@
   import { authClient } from "../lib/auth-client";
   import { getEnrollments, type Registration } from "../lib/api";
   import { createQuery } from "@tanstack/svelte-query";
+  import { formatEventDate, formatEventTime } from "../lib/event-dates";
 
   let loading = $state(false);
   let error = $state<string | null>(null);
@@ -39,7 +40,7 @@
   };
 
   function formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString("en-US", {
+    return formatEventDate(dateStr, {
       weekday: "short",
       month: "short",
       day: "numeric",
@@ -47,10 +48,7 @@
   }
 
   function formatTime(dateStr: string): string {
-    return new Date(dateStr).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return formatEventTime(dateStr);
   }
 </script>
 

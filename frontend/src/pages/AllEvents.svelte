@@ -6,6 +6,7 @@
   import { authClient } from "../lib/auth-client";
   import { goto } from "@mateothegreat/svelte5-router";
   import { createQuery } from "@tanstack/svelte-query";
+  import { getEventTimeMs, parseEventDateTime } from "../lib/event-dates";
 
   const session = authClient.useSession();
 
@@ -37,15 +38,13 @@
       }
       const now = new Date();
       const sorted: ClubEvent[] = [...query.data].sort(
-        (a, b) =>
-          new Date(b.eventStartTime).getTime() -
-          new Date(a.eventStartTime).getTime(),
+        (a, b) => getEventTimeMs(b.eventStartTime) - getEventTimeMs(a.eventStartTime),
       );
 
       return {
         ongoing: sorted.filter((e) => {
-          const start = new Date(e.eventStartTime);
-          const end = new Date(e.eventEndTime);
+          const start = parseEventDateTime(e.eventStartTime);
+          const end = parseEventDateTime(e.eventEndTime);
           return (
             (e.status === "ongoing" || (start <= now && end >= now)) &&
             e.status !== "completed" &&
@@ -53,7 +52,7 @@
           );
         }),
         upcoming: sorted.filter((e) => {
-          const start = new Date(e.eventStartTime);
+          const start = parseEventDateTime(e.eventStartTime);
           return (
             start > now &&
             e.status !== "completed" &&
@@ -62,7 +61,7 @@
           );
         }),
         completed: sorted.filter((e) => {
-          const end = new Date(e.eventEndTime);
+          const end = parseEventDateTime(e.eventEndTime);
           return (
             e.status === "completed" || end < now || e.status === "cancelled"
           );
