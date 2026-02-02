@@ -119,4 +119,52 @@ router.post("/sync-user", async (req, res) => {
     }
 });
 
+/**
+ * Clear FCM token on logout to prevent duplicate notifications
+ * This endpoint removes the FCM token from the user's record
+ */
+router.post("/clear-fcm-token", async (req, res) => {
+    try {
+        // Get user ID from Authorization header
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            res.status(401).json({
+                success: false,
+                message: "Unauthorized: No token provided",
+            });
+            return;
+        }
+
+        const userId = authHeader.split(' ')[1];
+        if (!userId) {
+            res.status(401).json({
+                success: false,
+                message: "Unauthorized: Invalid token",
+            });
+            return;
+        }
+
+        // Clear FCM token for the user
+        await db
+            .update(user)
+            .set({
+                fcmToken: null,
+                updatedAt: new Date(),
+            })
+            .where(eq(user.id, userId));
+
+        res.json({
+            success: true,
+            message: "FCM token cleared successfully",
+        });
+    } catch (error) {
+        console.error("Error clearing FCM token:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to clear FCM token",
+            error: error instanceof Error ? error.message : "Unknown error",
+        });
+    }
+});
+
 export default router;
