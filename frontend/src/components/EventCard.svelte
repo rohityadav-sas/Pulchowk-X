@@ -56,20 +56,11 @@
   <!-- Banner -->
   <div class="relative h-56 overflow-hidden bg-gray-900">
     {#if event.bannerUrl}
-      <div class="absolute inset-0">
-        <img
-          src={event.bannerUrl}
-          alt=""
-          class="w-full h-full object-cover scale-105 opacity-35"
-        />
-      </div>
-      <div class="relative w-full h-full flex items-center justify-center">
-        <img
-          src={event.bannerUrl}
-          alt={event.title}
-          class="max-w-full max-h-full object-contain transition-transform duration-700 group-hover:scale-105"
-        />
-      </div>
+      <img
+        src={event.bannerUrl}
+        alt={event.title}
+        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+      />
     {:else}
       <div
         class="w-full h-full bg-linear-to-br from-gray-800 to-gray-900 flex items-center justify-center"
