@@ -134,11 +134,13 @@
       sorted.forEach((e) => {
         const start = new Date(e.eventStartTime);
         const end = new Date(e.eventEndTime);
-        const status = e.status?.toLowerCase() || "";
+        const status = (e.status || "").toLowerCase().trim();
 
+        // Check cancelled first - cancelled events should never go to other categories
         if (status === "cancelled") {
           cancelled.push(e);
-        } else if (status === "completed" || end < now) {
+        } else if (end < now || status === "completed") {
+          // Event has ended OR is marked as completed
           completed.push(e);
         } else if (status === "ongoing" || (start <= now && end >= now)) {
           ongoing.push(e);

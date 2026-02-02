@@ -25,22 +25,22 @@ import {
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post("/club-profile", CreateClubProfile);
-router.get("/club-profile/:clubId", getProfile);
-router.put("/club-profile/:clubId", UpdateClubProfile);
+router.post("/club-profile", requireAuth, CreateClubProfile);
+router.get("/club-profile/:clubId", requireAuth, getProfile);
+router.put("/club-profile/:clubId", requireAuth, UpdateClubProfile);
 
 router.post("/:clubId/upload-logo", requireAuth, upload.single('logo'), UploadClubLogo);
 router.delete("/:clubId/upload-logo", requireAuth, DeleteClubLogo);
 
-router.post("/event-details/create-event-details", createEventDetail);
-router.put("/event-details/update-eventdetail", UpdateEventDetail);
-router.get("/event-details/:eventId", GetEventDetails);
+router.post("/event-details/create-event-details", requireAuth, createEventDetail);
+router.put("/event-details/update-eventdetail", requireAuth, UpdateEventDetail);
+router.get("/event-details/:eventId", requireAuth, GetEventDetails);
 
 
-router.post("/event-categories", CreateEventCategory);
-router.get("/event-categories/:clubId", GetEventCategories);
-router.get("/event-category/:categoryId", GetEventCategory);
-router.put("/event-category/:categoryId", UpdateEventCategory);
-router.delete("/event-category/:categoryId", DeleteEventCategory);
+router.post("/event-categories", requireAuth, CreateEventCategory);
+router.get("/event-categories/:clubId", requireAuth, GetEventCategories);
+router.get("/event-category/:categoryId", requireAuth, GetEventCategory);
+router.put("/event-category/:categoryId", requireAuth, UpdateEventCategory);
+router.delete("/event-category/:categoryId", requireAuth, DeleteEventCategory);
 
 export default router;
