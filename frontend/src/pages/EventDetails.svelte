@@ -77,6 +77,12 @@
   let showCancelModal = $state(false);
   let cancelLoading = $state(false);
 
+  // Countdown state
+  let countdown = $state({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  let countdownLabel = $state<string | null>(null);
+  let showCountdown = $state(false);
+  let countdownInterval: ReturnType<typeof setInterval> | null = null;
+
   // Click outside to close menu
   function handleGlobalClick(e: MouseEvent) {
     if (showExportMenu) {
@@ -115,6 +121,28 @@
   $effect(() => {
     window.addEventListener("click", handleGlobalClick);
     return () => window.removeEventListener("click", handleGlobalClick);
+  });
+
+  $effect(() => {
+    updateCountdown();
+
+    if (!showCountdown) {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+      return;
+    }
+
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(updateCountdown, 1000);
+
+    return () => {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+    };
   });
 
   async function loadRegisteredStudents() {
@@ -347,6 +375,16 @@
     bannerInputType = "file";
   }
 
+  function openBannerPreview() {
+    if (!event?.bannerUrl) return;
+    bannerRect = bannerEl?.getBoundingClientRect() || null;
+    showBannerPreview = true;
+  }
+
+  function closeBannerPreview() {
+    showBannerPreview = false;
+  }
+
   async function handleUpdateDetails() {
     saveLoading = true;
     try {
@@ -562,6 +600,47 @@
     )
       return true;
     return false;
+  }
+
+  function updateCountdown() {
+    if (!event) {
+      showCountdown = false;
+      countdownLabel = null;
+      return;
+    }
+
+    if (event.status === "draft" || event.status === "cancelled") {
+      showCountdown = false;
+      countdownLabel = null;
+      return;
+    }
+
+    const now = new Date();
+    const start = parseEventDateTime(event.eventStartTime);
+    const end = parseEventDateTime(event.eventEndTime);
+
+    let target: Date | null = null;
+    if (now < start) {
+      target = start;
+      countdownLabel = "Starts in";
+    } else if (now <= end) {
+      target = end;
+      countdownLabel = "Ends in";
+    } else {
+      showCountdown = false;
+      countdownLabel = null;
+      return;
+    }
+
+    const diffMs = Math.max(0, target.getTime() - now.getTime());
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const days = Math.floor(totalSeconds / (24 * 60 * 60));
+    const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    countdown = { days, hours, minutes, seconds };
+    showCountdown = true;
   }
 </script>
 
@@ -1273,6 +1352,66 @@
               </div>
             </div>
 
+            {#if showCountdown}
+              <div class="rounded-2xl border border-blue-100 bg-blue-50/40 p-4">
+                <p
+                  class="text-[11px] font-black text-blue-600 uppercase tracking-widest"
+                >
+                  {countdownLabel}
+                </p>
+                <div class="mt-3 grid grid-cols-4 gap-2 text-center">
+                  <div
+                    class="rounded-xl bg-white border border-blue-100 px-2 py-3 shadow-sm"
+                  >
+                    <p class="text-lg font-black text-gray-900 leading-none">
+                      {countdown.days}
+                    </p>
+                    <p
+                      class="mt-1 text-[9px] font-black uppercase tracking-wider text-gray-400"
+                    >
+                      Days
+                    </p>
+                  </div>
+                  <div
+                    class="rounded-xl bg-white border border-blue-100 px-2 py-3 shadow-sm"
+                  >
+                    <p class="text-lg font-black text-gray-900 leading-none">
+                      {String(countdown.hours).padStart(2, "0")}
+                    </p>
+                    <p
+                      class="mt-1 text-[9px] font-black uppercase tracking-wider text-gray-400"
+                    >
+                      Hours
+                    </p>
+                  </div>
+                  <div
+                    class="rounded-xl bg-white border border-blue-100 px-2 py-3 shadow-sm"
+                  >
+                    <p class="text-lg font-black text-gray-900 leading-none">
+                      {String(countdown.minutes).padStart(2, "0")}
+                    </p>
+                    <p
+                      class="mt-1 text-[9px] font-black uppercase tracking-wider text-gray-400"
+                    >
+                      Minutes
+                    </p>
+                  </div>
+                  <div
+                    class="rounded-xl bg-white border border-blue-100 px-2 py-3 shadow-sm"
+                  >
+                    <p class="text-lg font-black text-gray-900 leading-none">
+                      {String(countdown.seconds).padStart(2, "0")}
+                    </p>
+                    <p
+                      class="mt-1 text-[9px] font-black uppercase tracking-wider text-gray-400"
+                    >
+                      Seconds
+                    </p>
+                  </div>
+                </div>
+              </div>
+            {/if}
+
             {#if event.venue}
               <div class="flex items-start gap-4">
                 <div
@@ -1940,12 +2079,3 @@
     user-select: none;
   }
 </style>
-  function openBannerPreview() {
-    if (!event?.bannerUrl) return;
-    bannerRect = bannerEl?.getBoundingClientRect() || null;
-    showBannerPreview = true;
-  }
-
-  function closeBannerPreview() {
-    showBannerPreview = false;
-  }
