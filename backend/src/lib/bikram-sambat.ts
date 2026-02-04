@@ -3,8 +3,16 @@
  * Uses nepali-date-converter package for accurate BS-AD conversions
  * 
  * Pulchowk Campus Academic Calendar:
- * - Odd semesters (1, 3, 5, 7, 9): Start on Baisakh 17 BS
- * - Even semesters (2, 4, 6, 8, 10): Start on Mangsir 15 BS
+ * 
+ * BATCH 2079 (COVID Exception):
+ * - 1st semester started Baisakh 17, 2080 (delayed due to COVID)
+ * - Odd semesters (1, 3, 5, 7): Start on Baisakh 17
+ * - Even semesters (2, 4, 6, 8): Start on Mangsir 15
+ * 
+ * BATCH 2080 onwards (Normal):
+ * - 1st semester starts Mangsir 15 of the batch year
+ * - Odd semesters (1, 3, 5, 7): Start on Mangsir 15
+ * - Even semesters (2, 4, 6, 8): Start on Baisakh 17
  */
 
 import NepaliDateModule from 'nepali-date-converter';
@@ -39,23 +47,67 @@ export function adToBs(adDate: Date): BSDate {
 }
 
 /**
- * Get the AD date for Baisakh 17 (odd semester start) of a given BS year
+ * Get the AD date for Baisakh 17 of a given BS year
  */
-export function getOddSemesterStartDate(bsYear: number): Date {
+export function getBaisakh17(bsYear: number): Date {
     return bsToAd(bsYear, 1, 17); // Baisakh = month 1
 }
 
 /**
- * Get the AD date for Mangsir 15 (even semester start) of a given BS year
+ * Get the AD date for Mangsir 15 of a given BS year
  */
-export function getEvenSemesterStartDate(bsYear: number): Date {
+export function getMangsir15(bsYear: number): Date {
     return bsToAd(bsYear, 8, 15); // Mangsir = month 8
+}
+
+/**
+ * Check if a batch is affected by COVID (batch 2079)
+ * These batches have different semester start dates
+ */
+function isCOVIDBatch(fullBatchYear: number): boolean {
+    return fullBatchYear === 2079;
+}
+
+/**
+ * Get semester start date for a specific semester of a batch
+ * 
+ * For COVID batch (2079):
+ *   - Odd semesters start on Baisakh 17
+ *   - Even semesters start on Mangsir 15
+ *   - First semester started Baisakh 17, 2080
+ * 
+ * For normal batches (2080+):
+ *   - Odd semesters start on Mangsir 15
+ *   - Even semesters start on Baisakh 17
+ *   - First semester starts Mangsir 15 of batch year
+ */
+function getSemesterStartDate(fullBatchYear: number, semesterNumber: number): Date {
+    const isOddSemester = semesterNumber % 2 === 1;
+
+    if (isCOVIDBatch(fullBatchYear)) {
+        // COVID batch (2079): 1st sem started Baisakh 17, 2080
+        // Odd sems: Baisakh 17, Even sems: Mangsir 15
+        const semYear = 2080 + Math.floor((semesterNumber - 1) / 2);
+        return isOddSemester ? getBaisakh17(semYear) : getMangsir15(semYear);
+    } else {
+        // Normal batches (2080+): 1st sem starts Mangsir 15 of batch year
+        // Odd sems: Mangsir 15, Even sems: Baisakh 17
+        if (isOddSemester) {
+            // Sem 1: Mangsir 2080, Sem 3: Mangsir 2081, Sem 5: Mangsir 2082, etc.
+            const semYear = fullBatchYear + Math.floor((semesterNumber - 1) / 2);
+            return getMangsir15(semYear);
+        } else {
+            // Sem 2: Baisakh 2081, Sem 4: Baisakh 2082, Sem 6: Baisakh 2083, etc.
+            const semYear = fullBatchYear + Math.floor(semesterNumber / 2);
+            return getBaisakh17(semYear);
+        }
+    }
 }
 
 /**
  * Calculate current semester based on batch year and current date
  * 
- * @param batchYearBS - The BS batch year (e.g., 079 means 2079)
+ * @param batchYearBS - The BS batch year from email (e.g., 079 = batch 2079)
  * @param totalSemesters - Total semesters for the program (8 for most, 10 for architecture)
  * @param currentDate - The current date to calculate against
  * @returns Object with current semester and semester start date
@@ -69,25 +121,13 @@ export function calculateCurrentSemester(
     const fullBatchYear = batchYearBS < 100 ? 2000 + batchYearBS : batchYearBS;
 
     let semester = 1;
-    let semesterStartDate = getOddSemesterStartDate(fullBatchYear);
+    let semesterStartDate = getSemesterStartDate(fullBatchYear, 1);
     let isGraduated = false;
 
-    // First semester starts on Baisakh 17 of batch year
     // Calculate which semester we're currently in
     for (let sem = 1; sem <= totalSemesters; sem++) {
-        const isOddSemester = sem % 2 === 1;
-        const semYear = fullBatchYear + Math.floor((sem - 1) / 2);
-
-        let semStart: Date;
-        let semEnd: Date;
-
-        if (isOddSemester) {
-            semStart = getOddSemesterStartDate(semYear);
-            semEnd = getEvenSemesterStartDate(semYear);
-        } else {
-            semStart = getEvenSemesterStartDate(semYear);
-            semEnd = getOddSemesterStartDate(semYear + 1);
-        }
+        const semStart = getSemesterStartDate(fullBatchYear, sem);
+        const semEnd = getSemesterStartDate(fullBatchYear, sem + 1);
 
         if (currentDate >= semStart && currentDate < semEnd) {
             semester = sem;
@@ -109,21 +149,14 @@ export function calculateCurrentSemester(
 
 /**
  * Get semester end date based on batch year and semester number
+ * End date is when the next semester starts
  */
 export function getSemesterEndDate(batchYearBS: number, semesterNumber: number): Date {
     // Convert 2-digit year to 4-digit
     const fullBatchYear = batchYearBS < 100 ? 2000 + batchYearBS : batchYearBS;
 
-    const isOddSemester = semesterNumber % 2 === 1;
-    const semYear = fullBatchYear + Math.floor((semesterNumber - 1) / 2);
-
-    if (isOddSemester) {
-        // Odd semester ends when even semester starts (Mangsir 15 of same year)
-        return getEvenSemesterStartDate(semYear);
-    } else {
-        // Even semester ends when next odd semester starts (Baisakh 17 of next year)
-        return getOddSemesterStartDate(semYear + 1);
-    }
+    // End date is when the next semester starts
+    return getSemesterStartDate(fullBatchYear, semesterNumber + 1);
 }
 
 /**
