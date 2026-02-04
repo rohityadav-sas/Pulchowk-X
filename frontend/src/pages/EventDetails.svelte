@@ -1359,9 +1359,11 @@
                 >
                   {countdownLabel}
                 </p>
-                <div class="mt-3 grid grid-cols-4 gap-2 text-center">
+                <div
+                  class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center"
+                >
                   <div
-                    class="rounded-xl bg-white border border-blue-100 px-2 py-3 shadow-sm"
+                    class="rounded-xl bg-white border border-blue-100 px-2 py-2 shadow-sm min-w-0"
                   >
                     <p class="text-lg font-black text-gray-900 leading-none">
                       {countdown.days}
@@ -1373,7 +1375,7 @@
                     </p>
                   </div>
                   <div
-                    class="rounded-xl bg-white border border-blue-100 px-2 py-3 shadow-sm"
+                    class="rounded-xl bg-white border border-blue-100 px-2 py-2 shadow-sm min-w-0"
                   >
                     <p class="text-lg font-black text-gray-900 leading-none">
                       {String(countdown.hours).padStart(2, "0")}
@@ -1385,7 +1387,7 @@
                     </p>
                   </div>
                   <div
-                    class="rounded-xl bg-white border border-blue-100 px-2 py-3 shadow-sm"
+                    class="rounded-xl bg-white border border-blue-100 px-2 py-2 shadow-sm min-w-0"
                   >
                     <p class="text-lg font-black text-gray-900 leading-none">
                       {String(countdown.minutes).padStart(2, "0")}
@@ -1397,7 +1399,7 @@
                     </p>
                   </div>
                   <div
-                    class="rounded-xl bg-white border border-blue-100 px-2 py-3 shadow-sm"
+                    class="rounded-xl bg-white border border-blue-100 px-2 py-2 shadow-sm min-w-0"
                   >
                     <p class="text-lg font-black text-gray-900 leading-none">
                       {String(countdown.seconds).padStart(2, "0")}
