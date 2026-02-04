@@ -22,6 +22,7 @@
 		"express": "5.1.0",
 		"firebase-admin": "^13.6.0",
 		"multer": "^2.0.2",
+		"nepali-date-converter": "^3.4.0",
 		"pdfkit": "^0.17.2"
 	},
 	"devDependencies": {
