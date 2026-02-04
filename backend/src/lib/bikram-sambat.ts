@@ -10,6 +10,15 @@
 // Use default import for ESM compatibility
 import nepaliDateConverter from '@sbmdkl/nepali-date-converter';
 const { adToBs: pkgAdToBs, bsToAd: pkgBsToAd } = nepaliDateConverter;
+
+export interface BSDate {
+    year: number;
+    month: number; // 1-12 (Baisakh=1, Mangsir=8)
+    day: number;
+}
+
+/**
+ * Convert Bikram Sambat date to Gregorian (AD) date
  */
 export function bsToAd(bsYear: number, bsMonth: number, bsDay: number): Date {
     // Package expects YYYY-MM-DD format
