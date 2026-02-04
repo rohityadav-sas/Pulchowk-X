@@ -4,6 +4,7 @@ import {
     text,
     timestamp,
     integer,
+    boolean,
     index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
@@ -17,8 +18,8 @@ export const conversations = pgTable(
         listingId: integer("listing_id").notNull().references(() => bookListings.id, { onDelete: "cascade" }),
         buyerId: text("buyer_id").notNull().references(() => user.id, { onDelete: "cascade" }),
         sellerId: text("seller_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-        buyerDeleted: text("buyer_deleted").default("false").notNull(),
-        sellerDeleted: text("seller_deleted").default("false").notNull(),
+        buyerDeleted: boolean("buyer_deleted").default(false).notNull(),
+        sellerDeleted: boolean("seller_deleted").default(false).notNull(),
         createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
         updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     },
@@ -36,7 +37,7 @@ export const messages = pgTable(
         conversationId: integer("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
         senderId: text("sender_id").notNull().references(() => user.id, { onDelete: "cascade" }),
         content: text("content").notNull(),
-        isRead: text("is_read").default("false").notNull(), // Using text because of bool issues in some pg versions/drizzle configs if any, but boolean is better. Let's use boolean if available.
+        isRead: boolean("is_read").default(false).notNull(),
         createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     },
     (table) => [

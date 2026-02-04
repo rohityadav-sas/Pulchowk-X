@@ -727,6 +727,8 @@
       </div>
     {:else if event}
       <!-- Event Banner -->
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
         bind:this={bannerEl}
         class="relative w-full h-56 sm:h-72 lg:h-80 rounded-3xl overflow-hidden mb-8 shadow-2xl group bg-gray-900 cursor-zoom-in"
@@ -741,7 +743,7 @@
           />
         {:else}
           <div
-            class="w-full h-64 flex items-center justify-center bg-gradient-to-br from-gray-800 via-gray-900 to-black"
+            class="w-full h-64 flex items-center justify-center bg-linear-to-br from-gray-800 via-gray-900 to-black"
           >
             <svg
               class="w-24 h-24 text-white/20"
@@ -1344,10 +1346,7 @@
                   Date & Time
                 </p>
                 <p class="font-semibold text-gray-900 mt-1">
-                  {formatDateRange(
-                  event.eventStartTime,
-                   event.eventEndTime
-                   )}
+                  {formatDateRange(event.eventStartTime, event.eventEndTime)}
                 </p>
               </div>
             </div>
@@ -1369,7 +1368,7 @@
                       {countdown.days}
                     </p>
                     <p
-                      class="mt-1 text-[9px] font-black uppercase tracking-wider text-gray-400"
+                      class="mt-1 text-[7px] font-black uppercase tracking-wider text-gray-400"
                     >
                       Days
                     </p>
@@ -1381,7 +1380,7 @@
                       {String(countdown.hours).padStart(2, "0")}
                     </p>
                     <p
-                      class="mt-1 text-[9px] font-black uppercase tracking-wider text-gray-400"
+                      class="mt-1 text-[7px] font-black uppercase tracking-wider text-gray-400"
                     >
                       Hours
                     </p>
@@ -1393,7 +1392,7 @@
                       {String(countdown.minutes).padStart(2, "0")}
                     </p>
                     <p
-                      class="mt-1 text-[9px] font-black uppercase tracking-wider text-gray-400"
+                      class="mt-1 text-[7px] font-black uppercase tracking-wider text-gray-400"
                     >
                       Minutes
                     </p>
@@ -1405,7 +1404,7 @@
                       {String(countdown.seconds).padStart(2, "0")}
                     </p>
                     <p
-                      class="mt-1 text-[9px] font-black uppercase tracking-wider text-gray-400"
+                      class="mt-1 text-[7px] font-black uppercase tracking-wider text-gray-400"
                     >
                       Seconds
                     </p>
@@ -1693,7 +1692,7 @@
       <!-- Cancellation Confirmation Modal -->
       {#if showCancelModal}
         <div
-          class="fixed inset-0 z-[100] flex items-center justify-center px-4"
+          class="fixed inset-0 z-100 flex items-center justify-center px-4"
           transition:fade={{ duration: 200 }}
         >
           <button
@@ -1835,7 +1834,7 @@
                 </div>
 
                 <div
-                  class="relative h-48 sm:h-56 w-full rounded-[2rem] overflow-hidden shadow-inner bg-gray-100 group"
+                  class="relative h-48 sm:h-56 w-full rounded-4xl overflow-hidden shadow-inner bg-gray-100 group"
                 >
                   {#if bannerPreview}
                     <img
@@ -1868,7 +1867,7 @@
                     {/if}
                   {:else}
                     <div
-                      class="absolute inset-0 flex flex-col items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-200 rounded-[2rem]"
+                      class="absolute inset-0 flex flex-col items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-200 rounded-4xl"
                     >
                       <div
                         class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4 text-gray-300"
@@ -1919,7 +1918,7 @@
                 {#if bannerInputType === "file"}
                   <div in:fly={{ y: 10, duration: 400 }}>
                     <label
-                      class="relative flex flex-col items-center justify-center w-full h-40 transition-all bg-gray-50/50 border-2 border-gray-200 border-dashed rounded-[2rem] cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 group overflow-hidden"
+                      class="relative flex flex-col items-center justify-center w-full h-40 transition-all bg-gray-50/50 border-2 border-gray-200 border-dashed rounded-4xl cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 group overflow-hidden"
                     >
                       <div
                         class="flex flex-col items-center justify-center pb-6 pt-5 px-4 text-center"
@@ -1943,7 +1942,7 @@
                         </div>
                         {#if bannerFile}
                           <p
-                            class="text-gray-900 font-bold text-sm tracking-tight truncate max-w-[250px]"
+                            class="text-gray-900 font-bold text-sm tracking-tight truncate max-w-62.5"
                           >
                             {bannerFile.name}
                           </p>
@@ -1979,7 +1978,7 @@
                         bind:value={bannerUrlInput}
                         oninput={handleUrlChange}
                         placeholder="https://images.unsplash.com/your-epic-banner"
-                        class="w-full pl-6 pr-14 py-5 bg-gray-50 border-none rounded-[1.5rem] font-bold text-gray-900 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-gray-400/50 shadow-inner"
+                        class="w-full pl-6 pr-14 py-5 bg-gray-50 border-none rounded-3xl font-bold text-gray-900 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-gray-400/50 shadow-inner"
                       />
                       <div
                         class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300"
@@ -2015,7 +2014,7 @@
               <button
                 onclick={handleSaveBanner}
                 disabled={uploadLoading || !bannerPreview}
-                class="flex-[2] px-8 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 shadow-2xl shadow-blue-500/20 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-3"
+                class="flex-2 px-8 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 shadow-2xl shadow-blue-500/20 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-3"
               >
                 {#if uploadLoading}
                   <div
@@ -2046,7 +2045,7 @@
 
       {#if showBannerPreview && event?.bannerUrl}
         <div
-          class="fixed inset-0 z-[120] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+          class="fixed inset-0 z-120 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
           transition:fade={{ duration: 200 }}
         >
           <button

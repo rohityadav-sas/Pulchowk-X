@@ -71,8 +71,8 @@ export const sendMessage = async (senderId: string, listingId: number, content: 
         await db.update(conversations)
             .set({
                 updatedAt: new Date(),
-                buyerDeleted: "false",
-                sellerDeleted: "false"
+                buyerDeleted: false,
+                sellerDeleted: false
             })
             .where(eq(conversations.id, conversation.id));
 
@@ -109,8 +109,8 @@ export const getConversations = async (userId: string) => {
                     eq(conversations.sellerId, userId)
                 ),
                 sql`CASE
-                    WHEN ${conversations.buyerId} = ${userId} THEN ${conversations.buyerDeleted} = 'false'
-                    WHEN ${conversations.sellerId} = ${userId} THEN ${conversations.sellerDeleted} = 'false'
+                    WHEN ${conversations.buyerId} = ${userId} THEN ${conversations.buyerDeleted} = false
+                    WHEN ${conversations.sellerId} = ${userId} THEN ${conversations.sellerDeleted} = false
                     ELSE TRUE
                 END`
             ),
@@ -220,8 +220,8 @@ export const sendMessageToConversation = async (conversationId: number, senderId
         await db.update(conversations)
             .set({
                 updatedAt: new Date(),
-                buyerDeleted: "false",
-                sellerDeleted: "false"
+                buyerDeleted: false,
+                sellerDeleted: false
             })
             .where(eq(conversations.id, conversationId));
 
@@ -270,11 +270,11 @@ export const deleteConversation = async (conversationId: number, userId: string)
         // 2. Set the deleted flag for this user
         if (isBuyer) {
             await db.update(conversations)
-                .set({ buyerDeleted: "true" })
+                .set({ buyerDeleted: true })
                 .where(eq(conversations.id, conversationId));
         } else {
             await db.update(conversations)
-                .set({ sellerDeleted: "true" })
+                .set({ sellerDeleted: true })
                 .where(eq(conversations.id, conversationId));
         }
 
@@ -283,7 +283,7 @@ export const deleteConversation = async (conversationId: number, userId: string)
             where: eq(conversations.id, conversationId),
         });
 
-        if (updatedConversation && updatedConversation.buyerDeleted === "true" && updatedConversation.sellerDeleted === "true") {
+        if (updatedConversation && updatedConversation.buyerDeleted === true && updatedConversation.sellerDeleted === true) {
             // Permanently delete if both deleted
             await db.delete(conversations).where(eq(conversations.id, conversationId));
             return { success: true, message: "Conversation deleted permanently." };

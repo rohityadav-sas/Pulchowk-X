@@ -169,6 +169,13 @@
       "when": 1770122966063,
       "tag": "0023_remarkable_white_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1770400000000,
+      "tag": "0024_chat_boolean_fields",
+      "breakpoints": true
     }
   ]
 }

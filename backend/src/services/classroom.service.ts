@@ -19,6 +19,8 @@ import {
 } from "./cloudinary.service.js";
 import { sendToTopic, sendToUser } from "./notification.service.js";
 import { unwrapOne } from "../lib/type-utils.js";
+import { calculateCurrentSemester, getSemesterEndDate } from "../lib/bikram-sambat.js";
+import type { ParsedStudentEmail } from "../lib/student-email-parser.js";
 
 const { ASSIGNMENT_FILES, FOLDERS } = UPLOAD_CONSTANTS;
 
@@ -728,4 +730,71 @@ export async function getSubmissionsForExport(
       };
     })
   };
+}
+
+/**
+ * Create student profile automatically from parsed email data
+ * Called during first login for valid student emails
+ */
+export async function createStudentProfileFromEmail(
+  userId: string,
+  parsedEmail: ParsedStudentEmail
+) {
+  if (!parsedEmail.isValid || !parsedEmail.facultySlug || !parsedEmail.fullBatchYear) {
+    throw new Error("Invalid parsed email data");
+  }
+
+  await ensureSyllabusSeeded();
+
+  // Check if profile already exists
+  const existing = await db.query.studentProfiles.findFirst({
+    where: eq(studentProfiles.userId, userId),
+  });
+
+  if (existing) {
+    // Profile already exists, don't overwrite
+    return { success: true, profile: existing, created: false };
+  }
+
+  // Find faculty by slug
+  const faculty = await db.query.faculties.findFirst({
+    where: eq(faculties.slug, parsedEmail.facultySlug),
+  });
+
+  if (!faculty) {
+    throw new Error(`Faculty not found for slug: ${parsedEmail.facultySlug}`);
+  }
+
+  // Calculate current semester based on batch year and current date
+  const totalSemesters = parsedEmail.semestersCount || faculty.semestersCount;
+  const semesterInfo = calculateCurrentSemester(
+    parsedEmail.fullBatchYear,
+    totalSemesters,
+    new Date()
+  );
+
+  // Calculate semester end date
+  const semesterEndDate = getSemesterEndDate(
+    semesterInfo.semesterStartDate,
+    semesterInfo.semester
+  );
+
+  // Create student profile
+  const now = new Date();
+  await db.insert(studentProfiles).values({
+    userId,
+    facultyId: faculty.id,
+    currentSemester: semesterInfo.semester,
+    semesterStartDate: semesterInfo.semesterStartDate,
+    semesterEndDate,
+    autoAdvance: true,
+    updatedAt: now,
+  });
+
+  const profile = await db.query.studentProfiles.findFirst({
+    where: eq(studentProfiles.userId, userId),
+    with: { faculty: true },
+  });
+
+  return { success: true, profile, created: true };
 }

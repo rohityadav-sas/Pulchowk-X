@@ -41,6 +41,7 @@ dist-ssr
 # Backend build outputs (TypeScript compiled files)
 backend/dist/
 backend/build/
+backend/scripts
 backend/src/**/*.js
 backend/src/**/*.d.ts
 !backend/src/**/*.config.js

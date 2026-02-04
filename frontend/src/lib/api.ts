@@ -1285,7 +1285,7 @@ export interface ChatMessage {
     conversationId: number;
     senderId: string;
     content: string;
-    isRead: string;
+    isRead: boolean;
     createdAt: string;
     sender?: ChatUser;
 }
