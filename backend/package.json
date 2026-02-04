@@ -14,7 +14,6 @@
 		"@better-auth/expo": "^1.4.15",
 		"@google/generative-ai": "^0.24.1",
 		"@neondatabase/serverless": "^1.0.2",
-		"@sbmdkl/nepali-date-converter": "^2.0.4",
 		"@types/pdfkit": "^0.17.4",
 		"better-auth": "^1.4.10",
 		"cloudinary": "^2.9.0",

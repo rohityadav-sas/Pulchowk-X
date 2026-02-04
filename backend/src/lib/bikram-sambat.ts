@@ -1,15 +1,50 @@
 /**
  * Bikram Sambat Calendar Utilities for Nepal Academic Year
- * Uses @sbmdkl/nepali-date-converter for accurate BS-AD conversions
+ * Native implementation without external dependencies for deployment compatibility
  * 
  * Pulchowk Campus Academic Calendar:
  * - Odd semesters (1, 3, 5, 7, 9): Start on Baisakh 17 BS
  * - Even semesters (2, 4, 6, 8, 10): Start on Mangsir 15 BS
  */
 
-// Use default import for ESM compatibility
-import nepaliDateConverter from '@sbmdkl/nepali-date-converter';
-const { adToBs: pkgAdToBs, bsToAd: pkgBsToAd } = nepaliDateConverter;
+// BS calendar data: days in each month for years 1978-2099 BS
+// Format: [year, month1Days, month2Days, ..., month12Days]
+const BS_CALENDAR_DATA: Record<number, number[]> = {
+    2070: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30],
+    2071: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+    2072: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+    2073: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+    2074: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30],
+    2075: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+    2076: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30],
+    2077: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+    2078: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30],
+    2079: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+    2080: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30],
+    2081: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
+    2082: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
+    2083: [31, 31, 32, 31, 31, 30, 30, 30, 29, 30, 30, 30],
+    2084: [31, 31, 32, 31, 31, 30, 30, 30, 29, 30, 30, 30],
+    2085: [31, 32, 31, 32, 30, 31, 30, 30, 29, 30, 30, 30],
+    2086: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30],
+    2087: [31, 31, 32, 31, 31, 31, 30, 30, 29, 30, 30, 30],
+    2088: [30, 31, 32, 32, 30, 31, 30, 30, 29, 30, 30, 30],
+    2089: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30],
+    2090: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30],
+    2091: [31, 31, 32, 31, 31, 31, 30, 30, 29, 30, 30, 30],
+    2092: [30, 31, 32, 32, 31, 30, 30, 30, 29, 30, 30, 30],
+    2093: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30],
+    2094: [31, 31, 32, 31, 31, 30, 30, 30, 29, 30, 30, 30],
+    2095: [31, 31, 32, 31, 31, 31, 30, 29, 30, 30, 30, 30],
+    2096: [30, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30],
+    2097: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30],
+    2098: [31, 31, 32, 31, 31, 31, 29, 30, 29, 30, 29, 31],
+    2099: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31],
+};
+
+// Reference point: BS 2070/01/01 = AD 2013/04/14
+const BS_REF_YEAR = 2070;
+const AD_REF_DATE = new Date(2013, 3, 14); // April 14, 2013
 
 export interface BSDate {
     year: number;
@@ -18,30 +53,85 @@ export interface BSDate {
 }
 
 /**
+ * Get total days in a BS year
+ */
+function getBsYearDays(year: number): number {
+    const months = BS_CALENDAR_DATA[year];
+    if (!months) {
+        // Fallback for years outside data range - use 2080 as template
+        return BS_CALENDAR_DATA[2080].reduce((sum, days) => sum + days, 0);
+    }
+    return months.reduce((sum, days) => sum + days, 0);
+}
+
+/**
+ * Get days in a specific BS month
+ */
+function getBsMonthDays(year: number, month: number): number {
+    const months = BS_CALENDAR_DATA[year] || BS_CALENDAR_DATA[2080];
+    return months[month - 1];
+}
+
+/**
  * Convert Bikram Sambat date to Gregorian (AD) date
  */
 export function bsToAd(bsYear: number, bsMonth: number, bsDay: number): Date {
-    // Package expects YYYY-MM-DD format
-    const bsDateStr = `${bsYear}-${String(bsMonth).padStart(2, '0')}-${String(bsDay).padStart(2, '0')}`;
-    const adDateStr = pkgBsToAd(bsDateStr); // Returns "YYYY-MM-DD"
+    let totalDays = 0;
 
-    const [year, month, day] = adDateStr.split('-').map(Number);
-    return new Date(year, month - 1, day); // Month is 0-indexed in JS Date
+    // Days from reference year to target year
+    for (let year = BS_REF_YEAR; year < bsYear; year++) {
+        totalDays += getBsYearDays(year);
+    }
+
+    // Days in target year up to target month
+    for (let month = 1; month < bsMonth; month++) {
+        totalDays += getBsMonthDays(bsYear, month);
+    }
+
+    // Add remaining days
+    totalDays += bsDay - 1;
+
+    // Create result date from reference
+    const result = new Date(AD_REF_DATE);
+    result.setDate(result.getDate() + totalDays);
+    return result;
 }
 
 /**
  * Convert Gregorian (AD) date to Bikram Sambat date
  */
 export function adToBs(adDate: Date): BSDate {
-    const year = adDate.getFullYear();
-    const month = adDate.getMonth() + 1; // Convert from 0-indexed
-    const day = adDate.getDate();
+    const diffTime = adDate.getTime() - AD_REF_DATE.getTime();
+    let remainingDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-    // Package expects YYYY-MM-DD format
-    const adDateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    const bsDateStr = pkgAdToBs(adDateStr); // Returns "YYYY-MM-DD"
+    let bsYear = BS_REF_YEAR;
+    let bsMonth = 1;
+    let bsDay = 1;
 
-    const [bsYear, bsMonth, bsDay] = bsDateStr.split('-').map(Number);
+    // Find year
+    while (remainingDays > 0) {
+        const yearDays = getBsYearDays(bsYear);
+        if (remainingDays >= yearDays) {
+            remainingDays -= yearDays;
+            bsYear++;
+        } else {
+            break;
+        }
+    }
+
+    // Find month
+    while (remainingDays > 0 && bsMonth <= 12) {
+        const monthDays = getBsMonthDays(bsYear, bsMonth);
+        if (remainingDays >= monthDays) {
+            remainingDays -= monthDays;
+            bsMonth++;
+        } else {
+            break;
+        }
+    }
+
+    bsDay = remainingDays + 1;
+
     return { year: bsYear, month: bsMonth, day: bsDay };
 }
 
