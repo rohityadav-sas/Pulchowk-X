@@ -156,7 +156,7 @@
     }
   }
 
-  function exportParticipants(type: "csv" | "excel" | "pdf") {
+  function exportParticipants(type: "csv" | "pdf") {
     if (registeredStudents.length === 0) return;
     showExportMenu = false;
 
@@ -178,41 +178,6 @@
       ].join("\n");
 
       downloadFile(csvContent, `${filename}.csv`, "text/csv;charset=utf-8;");
-    } else if (type === "excel") {
-      const tableHtml = `
-        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-        <head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Participants</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>
-        <body>
-          <table border="1">
-            <tr style="background-color: #2563eb; color: #ffffff; font-weight: bold;">
-              <th style="padding: 10px;">S.N.</th>
-              <th style="padding: 10px;">Name</th>
-              <th style="padding: 10px;">Email</th>
-              <th style="padding: 10px;">Status</th>
-              <th style="padding: 10px;">Registration Date</th>
-            </tr>
-            ${registeredStudents
-              .map(
-                (reg, i) => `
-              <tr>
-                <td style="padding: 8px;">${i + 1}</td>
-                <td style="padding: 8px;">${reg.student.name}</td>
-                <td style="padding: 8px;">${reg.student.email}</td>
-                <td style="padding: 8px;">${reg.status}</td>
-                <td style="padding: 8px;">${new Date(reg.registeredAt).toLocaleString()}</td>
-              </tr>
-            `,
-              )
-              .join("")}
-          </table>
-        </body>
-        </html>
-      `;
-      downloadFile(
-        tableHtml,
-        `${filename}.xls`,
-        "application/vnd.ms-excel;charset=utf-8;",
-      );
     } else if (type === "pdf") {
       if (typeof (window as any).jspdf === "undefined") {
         const jspdfScript = document.createElement("script");
@@ -1183,29 +1148,6 @@
                         class="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden"
                       >
                         <div class="p-2 space-y-1">
-                          <button
-                            onclick={() => exportParticipants("excel")}
-                            class="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl transition-colors group"
-                          >
-                            <div
-                              class="w-8 h-8 rounded-lg bg-emerald-100/50 flex items-center justify-center text-emerald-600"
-                            >
-                              <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  stroke-width="2"
-                                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
-                              </svg>
-                            </div>
-                            <span>Excel (.xls)</span>
-                          </button>
 
                           <button
                             onclick={() => exportParticipants("pdf")}
