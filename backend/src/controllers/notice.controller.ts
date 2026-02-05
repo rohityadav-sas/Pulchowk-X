@@ -77,9 +77,9 @@ export async function getNoticeStats(_req: Request, res: Response) {
       })
       .from(notice)
 
-    // A notice is "new" if published within the last 2 days
-    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-    const isNew = (createdAt: Date) => createdAt >= twoDaysAgo
+    // A notice is "new" if published within the last 7 days (1 week)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    const isNew = (createdAt: Date) => createdAt >= sevenDaysAgo
 
     const stats = {
       beResults: allNotices.filter(

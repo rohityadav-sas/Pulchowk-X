@@ -129,7 +129,10 @@
         : statsQuery.data.mscRoutines
       : 0,
   )
-  const newCount = $derived(statsQuery.data ? statsQuery.data.newCount : 0)
+  // Calculate newCount locally from notices using the same isNoticeNew logic
+  const newCount = $derived(
+    filteredNotices.filter((n) => isNoticeNew(n.createdAt)).length,
+  )
 
   function openImagePreview(url: string, title: string) {
     previewImage = url
