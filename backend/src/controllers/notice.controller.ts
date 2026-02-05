@@ -284,10 +284,22 @@ export async function uploadNoticeAttachment(
     const dataUri = `data:${file.mimetype};base64,${base64}`
     const publicId = generatePublicId('notice', req.user.id)
 
+    // Determine attachment type and Cloudinary resource type
+    const isPdf = file.mimetype === 'application/pdf'
+    const attachmentType = file.mimetype.startsWith('image/')
+      ? 'image'
+      : isPdf
+        ? 'pdf'
+        : null
+
+    // Use 'raw' for PDFs (ensures proper URL path), 'image' for images
+    const cloudinaryResourceType = isPdf ? 'raw' : 'image'
+
     const uploadResult = await uploadAssignmentFileToCloudinary(
       dataUri,
       FOLDERS.NOTICE_ATTACHMENTS,
       publicId,
+      cloudinaryResourceType,
     )
 
     if (!uploadResult.success || !uploadResult.data) {
@@ -296,12 +308,6 @@ export async function uploadNoticeAttachment(
         message: uploadResult.message || 'Upload failed',
       })
     }
-
-    const attachmentType = file.mimetype.startsWith('image/')
-      ? 'image'
-      : file.mimetype === 'application/pdf'
-        ? 'pdf'
-        : null
 
     return res.json({
       success: true,
