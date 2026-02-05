@@ -289,7 +289,8 @@ export async function uploadNoticeAttachment(
       publicId += '.pdf'
     }
 
-    // Determine attachment type and Cloudinary resource type
+    // Determine attachment type
+    // Per Cloudinary docs: PDFs are treated as image files, so use 'image' resource type for both
     const isPdf = file.mimetype === 'application/pdf'
     const attachmentType = file.mimetype.startsWith('image/')
       ? 'image'
@@ -297,8 +298,9 @@ export async function uploadNoticeAttachment(
         ? 'pdf'
         : null
 
-    // Use 'raw' for PDFs (correct for non-image files), 'image' for images
-    const cloudinaryResourceType = isPdf ? 'raw' : 'image'
+    // Use 'image' for both images and PDFs - Cloudinary treats PDFs as images
+    // This ensures public access via /image/upload/ URL path
+    const cloudinaryResourceType = 'image'
 
     const uploadResult = await uploadAssignmentFileToCloudinary(
       dataUri,
