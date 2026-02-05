@@ -22,6 +22,7 @@
 
   type NoticeSection = "results" | "routines";
   type NoticeSubsection = "be" | "msc";
+  type NoticeAttachmentTypeForm = Exclude<Notice["attachmentType"], null> | "";
 
   // State
   let notices = $state<Notice[]>([]);
@@ -50,7 +51,7 @@
   let formSection = $state<NoticeSection>("results");
   let formSubsection = $state<NoticeSubsection>("be");
   let formAttachmentUrl = $state("");
-  let formAttachmentType = $state("");
+  let formAttachmentType = $state<NoticeAttachmentTypeForm>("");
   let formAttachmentName = $state("");
   let formIsNew = $state(true);
   let formPublishedAt = $state(new Date().toISOString().slice(0, 16));
@@ -104,7 +105,7 @@
 
   // Filtered notices (client-side search)
   function getFilteredNotices() {
-    let filtered = notices;
+    let filtered = [...notices];
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -183,7 +184,7 @@
     formSection = notice.section;
     formSubsection = notice.subsection;
     formAttachmentUrl = notice.attachmentUrl || "";
-    formAttachmentType = notice.attachmentType || "";
+    formAttachmentType = notice.attachmentType ?? "";
     formAttachmentName = notice.attachmentName || "";
     formIsNew = notice.isNew;
     formPublishedAt = new Date(notice.publishedAt).toISOString().slice(0, 16);
@@ -208,16 +209,19 @@
       section: formSection,
       subsection: formSubsection,
       attachmentUrl: formAttachmentUrl.trim() || null,
-      attachmentType: formAttachmentType || null,
+      attachmentType: formAttachmentType === "" ? null : formAttachmentType,
       attachmentName: formAttachmentName.trim() || null,
       isNew: formIsNew,
       publishedAt: new Date(formPublishedAt).toISOString(),
-    };
+    } satisfies Omit<
+      Notice,
+      "id" | "authorId" | "createdAt" | "updatedAt" | "author"
+    >;
     let result;
     if (editingNotice) {
       result = await updateNotice(editingNotice.id, data);
     } else {
-      result = await createNotice(data as any);
+      result = await createNotice(data);
     }
     isSubmitting = false;
     if (result.success) {

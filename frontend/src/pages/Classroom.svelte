@@ -939,16 +939,38 @@
                             <label
                               class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer bg-white hover:bg-slate-50 hover:border-blue-300 transition-colors"
                             >
-                              <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                <svg class="w-8 h-8 mb-2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                              <div
+                                class="flex flex-col items-center justify-center pt-5 pb-6"
+                              >
+                                <svg
+                                  class="w-8 h-8 mb-2 text-slate-400"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.5"
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                  />
                                 </svg>
                                 {#if submissionFile}
-                                  <p class="text-sm font-medium text-blue-600">{submissionFile.name}</p>
-                                  <p class="text-xs text-slate-500">Click to change file</p>
+                                  <p class="text-sm font-medium text-blue-600">
+                                    {submissionFile.name}
+                                  </p>
+                                  <p class="text-xs text-slate-500">
+                                    Click to change file
+                                  </p>
                                 {:else}
-                                  <p class="text-sm text-slate-500"><span class="font-semibold text-blue-600">Click to upload</span> or drag and drop</p>
-                                  <p class="text-xs text-slate-400">PNG, JPG or PDF</p>
+                                  <p class="text-sm text-slate-500">
+                                    <span class="font-semibold text-blue-600"
+                                      >Click to upload</span
+                                    > or drag and drop
+                                  </p>
+                                  <p class="text-xs text-slate-400">
+                                    PNG, JPG or PDF
+                                  </p>
                                 {/if}
                               </div>
                               <input
@@ -956,7 +978,8 @@
                                 accept="image/*,application/pdf"
                                 class="hidden"
                                 onchange={(event) => {
-                                  const target = event.target as HTMLInputElement;
+                                  const target =
+                                    event.target as HTMLInputElement;
                                   submissionFile = target.files
                                     ? target.files[0]
                                     : null;
@@ -979,9 +1002,21 @@
                           </div>
 
                           {#if submissionError}
-                            <div class="flex items-center gap-2 p-3 bg-rose-50 border border-rose-100 rounded-xl">
-                              <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <div
+                              class="flex items-center gap-2 p-3 bg-rose-50 border border-rose-100 rounded-xl"
+                            >
+                              <svg
+                                class="w-4 h-4 text-rose-500 shrink-0"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
                               </svg>
                               <p class="text-xs text-rose-600 font-medium">
                                 {submissionError}
