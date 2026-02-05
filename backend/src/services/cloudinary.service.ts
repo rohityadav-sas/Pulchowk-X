@@ -237,6 +237,7 @@ export async function uploadAssignmentFileToCloudinary(
       public_id: publicId,
       overwrite: false,
       resource_type: resourceType,
+      access_mode: 'public', // Make raw resources (like PDFs) publicly accessible
     })
 
     return {
