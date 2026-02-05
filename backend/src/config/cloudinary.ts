@@ -16,6 +16,7 @@ export const UPLOAD_CONSTANTS = {
         CLUB_LOGOS: 'club-logos',
         EVENT_BANNERS: 'event-banners',
         ASSIGNMENT_SUBMISSIONS: 'assignment-submissions',
+        NOTICE_ATTACHMENTS: 'notice-attachments',
     },
     TRANSFORMATIONS: {
         CLUB_LOGO: [
@@ -46,6 +47,16 @@ export const UPLOAD_CONSTANTS = {
         ],
     },
     ASSIGNMENT_FILES: {
+        MAX_FILE_SIZE: 10 * 1024 * 1024,
+        ALLOWED_TYPES: [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/jpg',
+            'application/pdf',
+        ] as const,
+    },
+    NOTICE_ATTACHMENTS: {
         MAX_FILE_SIZE: 10 * 1024 * 1024,
         ALLOWED_TYPES: [
             'image/jpeg',

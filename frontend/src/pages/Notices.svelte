@@ -7,6 +7,7 @@
     createNotice,
     updateNotice,
     deleteNotice,
+    uploadNoticeAttachment,
     type Notice,
     type NoticeStats,
   } from "../lib/api";
@@ -40,6 +41,9 @@
   let editingNotice = $state<Notice | null>(null);
   let isSubmitting = $state(false);
   let formError = $state<string | null>(null);
+  let isUploadingAttachment = $state(false);
+  let attachmentUploadError = $state<string | null>(null);
+  let attachmentFileInput = $state<HTMLInputElement | null>(null);
 
   // Form state
   let formTitle = $state("");
@@ -163,6 +167,8 @@
     formAttachmentType = "";
     formAttachmentName = "";
     formIsNew = true;
+    attachmentUploadError = null;
+    if (attachmentFileInput) attachmentFileInput.value = "";
     formError = null;
     showManageModal = true;
   }
@@ -176,6 +182,8 @@
     formAttachmentType = notice.attachmentType ?? "";
     formAttachmentName = notice.attachmentName || "";
     formIsNew = notice.isNew;
+    attachmentUploadError = null;
+    if (attachmentFileInput) attachmentFileInput.value = "";
     formError = null;
     showManageModal = true;
   }
@@ -184,9 +192,37 @@
     editingNotice = null;
     formError = null;
   }
+  function clearAttachment() {
+    formAttachmentUrl = "";
+    formAttachmentType = "";
+    formAttachmentName = "";
+    attachmentUploadError = null;
+    if (attachmentFileInput) attachmentFileInput.value = "";
+  }
+  async function handleAttachmentFileChange(event: Event) {
+    const target = event.currentTarget as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) return;
+    isUploadingAttachment = true;
+    attachmentUploadError = null;
+    const result = await uploadNoticeAttachment(file);
+    isUploadingAttachment = false;
+    if (!result.success || !result.data) {
+      attachmentUploadError =
+        result.message || "Failed to upload attachment. Please try again.";
+      return;
+    }
+    formAttachmentUrl = result.data.url;
+    formAttachmentType = (result.data.type || "") as NoticeAttachmentTypeForm;
+    formAttachmentName = result.data.name || file.name;
+  }
   async function handleSubmit() {
     if (!formTitle.trim() || !formContent.trim()) {
       formError = "Title and content are required";
+      return;
+    }
+    if (isUploadingAttachment) {
+      formError = "Please wait for the attachment upload to finish";
       return;
     }
     isSubmitting = true;
@@ -783,6 +819,26 @@
         <div>
           <!-- svelte-ignore a11y_label_has_associated_control -->
           <label class="block text-sm font-medium text-slate-700 mb-1"
+            >Attachment File (optional)</label
+          >
+          <input
+            type="file"
+            accept="image/*,application/pdf"
+            bind:this={attachmentFileInput}
+            onchange={handleAttachmentFileChange}
+            class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          />
+          {#if isUploadingAttachment}
+            <p class="text-sm text-slate-500 mt-2">Uploading...</p>
+          {/if}
+          {#if attachmentUploadError}
+            <p class="text-sm text-red-600 mt-2">{attachmentUploadError}</p>
+          {/if}
+        </div>
+
+        <div>
+          <!-- svelte-ignore a11y_label_has_associated_control -->
+          <label class="block text-sm font-medium text-slate-700 mb-1"
             >Attachment URL (optional)</label
           >
           <input
@@ -791,6 +847,15 @@
             class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="https://..."
           />
+          {#if formAttachmentUrl}
+            <button
+              type="button"
+              onclick={clearAttachment}
+              class="mt-2 text-sm text-slate-500 hover:text-slate-700"
+            >
+              Clear attachment
+            </button>
+          {/if}
         </div>
 
         <div class="grid grid-cols-2 gap-4">
@@ -843,10 +908,16 @@
           </button>
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isUploadingAttachment}
             class="px-5 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
-            {isSubmitting ? "Saving..." : editingNotice ? "Update" : "Create"}
+            {isSubmitting
+              ? "Saving..."
+              : isUploadingAttachment
+                ? "Uploading..."
+                : editingNotice
+                  ? "Update"
+                  : "Create"}
           </button>
         </div>
       </form>

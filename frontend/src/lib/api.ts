@@ -1469,6 +1469,25 @@ export async function getNoticeStats(): Promise<{ success: boolean; data?: Notic
     }
 }
 
+export async function uploadNoticeAttachment(
+    file: File
+): Promise<{ success: boolean; data?: { url: string; type: 'pdf' | 'image' | null; name: string }; message?: string }> {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await fetch(`${API_NOTICES}/upload`, {
+            method: 'POST',
+            credentials: 'include',
+            body: formData,
+        });
+
+        return await res.json();
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
 export async function createNotice(
     data: Omit<Notice, 'id' | 'authorId' | 'createdAt' | 'updatedAt' | 'author'>
 ): Promise<{ success: boolean; data?: Notice; message?: string }> {

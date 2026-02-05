@@ -3,6 +3,8 @@ import { and, desc, eq } from "drizzle-orm";
 import { db } from "../lib/db.js";
 import { notice, type NewNotice } from "../models/notice-schema.js";
 import { user } from "../models/auth-schema.js";
+import { UPLOAD_CONSTANTS, generatePublicId } from "../config/cloudinary.js";
+import { uploadAssignmentFileToCloudinary } from "../services/cloudinary.service.js";
 
 type AuthedRequest = Request & { user?: { id: string; role?: string | null } };
 
@@ -10,6 +12,8 @@ const isNoticeManager = (req: AuthedRequest): boolean => {
   const role = req.user?.role;
   return role === "notice_manager" || role === "admin";
 };
+
+const { NOTICE_ATTACHMENTS, FOLDERS } = UPLOAD_CONSTANTS;
 
 // Get all notices (with optional filtering)
 export async function getNotices(req: Request, res: Response) {
@@ -233,6 +237,77 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
   }
 }
 
+// Upload notice attachment (notice_manager/admin only)
+export async function uploadNoticeAttachment(req: AuthedRequest, res: Response) {
+  try {
+    if (!req.user || !isNoticeManager(req)) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized. Only notice managers can upload attachments.",
+      });
+    }
+
+    const file = (req as any).file as Express.Multer.File | undefined;
+    if (!file) {
+      return res.status(400).json({
+        success: false,
+        message: "Attachment file is required",
+      });
+    }
+
+    if (!NOTICE_ATTACHMENTS.ALLOWED_TYPES.includes(file.mimetype as any)) {
+      return res.status(400).json({
+        success: false,
+        message: "Only images or PDF files are allowed",
+      });
+    }
+
+    if (file.size > NOTICE_ATTACHMENTS.MAX_FILE_SIZE) {
+      return res.status(400).json({
+        success: false,
+        message: "File too large. Maximum size is 10MB",
+      });
+    }
+
+    const base64 = file.buffer.toString("base64");
+    const dataUri = `data:${file.mimetype};base64,${base64}`;
+    const publicId = generatePublicId("notice", req.user.id);
+
+    const uploadResult = await uploadAssignmentFileToCloudinary(
+      dataUri,
+      FOLDERS.NOTICE_ATTACHMENTS,
+      publicId,
+    );
+
+    if (!uploadResult.success || !uploadResult.data) {
+      return res.status(400).json({
+        success: false,
+        message: uploadResult.message || "Upload failed",
+      });
+    }
+
+    const attachmentType = file.mimetype.startsWith("image/")
+      ? "image"
+      : file.mimetype === "application/pdf"
+        ? "pdf"
+        : null;
+
+    return res.json({
+      success: true,
+      data: {
+        url: uploadResult.data.url,
+        type: attachmentType,
+        name: file.originalname,
+      },
+    });
+  } catch (error: any) {
+    console.error("Error uploading notice attachment:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: error.message || "Failed to upload file" });
+  }
+}
+
 // Delete a notice (notice_manager/admin only)
 export async function deleteNotice(req: AuthedRequest, res: Response) {
   try {
@@ -291,4 +366,3 @@ export async function markNoticeAsRead(req: AuthedRequest, res: Response) {
       .json({ success: false, message: error.message || "Failed to mark notice as read" });
   }
 }
-
