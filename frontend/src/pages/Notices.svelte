@@ -44,6 +44,7 @@
   let isUploadingAttachment = $state(false);
   let attachmentUploadError = $state<string | null>(null);
   let attachmentFileInput = $state<HTMLInputElement | null>(null);
+  let isDragActive = $state(false);
 
   // Form state
   let formTitle = $state("");
@@ -53,7 +54,6 @@
   let formAttachmentUrl = $state("");
   let formAttachmentType = $state<NoticeAttachmentTypeForm>("");
   let formAttachmentName = $state("");
-  let formIsNew = $state(true);
 
   // Delete confirmation
   let deleteConfirmId = $state<number | null>(null);
@@ -154,6 +154,13 @@
       year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
     });
   }
+  function isNoticeNew(publishedAt: string): boolean {
+    const publishDate = new Date(publishedAt);
+    const now = new Date();
+    const diffMs = now.getTime() - publishDate.getTime();
+    const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
+    return diffMs < twoDaysMs;
+  }
   function toggleExpand(id: number) {
     expandedNoticeId = expandedNoticeId === id ? null : id;
   }
@@ -166,7 +173,6 @@
     formAttachmentUrl = "";
     formAttachmentType = "";
     formAttachmentName = "";
-    formIsNew = true;
     attachmentUploadError = null;
     if (attachmentFileInput) attachmentFileInput.value = "";
     formError = null;
@@ -181,7 +187,6 @@
     formAttachmentUrl = notice.attachmentUrl || "";
     formAttachmentType = notice.attachmentType ?? "";
     formAttachmentName = notice.attachmentName || "";
-    formIsNew = notice.isNew;
     attachmentUploadError = null;
     if (attachmentFileInput) attachmentFileInput.value = "";
     formError = null;
@@ -199,10 +204,8 @@
     attachmentUploadError = null;
     if (attachmentFileInput) attachmentFileInput.value = "";
   }
-  async function handleAttachmentFileChange(event: Event) {
-    const target = event.currentTarget as HTMLInputElement;
-    const file = target.files?.[0];
-    if (!file) return;
+  async function handleAttachmentFileSelected(file: File) {
+    if (isUploadingAttachment) return;
     isUploadingAttachment = true;
     attachmentUploadError = null;
     const result = await uploadNoticeAttachment(file);
@@ -215,6 +218,28 @@
     formAttachmentUrl = result.data.url;
     formAttachmentType = (result.data.type || "") as NoticeAttachmentTypeForm;
     formAttachmentName = result.data.name || file.name;
+  }
+  async function handleAttachmentFileChange(event: Event) {
+    const target = event.currentTarget as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) return;
+    await handleAttachmentFileSelected(file);
+    target.value = "";
+  }
+  function handleAttachmentDragOver(event: DragEvent) {
+    event.preventDefault();
+    isDragActive = true;
+  }
+  function handleAttachmentDragLeave(event: DragEvent) {
+    event.preventDefault();
+    isDragActive = false;
+  }
+  async function handleAttachmentDrop(event: DragEvent) {
+    event.preventDefault();
+    isDragActive = false;
+    const file = event.dataTransfer?.files?.[0];
+    if (!file) return;
+    await handleAttachmentFileSelected(file);
   }
   async function handleSubmit() {
     if (!formTitle.trim() || !formContent.trim()) {
@@ -235,7 +260,6 @@
       attachmentUrl: formAttachmentUrl.trim() || null,
       attachmentType: formAttachmentType === "" ? null : formAttachmentType,
       attachmentName: formAttachmentName.trim() || null,
-      isNew: formIsNew,
       publishedAt: editingNotice?.publishedAt ?? new Date().toISOString(),
     } satisfies Omit<
       Notice,
@@ -557,7 +581,7 @@
                     </p>
                   </div>
                   <div class="flex items-center gap-2 shrink-0">
-                    {#if notice.isNew}
+                    {#if isNoticeNew(notice.publishedAt)}
                       <span
                         class="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full"
                         >NEW</span
@@ -819,15 +843,42 @@
         <div>
           <!-- svelte-ignore a11y_label_has_associated_control -->
           <label class="block text-sm font-medium text-slate-700 mb-1"
-            >Attachment File (optional)</label
+            >File (Image/PDF)</label
           >
-          <input
-            type="file"
-            accept="image/*,application/pdf"
-            bind:this={attachmentFileInput}
-            onchange={handleAttachmentFileChange}
-            class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-          />
+          <label
+            class="flex flex-col items-center justify-center gap-1 rounded-xl border border-dashed px-4 py-6 text-sm transition-colors {isDragActive
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-slate-200 bg-white hover:border-blue-400'}"
+            ondragover={handleAttachmentDragOver}
+            ondragleave={handleAttachmentDragLeave}
+            ondrop={handleAttachmentDrop}
+          >
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              bind:this={attachmentFileInput}
+              onchange={handleAttachmentFileChange}
+              class="sr-only"
+            />
+            <svg
+              class="w-6 h-6 text-slate-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 16a4 4 0 01.88-7.903A5 5 0 1118 12h-1m-5-6v12m0 0l-3-3m3 3l3-3"
+              />
+            </svg>
+            <span class="text-slate-600">
+              <span class="text-blue-600 font-medium">Click to upload</span>
+              <span class="text-slate-400"> or drag and drop</span>
+            </span>
+            <span class="text-xs text-slate-400">PNG, JPG or PDF</span>
+          </label>
           {#if isUploadingAttachment}
             <p class="text-sm text-slate-500 mt-2">Uploading...</p>
           {/if}
@@ -887,16 +938,7 @@
           </div>
         </div>
 
-        <div class="flex items-center pt-2">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              bind:checked={formIsNew}
-              class="w-4 h-4 rounded text-blue-600"
-            />
-            <span class="text-sm font-medium text-slate-700">Mark as New</span>
-          </label>
-        </div>
+
 
         <div class="flex justify-end gap-3 pt-4">
           <button
