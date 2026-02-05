@@ -29,9 +29,9 @@ export async function getNotices(req: Request, res: Response) {
         section: notice.section,
         subsection: notice.subsection,
         attachmentUrl: notice.attachmentUrl,
-        attachmentType: notice.attachmentType,
+
         attachmentName: notice.attachmentName,
-        publishedAt: notice.publishedAt,
+
         createdAt: notice.createdAt,
         updatedAt: notice.updatedAt,
         authorId: notice.authorId,
@@ -43,7 +43,7 @@ export async function getNotices(req: Request, res: Response) {
       })
       .from(notice)
       .leftJoin(user, eq(notice.authorId, user.id))
-      .orderBy(desc(notice.publishedAt))
+      .orderBy(desc(notice.createdAt))
 
     let results
     if (section && subsection) {
@@ -73,13 +73,13 @@ export async function getNoticeStats(_req: Request, res: Response) {
       .select({
         section: notice.section,
         subsection: notice.subsection,
-        publishedAt: notice.publishedAt,
+        createdAt: notice.createdAt,
       })
       .from(notice)
 
     // A notice is "new" if published within the last 2 days
     const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-    const isNew = (publishedAt: Date) => publishedAt >= twoDaysAgo
+    const isNew = (createdAt: Date) => createdAt >= twoDaysAgo
 
     const stats = {
       beResults: allNotices.filter(
@@ -94,7 +94,7 @@ export async function getNoticeStats(_req: Request, res: Response) {
       mscRoutines: allNotices.filter(
         (n) => n.section === 'routines' && n.subsection === 'msc',
       ).length,
-      newCount: allNotices.filter((n) => isNew(n.publishedAt)).length,
+      newCount: allNotices.filter((n) => isNew(n.createdAt)).length,
       total: allNotices.length,
     }
 
@@ -125,9 +125,8 @@ export async function createNotice(req: AuthedRequest, res: Response) {
       section,
       subsection,
       attachmentUrl,
-      attachmentType,
+
       attachmentName,
-      publishedAt,
     } = body
 
     if (!title || !content || !section || !subsection) {
@@ -157,10 +156,9 @@ export async function createNotice(req: AuthedRequest, res: Response) {
       section,
       subsection,
       attachmentUrl: attachmentUrl || null,
-      attachmentType: attachmentType || null,
+
       attachmentName: attachmentName || null,
       authorId: req.user.id,
-      publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
     }
 
     const [created] = await db.insert(notice).values(newNotice).returning()
@@ -203,9 +201,8 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
       section,
       subsection,
       attachmentUrl,
-      attachmentType,
+
       attachmentName,
-      publishedAt,
     } = body
 
     const updateData: Partial<NewNotice> = {}
@@ -214,10 +211,8 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
     if (section) updateData.section = section
     if (subsection) updateData.subsection = subsection
     if (attachmentUrl !== undefined) updateData.attachmentUrl = attachmentUrl
-    if (attachmentType !== undefined) updateData.attachmentType = attachmentType
+
     if (attachmentName !== undefined) updateData.attachmentName = attachmentName
-    if (publishedAt !== undefined)
-      updateData.publishedAt = new Date(publishedAt)
 
     const [updated] = await db
       .update(notice)
@@ -286,15 +281,6 @@ export async function uploadNoticeAttachment(
     // Generate public ID (no extension needed - Cloudinary handles format automatically)
     const publicId = generatePublicId('notice', req.user.id)
 
-    // Determine attachment type
-    // Per Cloudinary docs: PDFs are treated as image files, so use 'image' resource type for both
-    const isPdf = file.mimetype === 'application/pdf'
-    const attachmentType = file.mimetype.startsWith('image/')
-      ? 'image'
-      : isPdf
-        ? 'pdf'
-        : null
-
     // Use 'image' for both images and PDFs - Cloudinary treats PDFs as images
     // This ensures public access via /image/upload/ URL path
     const cloudinaryResourceType = 'image'
@@ -317,7 +303,7 @@ export async function uploadNoticeAttachment(
       success: true,
       data: {
         url: uploadResult.data.url,
-        type: attachmentType,
+
         name: file.originalname,
       },
     })

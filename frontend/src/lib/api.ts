@@ -474,9 +474,7 @@ export async function createClubProfile(
   }
 }
 
-export async function getClubProfile(
-  clubId: number,
-): Promise<{
+export async function getClubProfile(clubId: number): Promise<{
   success: boolean
   profile: ClubProfile | null
   message?: string
@@ -623,9 +621,7 @@ export async function createExtraEventDetails(
   }
 }
 
-export async function getExtraEventDetails(
-  eventId: number,
-): Promise<{
+export async function getExtraEventDetails(eventId: number): Promise<{
   success: boolean
   details: ExtraEventDetail | null
   message?: string
@@ -675,9 +671,7 @@ export async function createEventCategory(
   }
 }
 
-export async function getEventCategories(
-  clubId: number,
-): Promise<{
+export async function getEventCategories(clubId: number): Promise<{
   success: boolean
   categories: EventCategory[]
   message?: string
@@ -692,9 +686,7 @@ export async function getEventCategories(
   }
 }
 
-export async function getEventCategory(
-  categoryId: number,
-): Promise<{
+export async function getEventCategory(categoryId: number): Promise<{
   success: boolean
   category: EventCategory | null
   message?: string
@@ -883,9 +875,7 @@ export async function submitAssignment(
   }
 }
 
-export async function getAssignmentSubmissions(
-  assignmentId: number,
-): Promise<{
+export async function getAssignmentSubmissions(assignmentId: number): Promise<{
   success: boolean
   submissions: AssignmentSubmission[]
   message?: string
@@ -1314,9 +1304,7 @@ export async function upsertSellerContactInfo(
   }
 }
 
-export async function getSellerContactInfo(
-  listingId: number,
-): Promise<{
+export async function getSellerContactInfo(listingId: number): Promise<{
   success: boolean
   data?: SellerContactInfo | null
   hasContactInfo?: boolean
@@ -1356,9 +1344,7 @@ export async function createPurchaseRequest(
   }
 }
 
-export async function getPurchaseRequestStatus(
-  listingId: number,
-): Promise<{
+export async function getPurchaseRequestStatus(listingId: number): Promise<{
   success: boolean
   data?: PurchaseRequest | null
   message?: string
@@ -1575,10 +1561,10 @@ export interface Notice {
   section: 'results' | 'routines'
   subsection: 'be' | 'msc'
   attachmentUrl: string | null
-  attachmentType: 'pdf' | 'image' | null
+
   attachmentName: string | null
   authorId: string
-  publishedAt: string
+
   createdAt: string
   updatedAt: string
   author?: {
@@ -1671,9 +1657,7 @@ export async function getNoticeStats(): Promise<{
   }
 }
 
-export async function uploadNoticeAttachment(
-  file: File,
-): Promise<{
+export async function uploadNoticeAttachment(file: File): Promise<{
   success: boolean
   data?: { url: string; type: 'pdf' | 'image' | null; name: string }
   message?: string

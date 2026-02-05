@@ -1,0 +1,1 @@
+ALTER TABLE "notice" DROP COLUMN "published_at";

@@ -9,12 +9,12 @@ export const notice = pgTable('notice', {
   section: varchar('section', { length: 50 }).notNull(), // 'results' | 'routines'
   subsection: varchar('subsection', { length: 50 }).notNull(), // 'be' | 'msc'
   attachmentUrl: text('attachment_url'),
-  attachmentType: varchar('attachment_type', { length: 20 }), // 'pdf' | 'image'
+
   attachmentName: varchar('attachment_name', { length: 255 }),
   authorId: text('author_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
-  publishedAt: timestamp('published_at').defaultNow().notNull(),
+
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at')
     .defaultNow()

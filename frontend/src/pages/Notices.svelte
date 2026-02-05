@@ -24,7 +24,6 @@
 
   type NoticeSection = 'results' | 'routines'
   type NoticeSubsection = 'be' | 'msc'
-  type NoticeAttachmentTypeForm = Exclude<Notice['attachmentType'], null> | ''
 
   // State
   let activeSection = $state<NoticeSection>('results')
@@ -52,7 +51,7 @@
   let formSection = $state<NoticeSection>('results')
   let formSubsection = $state<NoticeSubsection>('be')
   let formAttachmentUrl = $state('')
-  let formAttachmentType = $state<NoticeAttachmentTypeForm>('')
+
   let formAttachmentName = $state('')
 
   // Delete confirmation
@@ -110,7 +109,7 @@
     }
     return filtered.sort(
       (a, b) =>
-        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     )
   }
 
@@ -154,12 +153,25 @@
       year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
     })
   }
-  function isNoticeNew(publishedAt: string): boolean {
-    const publishDate = new Date(publishedAt)
+  function isNoticeNew(createdAt: string): boolean {
+    const publishDate = new Date(createdAt)
     const now = new Date()
     const diffMs = now.getTime() - publishDate.getTime()
-    const twoDaysMs = 2 * 24 * 60 * 60 * 1000
-    return diffMs < twoDaysMs
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000
+    return diffMs < sevenDaysMs
+  }
+  function getAttachmentType(
+    url: string | null,
+    name: string | null,
+  ): 'image' | 'pdf' {
+    if (!url) return 'image'
+    if (
+      url.toLowerCase().endsWith('.pdf') ||
+      name?.toLowerCase().endsWith('.pdf')
+    ) {
+      return 'pdf'
+    }
+    return 'image'
   }
   function toggleExpand(id: number) {
     expandedNoticeId = expandedNoticeId === id ? null : id
@@ -171,7 +183,7 @@
     formSection = activeSection
     formSubsection = activeSubsection
     formAttachmentUrl = ''
-    formAttachmentType = ''
+
     formAttachmentName = ''
     attachmentUploadError = null
     if (attachmentFileInput) attachmentFileInput.value = ''
@@ -185,7 +197,7 @@
     formSection = notice.section
     formSubsection = notice.subsection
     formAttachmentUrl = notice.attachmentUrl || ''
-    formAttachmentType = notice.attachmentType ?? ''
+
     formAttachmentName = notice.attachmentName || ''
     attachmentUploadError = null
     if (attachmentFileInput) attachmentFileInput.value = ''
@@ -199,7 +211,7 @@
   }
   function clearAttachment() {
     formAttachmentUrl = ''
-    formAttachmentType = ''
+
     formAttachmentName = ''
     attachmentUploadError = null
     if (attachmentFileInput) attachmentFileInput.value = ''
@@ -216,7 +228,7 @@
       return
     }
     formAttachmentUrl = result.data.url
-    formAttachmentType = (result.data.type || '') as NoticeAttachmentTypeForm
+
     formAttachmentName = result.data.name || file.name
   }
   async function handleAttachmentFileChange(event: Event) {
@@ -258,9 +270,8 @@
       section: formSection,
       subsection: formSubsection,
       attachmentUrl: formAttachmentUrl.trim() || null,
-      attachmentType: formAttachmentType === '' ? null : formAttachmentType,
+
       attachmentName: formAttachmentName.trim() || null,
-      publishedAt: editingNotice?.publishedAt ?? new Date().toISOString(),
     } satisfies Omit<
       Notice,
       'id' | 'authorId' | 'createdAt' | 'updatedAt' | 'author'
@@ -581,7 +592,7 @@
                     </p>
                   </div>
                   <div class="flex items-center gap-2 shrink-0">
-                    {#if isNoticeNew(notice.publishedAt)}
+                    {#if isNoticeNew(notice.createdAt)}
                       <span
                         class="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full"
                         >NEW</span
@@ -591,7 +602,10 @@
                       <span
                         class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full uppercase"
                       >
-                        {notice.attachmentType || 'file'}
+                        {getAttachmentType(
+                          notice.attachmentUrl,
+                          notice.attachmentName,
+                        ) || 'file'}
                       </span>
                     {/if}
                   </div>
@@ -600,7 +614,7 @@
                 <div
                   class="flex items-center gap-4 mt-2 text-xs text-slate-400"
                 >
-                  <span>{formatDate(notice.publishedAt)}</span>
+                  <span>{formatDate(notice.createdAt)}</span>
                   {#if notice.author}
                     <span>by {notice.author.name}</span>
                   {/if}
@@ -639,7 +653,7 @@
 
                   {#if notice.attachmentUrl}
                     <div class="mt-4 p-4 bg-slate-50 rounded-xl">
-                      {#if notice.attachmentType === 'image'}
+                      {#if getAttachmentType(notice.attachmentUrl, notice.attachmentName) === 'image'}
                         <button
                           onclick={() =>
                             openImagePreview(
@@ -670,7 +684,7 @@
                             />
                           </svg>
                           <span class="font-medium"
-                            >{notice.attachmentName || 'Download PDF'}</span
+                            >{notice.attachmentName || 'View PDF'}</span
                           >
                         </a>
                       {/if}
@@ -885,7 +899,7 @@
             <div
               class="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl"
             >
-              {#if formAttachmentType === 'image'}
+              {#if getAttachmentType(formAttachmentUrl, formAttachmentName) === 'image'}
                 <div
                   class="shrink-0 w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center"
                 >
@@ -927,7 +941,8 @@
                   {formAttachmentName || 'Uploaded file'}
                 </p>
                 <p class="text-sm text-slate-500">
-                  {formAttachmentType === 'image'
+                  {getAttachmentType(formAttachmentUrl, formAttachmentName) ===
+                  'image'
                     ? 'Image file'
                     : 'PDF Document'}
                 </p>
