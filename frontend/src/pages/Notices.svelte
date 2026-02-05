@@ -51,8 +51,9 @@
   let formSection = $state<NoticeSection>('results')
   let formSubsection = $state<NoticeSubsection>('be')
   let formAttachmentUrl = $state('')
-
+  let manualUrlInput = $state('')
   let formAttachmentName = $state('')
+  let activeAttachmentTab = $state<'upload' | 'url'>('upload')
 
   // Delete confirmation
   let deleteConfirmId = $state<number | null>(null)
@@ -197,6 +198,8 @@
     formSection = notice.section
     formSubsection = notice.subsection
     formAttachmentUrl = notice.attachmentUrl || ''
+    manualUrlInput = ''
+    activeAttachmentTab = 'upload'
 
     formAttachmentName = notice.attachmentName || ''
     attachmentUploadError = null
@@ -211,6 +214,7 @@
   }
   function clearAttachment() {
     formAttachmentUrl = ''
+    manualUrlInput = ''
 
     formAttachmentName = ''
     attachmentUploadError = null
@@ -859,41 +863,100 @@
             >Attachment (optional)</label
           >
           {#if !formAttachmentUrl}
-            <!-- Upload zone when no file is attached -->
-            <label
-              class="flex flex-col items-center justify-center gap-1 w-full h-24 rounded-xl border-2 border-dashed cursor-pointer transition-all {isDragActive
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-slate-200 bg-white hover:border-blue-400'}"
-              ondragover={handleAttachmentDragOver}
-              ondragleave={handleAttachmentDragLeave}
-              ondrop={handleAttachmentDrop}
-            >
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                bind:this={attachmentFileInput}
-                onchange={handleAttachmentFileChange}
-                class="sr-only"
-              />
-              <svg
-                class="w-6 h-6 text-slate-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
+            <!-- Attachment Method Tabs -->
+            <div class="flex p-1 bg-slate-100 rounded-lg mb-4">
+              <button
+                type="button"
+                onclick={() => (activeAttachmentTab = 'upload')}
+                class="flex-1 py-1.5 text-sm font-medium rounded-md transition-all {activeAttachmentTab ===
+                'upload'
+                  ? 'bg-white text-slate-800 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'}"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M7 16a4 4 0 01.88-7.903A5 5 0 1118 12h-1m-5-6v12m0 0l-3-3m3 3l3-3"
+                Upload File
+              </button>
+              <button
+                type="button"
+                onclick={() => (activeAttachmentTab = 'url')}
+                class="flex-1 py-1.5 text-sm font-medium rounded-md transition-all {activeAttachmentTab ===
+                'url'
+                  ? 'bg-white text-slate-800 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'}"
+              >
+                Provide URL
+              </button>
+            </div>
+
+            {#if activeAttachmentTab === 'upload'}
+              <!-- Upload zone when no file is attached -->
+              <label
+                class="flex flex-col items-center justify-center gap-1 w-full h-32 rounded-xl border-2 border-dashed cursor-pointer transition-all {isDragActive
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-slate-200 bg-white hover:border-blue-400'}"
+                ondragover={handleAttachmentDragOver}
+                ondragleave={handleAttachmentDragLeave}
+                ondrop={handleAttachmentDrop}
+              >
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  bind:this={attachmentFileInput}
+                  onchange={handleAttachmentFileChange}
+                  class="sr-only"
                 />
-              </svg>
-              <span class="text-slate-600 text-sm">
-                <span class="text-blue-600 font-medium">Click to upload</span>
-                <span class="text-slate-400"> or drag and drop</span>
-              </span>
-              <span class="text-xs text-slate-400">PNG, JPG or PDF</span>
-            </label>
+                <svg
+                  class="w-8 h-8 text-slate-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 16a4 4 0 01.88-7.903A5 5 0 1118 12h-1m-5-6v12m0 0l-3-3m3 3l3-3"
+                  />
+                </svg>
+                <span class="text-slate-600 text-sm font-medium mt-2">
+                  Click to upload
+                  <span class="text-slate-400 font-normal">
+                    or drag and drop</span
+                  >
+                </span>
+                <span class="text-xs text-slate-400 mt-1"
+                  >PNG, JPG or PDF (max 10MB)</span
+                >
+              </label>
+            {:else}
+              <!-- URL Input Mode -->
+              <div class="space-y-3">
+                <div class="flex gap-2">
+                  <input
+                    type="url"
+                    bind:value={manualUrlInput}
+                    placeholder="https://example.com/document.pdf"
+                    class="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    disabled={!manualUrlInput.trim()}
+                    onclick={() => {
+                      if (manualUrlInput.trim()) {
+                        formAttachmentUrl = manualUrlInput.trim()
+                        formAttachmentName =
+                          manualUrlInput.split('/').pop() || 'External Link'
+                      }
+                    }}
+                    class="px-4 py-2 bg-slate-800 text-white rounded-lg font-medium hover:bg-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Add
+                  </button>
+                </div>
+                <p class="text-xs text-slate-500">
+                  Provide a direct link to an image or PDF file.
+                </p>
+              </div>
+            {/if}
           {:else}
             <!-- Uploaded file preview -->
             <div
