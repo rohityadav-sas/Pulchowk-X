@@ -1,46 +1,46 @@
 <script lang="ts">
-  import { route, goto } from "@mateothegreat/svelte5-router";
-  import { getClubs, type Club } from "../lib/api";
-  import LoadingSpinner from "../components/LoadingSpinner.svelte";
-  import { fade, fly } from "svelte/transition";
-  import { authClient } from "../lib/auth-client";
-  import { createQuery } from "@tanstack/svelte-query";
-  import { untrack } from "svelte";
+  import { route, goto } from '@mateothegreat/svelte5-router'
+  import { getClubs, type Club } from '../lib/api'
+  import LoadingSpinner from '../components/LoadingSpinner.svelte'
+  import { fade, fly } from 'svelte/transition'
+  import { authClient } from '../lib/auth-client'
+  import { createQuery } from '@tanstack/svelte-query'
+  import { untrack } from 'svelte'
 
-  const session = authClient.useSession();
+  const session = authClient.useSession()
 
   const query = createQuery(() => ({
-    queryKey: ["clubs"],
+    queryKey: ['clubs'],
     queryFn: async () => {
-      const result = await getClubs();
+      const result = await getClubs()
       if (result.success && result.existingClub) {
-        return result.existingClub;
+        return result.existingClub
       }
-      throw new Error(result.message || "Failed to load clubs");
+      throw new Error(result.message || 'Failed to load clubs')
     },
-  }));
+  }))
 
   $effect(() => {
     if (!$session.isPending && !$session.error && !$session.data?.user) {
       untrack(() => {
-        goto("/register?message=login_required");
-      });
+        goto('/register?message=login_required')
+      })
     }
-  });
+  })
 
   const gradients = [
-    "from-blue-500 to-indigo-600",
-    "from-purple-500 to-pink-600",
-    "from-emerald-500 to-teal-600",
-    "from-orange-500 to-red-600",
-    "from-cyan-500 to-blue-600",
-    "from-rose-500 to-purple-600",
-    "from-amber-500 to-orange-600",
-    "from-lime-500 to-emerald-600",
-  ];
+    'from-blue-500 to-indigo-600',
+    'from-purple-500 to-pink-600',
+    'from-emerald-500 to-teal-600',
+    'from-orange-500 to-red-600',
+    'from-cyan-500 to-blue-600',
+    'from-rose-500 to-purple-600',
+    'from-amber-500 to-orange-600',
+    'from-lime-500 to-emerald-600',
+  ]
 
   function getGradient(index: number): string {
-    return gradients[index % gradients.length];
+    return gradients[index % gradients.length]
   }
 </script>
 
@@ -48,7 +48,7 @@
   <div class="max-w-7xl mx-auto sm:px-4">
     <!-- Header -->
     <div class="text-center mb-10 animate-fade-in">
-      {#if $session.data?.user && ($session.data.user as any).role === "admin"}
+      {#if $session.data?.user && ($session.data.user as any).role === 'admin'}
         <a
           href="/create-club"
           use:route
@@ -138,16 +138,16 @@
         </p>
       </div>
     {:else}
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {#each query.data as club, i (club.id)}
           <a
             href="/clubs/{club.id}"
             use:route
-            class="group relative bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-blue-300 transition-all duration-500 transform hover:-translate-y-2 animate-slide-up"
+            class="group relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-blue-300 transition-all duration-500 transform hover:-translate-y-1.5 animate-slide-up"
             style="animation-delay: {i * 100}ms"
           >
             <!-- Club Banner/Logo -->
-            <div class="relative h-40 overflow-hidden">
+            <div class="relative h-32 overflow-hidden">
               {#if club.logoUrl}
                 <img
                   src={club.logoUrl}
@@ -168,7 +168,7 @@
                     class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,var(--tw-gradient-from)_0%,transparent_70%)]"
                   ></div>
                   <span
-                    class="text-5xl font-black text-white/90 transform group-hover:scale-115 transition-transform duration-500 drop-shadow-2xl"
+                    class="text-4xl font-black text-white/90 transform group-hover:scale-115 transition-transform duration-500 drop-shadow-2xl"
                   >
                     {club.name.charAt(0).toUpperCase()}
                   </span>
@@ -177,28 +177,28 @@
 
               <!-- Floating Badge -->
               <div
-                class="absolute top-3 right-3 bg-gray-900/50 backdrop-blur-md px-3 py-1 rounded-full text-[9px] font-bold text-white uppercase tracking-wider border border-white/20 shadow-lg"
+                class="absolute top-2 right-2 bg-gray-900/50 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[8px] font-bold text-white uppercase tracking-wider border border-white/20 shadow-lg"
               >
                 Official Club
               </div>
             </div>
 
             <!-- Club Info -->
-            <div class="p-5 relative">
+            <div class="p-4 relative">
               <!-- Floating Icon Profile -->
-              <div class="absolute -top-8 left-5">
+              <div class="absolute -top-6 left-4">
                 <div
-                  class="w-14 h-14 rounded-xl bg-white p-1 shadow-lg border border-gray-50 transform -rotate-3 group-hover:rotate-0 transition-transform duration-300"
+                  class="w-11 h-11 rounded-lg bg-white p-0.5 shadow-lg border border-gray-50 transform -rotate-3 group-hover:rotate-0 transition-transform duration-300"
                 >
                   {#if club.logoUrl}
                     <img
                       src={club.logoUrl}
                       alt=""
-                      class="w-full h-full object-cover rounded-xl"
+                      class="w-full h-full object-cover rounded-lg"
                     />
                   {:else}
                     <div
-                      class="w-full h-full rounded-xl bg-gray-50 flex items-center justify-center font-bold text-blue-600"
+                      class="w-full h-full rounded-lg bg-gray-50 flex items-center justify-center font-bold text-sm text-blue-600"
                     >
                       {club.name.charAt(0)}
                     </div>
@@ -206,26 +206,26 @@
                 </div>
               </div>
 
-              <div class="mt-5">
+              <div class="mt-4">
                 <h3
-                  class="text-lg font-extrabold text-gray-900 mb-1.5 group-hover:text-blue-600 transition-colors line-clamp-1"
+                  class="text-sm font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors line-clamp-1"
                 >
                   {club.name}
                 </h3>
                 <p
-                  class="text-gray-500 text-[13px] leading-relaxed line-clamp-3 min-h-12"
+                  class="text-gray-500 text-[11px] leading-relaxed line-clamp-3 min-h-10"
                 >
                   {club.description ||
-                    "The vibrant community of students at Pulchowk Campus, dedicated to excellence and innovation."}
+                    'The vibrant community of students at Pulchowk Campus, dedicated to excellence and innovation.'}
                 </p>
 
                 <!-- Stats/Details Row -->
                 <div
-                  class="mt-5 pt-4 border-t border-gray-50 flex items-center justify-between text-gray-400"
+                  class="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between text-gray-400"
                 >
-                  <div class="flex items-center gap-1.5">
+                  <div class="flex items-center gap-1">
                     <svg
-                      class="w-3.5 h-3.5"
+                      class="w-3 h-3"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -237,15 +237,15 @@
                         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    <span class="text-[11px] font-medium">Club Details</span>
+                    <span class="text-[10px] font-medium">Club Details</span>
                   </div>
 
                   <div
-                    class="flex items-center text-blue-600 text-[11px] font-bold uppercase tracking-wide group-hover:translate-x-0.5 transition-transform duration-300"
+                    class="flex items-center text-blue-600 text-[10px] font-bold uppercase tracking-wide group-hover:translate-x-0.5 transition-transform duration-300"
                   >
                     <span>View Events</span>
                     <svg
-                      class="w-3.5 h-3.5 ml-1"
+                      class="w-3 h-3 ml-0.5"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -264,7 +264,7 @@
 
             <!-- Hover Glow Effect -->
             <div
-              class="absolute inset-0 rounded-3xl ring-2 ring-blue-500 ring-opacity-0 group-hover:ring-opacity-20 transition-all duration-300 pointer-events-none"
+              class="absolute inset-0 rounded-2xl ring-2 ring-blue-500 ring-opacity-0 group-hover:ring-opacity-20 transition-all duration-300 pointer-events-none"
             ></div>
           </a>
         {/each}

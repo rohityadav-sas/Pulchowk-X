@@ -431,29 +431,17 @@
 
 <div class="min-h-[calc(100vh-4rem)] bg-gray-50/50 px-4 py-8 sm:px-6 lg:px-8">
   <div class="max-w-5xl mx-auto">
-    <!-- Header -->
-    <div class="text-center mb-12" in:fade>
-      <h1 class="text-4xl sm:text-5xl font-black mb-4">
-        <span class="text-blue-600">Notice</span>
-        <span class="text-slate-800">Board</span>
-      </h1>
-      <p class="text-slate-600 text-lg max-w-2xl mx-auto">
-        Access examination results and routines for BE and MSc programs at IOE
-        Pulchowk Campus.
-      </p>
-    </div>
-
     <!-- Section Tabs -->
-    <div class="flex justify-center gap-3 mb-6">
+    <div class="flex justify-center gap-2 mb-4">
       <button
         onclick={() => setSection('results')}
-        class="px-6 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 {activeSection ===
+        class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 {activeSection ===
         'results'
-          ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
           : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}"
       >
         <svg
-          class="w-5 h-5"
+          class="w-4 h-4"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -469,13 +457,13 @@
       </button>
       <button
         onclick={() => setSection('routines')}
-        class="px-6 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 {activeSection ===
+        class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 {activeSection ===
         'routines'
-          ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
           : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}"
       >
         <svg
-          class="w-5 h-5"
+          class="w-4 h-4"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -492,48 +480,48 @@
     </div>
 
     <!-- Program Tabs -->
-    <div class="flex justify-center gap-3 mb-8">
+    <div class="flex justify-center gap-2 mb-5">
       <button
         onclick={() => setSubsection('be')}
-        class="px-5 py-2 rounded-full font-medium transition-all flex items-center gap-2 {activeSubsection ===
+        class="px-3.5 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 {activeSubsection ===
         'be'
           ? 'bg-slate-800 text-white'
           : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}"
       >
         <span
-          class="w-2 h-2 rounded-full {activeSubsection === 'be'
+          class="w-1.5 h-1.5 rounded-full {activeSubsection === 'be'
             ? 'bg-green-400'
             : 'bg-slate-300'}"
         ></span>
         BE Programs
-        <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full"
+        <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full"
           >{beResults}</span
         >
       </button>
       <button
         onclick={() => setSubsection('msc')}
-        class="px-5 py-2 rounded-full font-medium transition-all flex items-center gap-2 {activeSubsection ===
+        class="px-3.5 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 {activeSubsection ===
         'msc'
           ? 'bg-slate-800 text-white'
           : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}"
       >
         <span
-          class="w-2 h-2 rounded-full {activeSubsection === 'msc'
+          class="w-1.5 h-1.5 rounded-full {activeSubsection === 'msc'
             ? 'bg-purple-400'
             : 'bg-slate-300'}"
         ></span>
         MSc Programs
-        <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full"
+        <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full"
           >{mscResults}</span
         >
       </button>
     </div>
 
     <!-- Search and Management -->
-    <div class="flex gap-4 mb-6">
+    <div class="flex gap-3 mb-4">
       <div class="flex-1 relative">
         <svg
-          class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
+          class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -549,17 +537,17 @@
           type="text"
           placeholder="Search results..."
           bind:value={searchQuery}
-          class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          class="w-full pl-9 pr-3 py-4 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
 
       {#if isNoticeManager}
         <button
           onclick={openCreateModal}
-          class="px-5 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors flex items-center gap-2"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center gap-1.5"
         >
           <svg
-            class="w-5 h-5"
+            class="w-4 h-4"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -578,11 +566,12 @@
 
     <!-- New notices badge -->
     {#if newCount > 0}
-      <div class="flex justify-center mb-6">
+      <div class="flex justify-center mb-4">
         <span
-          class="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-full text-sm font-medium border border-amber-200"
+          class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-medium border border-amber-200"
         >
-          <span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+          <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"
+          ></span>
           {newCount} new notices this week
         </span>
       </div>
@@ -658,26 +647,26 @@
       </div>
     {:else}
       <!-- Notices List -->
-      <div class="space-y-4" in:fade={{ delay: 100 }}>
+      <div class="space-y-2.5" in:fade={{ delay: 100 }}>
         {#each filteredNotices as notice (notice.id)}
           <div
-            class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all overflow-hidden"
+            class="group bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all overflow-hidden"
           >
             <!-- Notice Header -->
             <button
               onclick={() => toggleExpand(notice.id)}
-              class="w-full px-6 py-4 flex items-start gap-4 text-left"
+              class="w-full px-4 py-3 flex items-start gap-3 text-left"
             >
               <!-- Icon -->
               <div
-                class="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center {activeSection ===
+                class="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center {activeSection ===
                 'results'
                   ? 'bg-green-100 text-green-600'
                   : 'bg-blue-100 text-blue-600'}"
               >
                 {#if activeSection === 'results'}
                   <svg
-                    class="w-6 h-6"
+                    class="w-4 h-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -691,7 +680,7 @@
                   </svg>
                 {:else}
                   <svg
-                    class="w-6 h-6"
+                    class="w-4 h-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -708,27 +697,27 @@
 
               <!-- Content -->
               <div class="flex-1 min-w-0">
-                <div class="flex items-start justify-between gap-4">
+                <div class="flex items-start justify-between gap-3">
                   <div>
                     <h3
-                      class="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors"
+                      class="text-sm font-semibold text-slate-800 group-hover:text-blue-600 transition-colors"
                     >
                       {notice.title}
                     </h3>
-                    <p class="text-sm text-slate-500 mt-1 line-clamp-1">
+                    <p class="text-xs text-slate-500 mt-0.5 line-clamp-1">
                       {notice.content}
                     </p>
                   </div>
-                  <div class="flex items-center gap-2 shrink-0">
+                  <div class="flex items-center gap-1.5 shrink-0">
                     {#if isNoticeNew(notice.createdAt)}
                       <span
-                        class="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full"
+                        class="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-semibold rounded-full"
                         >NEW</span
                       >
                     {/if}
                     {#if notice.attachmentUrl}
                       <span
-                        class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full uppercase"
+                        class="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-semibold rounded-full uppercase"
                       >
                         {getAttachmentType(
                           notice.attachmentUrl,
@@ -740,7 +729,7 @@
                 </div>
 
                 <div
-                  class="flex items-center gap-4 mt-2 text-xs text-slate-400"
+                  class="flex items-center gap-3 mt-1 text-[10px] text-slate-400"
                 >
                   <span>{formatDate(notice.createdAt)}</span>
                   {#if notice.author}

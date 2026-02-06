@@ -49,11 +49,11 @@
 <a
   href="/clubs/{clubId}/events/{event.id}"
   use:route
-  class="group relative bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-500 transform hover:-translate-y-1.5 flex flex-col h-full"
+  class="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-500 transform hover:-translate-y-1 flex flex-col h-full"
   in:fly={{ y: 20, duration: 600, delay: index * 50 }}
 >
   <!-- Banner -->
-  <div class="relative h-44 overflow-hidden bg-gray-900">
+  <div class="relative h-32 overflow-hidden bg-gray-900">
     {#if event.bannerUrl}
       <img
         src={event.bannerUrl}
@@ -64,7 +64,7 @@
       <div
         class="w-full h-full bg-linear-to-br from-gray-800 to-gray-900 flex items-center justify-center"
       >
-        <span class="text-xl font-semibold text-white/70">Event</span>
+        <span class="text-base font-semibold text-white/70">Event</span>
       </div>
     {/if}
 
@@ -72,7 +72,7 @@
     {#if isOngoing}
       <div class="absolute inset-0 bg-blue-600/10"></div>
       <div
-        class="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-blue-600 text-white text-[9px] font-bold rounded-full uppercase shadow-lg animate-pulse"
+        class="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white text-[8px] font-bold rounded-full uppercase shadow-lg animate-pulse"
       >
         <span class="w-1.5 h-1.5 bg-white rounded-full"></span>
         Live
@@ -80,9 +80,9 @@
     {/if}
 
     <!-- Status Badge -->
-    <div class="absolute top-3 right-3">
+    <div class="absolute top-2 right-2">
       <span
-        class={`px-2.5 py-1 text-[9px] font-bold rounded-full shadow-sm border ${getStatusColor(event.status)} uppercase tracking-wider backdrop-blur-md bg-white/90`}
+        class={`px-2 py-0.5 text-[8px] font-bold rounded-full shadow-sm border ${getStatusColor(event.status)} uppercase tracking-wider backdrop-blur-md bg-white/90`}
       >
         {getEventStatusLabel(event.status)}
       </span>
@@ -90,12 +90,12 @@
 
     <!-- Date Block -->
     <div
-      class="absolute bottom-3 left-3 right-3 flex items-end justify-between"
+      class="absolute bottom-2 left-2 right-2 flex items-end justify-between"
     >
       <div
-        class="bg-white/95 backdrop-blur-sm px-2.5 py-1.5 rounded-xl shadow-lg flex items-center"
+        class="bg-white/95 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg flex items-center"
       >
-        <span class="text-[10px] font-bold text-blue-600 uppercase whitespace-nowrap">
+        <span class="text-[9px] font-bold text-blue-600 uppercase whitespace-nowrap">
           {parseEventDateTime(event.eventStartTime).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
@@ -106,31 +106,31 @@
   </div>
 
   <!-- Content -->
-  <div class="p-5 flex flex-col flex-1">
+  <div class="p-3.5 flex flex-col flex-1">
     {#if event.club?.name}
-      <div class="mb-1.5">
+      <div class="mb-1">
         <span
-          class="text-[9px] font-bold text-blue-600 uppercase tracking-wider"
+          class="text-[8px] font-bold text-blue-600 uppercase tracking-wider"
           >{event.club.name}</span
         >
       </div>
     {/if}
     <h3
-      class="text-lg font-extrabold text-gray-900 mb-1.5 group-hover:text-blue-600 transition-colors line-clamp-2"
+      class="text-sm font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors line-clamp-2"
     >
       {event.title}
     </h3>
-    <p class="text-gray-500 text-[13px] leading-relaxed mb-5 line-clamp-2 flex-1">
+    <p class="text-gray-500 text-[11px] leading-relaxed mb-3 line-clamp-2 flex-1">
       {event.description ||
         "Join us for an experience that's unlike anything you've seen before. Innovation meets community."}
     </p>
 
     <!-- Metadata -->
-    <div class="space-y-2.5 pt-3 border-t border-gray-50">
-      <div class="flex items-center justify-between text-[11px] text-gray-500">
-        <div class="flex items-center gap-1.5">
+    <div class="space-y-2 pt-2.5 border-t border-gray-50">
+      <div class="flex items-center justify-between text-[10px] text-gray-500">
+        <div class="flex items-center gap-1">
           <svg
-            class="w-3.5 h-3.5 text-blue-500"
+            class="w-3 h-3 text-blue-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -145,9 +145,9 @@
           <span>{formatTime(event.eventStartTime)}</span>
         </div>
         {#if event.venue}
-          <div class="flex items-center gap-1.5">
+          <div class="flex items-center gap-1">
             <svg
-              class="w-3.5 h-3.5 text-rose-500"
+              class="w-3 h-3 text-rose-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -159,15 +159,15 @@
                 d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
               />
             </svg>
-            <span class="font-medium truncate max-w-25">{event.venue}</span>
+            <span class="font-medium truncate max-w-20">{event.venue}</span>
           </div>
         {/if}
       </div>
 
       <!-- Registration Progress -->
-      <div class="flex flex-col gap-1.5">
+      <div class="flex flex-col gap-1">
         <div
-          class="flex items-center justify-between text-[9px] font-bold uppercase tracking-tight text-gray-400"
+          class="flex items-center justify-between text-[8px] font-bold uppercase tracking-tight text-gray-400"
         >
           <span>Registration</span>
           <span
@@ -176,7 +176,7 @@
               : ""}</span
           >
         </div>
-        <div class="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+        <div class="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
           <div
             class="h-full bg-blue-600 rounded-full transition-all duration-1000"
             style="width: {event.maxParticipants
@@ -193,7 +193,7 @@
 
   <!-- Hover Indicator -->
   <div
-    class="absolute inset-0 ring-2 ring-blue-500 ring-opacity-0 group-hover:ring-opacity-20 transition-all duration-500 pointer-events-none rounded-3xl"
+    class="absolute inset-0 ring-2 ring-blue-500 ring-opacity-0 group-hover:ring-opacity-20 transition-all duration-500 pointer-events-none rounded-2xl"
   ></div>
 </a>
 

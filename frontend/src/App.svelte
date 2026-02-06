@@ -6,154 +6,154 @@
     query,
     goto,
     route,
-  } from "@mateothegreat/svelte5-router";
-  import { QueryClientProvider } from "@tanstack/svelte-query";
-  import { queryClient } from "./lib/query-client";
-  import { authClient } from "./lib/auth-client";
-  import ErrorToast from "./components/ErrorToast.svelte";
-  import Home from "./pages/Home.svelte";
-  import Register from "./pages/Register.svelte";
-  import Dashboard from "./pages/Dashboard.svelte";
-  import Classroom from "./pages/Classroom.svelte";
-  import Clubs from "./pages/Clubs.svelte";
-  import ClubDetails from "./pages/ClubDetails.svelte";
-  import ClubEvents from "./pages/ClubEvents.svelte";
-  import AllEvents from "./pages/AllEvents.svelte";
-  import EventDetails from "./pages/EventDetails.svelte";
-  import EventCategoryDetails from "./pages/EventCategoryDetails.svelte";
-  import CreateEvent from "./pages/CreateEvent.svelte";
-  import CreateClub from "./pages/CreateClub.svelte";
-  import MapPlaceholder from "./pages/MapPlaceholder.svelte";
-  import BookMarketplace from "./pages/BookMarketplace.svelte";
-  import BookDetails from "./pages/BookDetails.svelte";
-  import SellBook from "./pages/SellBook.svelte";
-  import MyBooks from "./pages/MyBooks.svelte";
-  import Messages from "./pages/Messages.svelte";
-  import Notices from "./pages/Notices.svelte";
-  import Search from "./pages/Search.svelte";
-  import Admin from "./pages/Admin.svelte";
-  import GlobalSearch from "./components/GlobalSearch.svelte";
-  import { onMount, type Component } from "svelte";
+  } from '@mateothegreat/svelte5-router'
+  import { QueryClientProvider } from '@tanstack/svelte-query'
+  import { queryClient } from './lib/query-client'
+  import { authClient } from './lib/auth-client'
+  import ErrorToast from './components/ErrorToast.svelte'
+  import Home from './pages/Home.svelte'
+  import Register from './pages/Register.svelte'
+  import Dashboard from './pages/Dashboard.svelte'
+  import Classroom from './pages/Classroom.svelte'
+  import Clubs from './pages/Clubs.svelte'
+  import ClubDetails from './pages/ClubDetails.svelte'
+  import ClubEvents from './pages/ClubEvents.svelte'
+  import AllEvents from './pages/AllEvents.svelte'
+  import EventDetails from './pages/EventDetails.svelte'
+  import EventCategoryDetails from './pages/EventCategoryDetails.svelte'
+  import CreateEvent from './pages/CreateEvent.svelte'
+  import CreateClub from './pages/CreateClub.svelte'
+  import MapPlaceholder from './pages/MapPlaceholder.svelte'
+  import BookMarketplace from './pages/BookMarketplace.svelte'
+  import BookDetails from './pages/BookDetails.svelte'
+  import SellBook from './pages/SellBook.svelte'
+  import MyBooks from './pages/MyBooks.svelte'
+  import Messages from './pages/Messages.svelte'
+  import Notices from './pages/Notices.svelte'
+  import Search from './pages/Search.svelte'
+  import Admin from './pages/Admin.svelte'
+  import GlobalSearch from './components/GlobalSearch.svelte'
+  import { onMount, type Component } from 'svelte'
 
-  let MapComponent: Component | any = $state(null);
+  let MapComponent: Component | any = $state(null)
 
   onMount(() => {
     const loadMap = () => {
-      import("./pages/Map.svelte").then((module) => {
-        MapComponent = module.default;
-      });
-    };
+      import('./pages/Map.svelte').then((module) => {
+        MapComponent = module.default
+      })
+    }
 
-    if (document.readyState === "complete") loadMap();
+    if (document.readyState === 'complete') loadMap()
     else
-      window.addEventListener("load", loadMap, {
+      window.addEventListener('load', loadMap, {
         once: true,
-      });
-  });
+      })
+  })
 
-  let instance: RouterInstance = $state()!;
+  let instance: RouterInstance = $state()!
 
   function normalizePath(path: string) {
-    const clean = path.split("?")[0].split("#")[0];
-    if (clean.length > 1 && clean.endsWith("/")) return clean.slice(0, -1);
-    return clean;
+    const clean = path.split('?')[0].split('#')[0]
+    if (clean.length > 1 && clean.endsWith('/')) return clean.slice(0, -1)
+    return clean
   }
 
   function tryNormalizePath(path?: string | null) {
-    if (!path) return null;
-    return normalizePath(path);
+    if (!path) return null
+    return normalizePath(path)
   }
 
-  let activePath = $state("/");
+  let activePath = $state('/')
 
   function syncActivePathFromWindow() {
-    if (typeof window === "undefined") return;
-    activePath = normalizePath(window.location.pathname);
+    if (typeof window === 'undefined') return
+    activePath = normalizePath(window.location.pathname)
   }
 
   onMount(() => {
-    syncActivePathFromWindow();
-    window.addEventListener("pushState", syncActivePathFromWindow);
-    window.addEventListener("replaceState", syncActivePathFromWindow);
-    window.addEventListener("popstate", syncActivePathFromWindow);
+    syncActivePathFromWindow()
+    window.addEventListener('pushState', syncActivePathFromWindow)
+    window.addEventListener('replaceState', syncActivePathFromWindow)
+    window.addEventListener('popstate', syncActivePathFromWindow)
 
     return () => {
-      window.removeEventListener("pushState", syncActivePathFromWindow);
-      window.removeEventListener("replaceState", syncActivePathFromWindow);
-      window.removeEventListener("popstate", syncActivePathFromWindow);
-    };
-  });
+      window.removeEventListener('pushState', syncActivePathFromWindow)
+      window.removeEventListener('replaceState', syncActivePathFromWindow)
+      window.removeEventListener('popstate', syncActivePathFromWindow)
+    }
+  })
 
   $effect(() => {
     const routerPath = tryNormalizePath(
       instance?.current?.result?.path?.original,
-    );
+    )
     if (routerPath && routerPath !== activePath) {
-      activePath = routerPath;
+      activePath = routerPath
     }
-  });
+  })
 
-  const currentPath = $derived(activePath);
+  const currentPath = $derived(activePath)
 
-  const isMapRoute = $derived(currentPath === "/map");
+  const isMapRoute = $derived(currentPath === '/map')
 
-  const session = authClient.useSession();
-  let navUserCache = $state<any | null>(null);
-  let navAuthResolved = $state(false);
+  const session = authClient.useSession()
+  let navUserCache = $state<any | null>(null)
+  let navAuthResolved = $state(false)
 
   $effect(() => {
-    const liveUser = ($session.data?.user as any) ?? null;
+    const liveUser = ($session.data?.user as any) ?? null
 
     if (!$session.isPending) {
-      navAuthResolved = true;
+      navAuthResolved = true
     }
 
     if (liveUser) {
-      navUserCache = liveUser;
-      return;
+      navUserCache = liveUser
+      return
     }
 
     // Clear cache only after initial auth has resolved and session settles as signed-out.
     if (navAuthResolved && !$session.isPending) {
-      navUserCache = null;
+      navUserCache = null
     }
-  });
+  })
 
-  const navUser = $derived(($session.data?.user as any) ?? navUserCache);
-  const showNavSessionLoader = $derived(!navAuthResolved && $session.isPending);
-  const currentRole = $derived((navUser as any)?.role as string | undefined);
+  const navUser = $derived(($session.data?.user as any) ?? navUserCache)
+  const showNavSessionLoader = $derived(!navAuthResolved && $session.isPending)
+  const currentRole = $derived((navUser as any)?.role as string | undefined)
 
-  const error = query("message");
-  let showError = $state(error === "unauthorized_domain");
+  const error = query('message')
+  let showError = $state(error === 'unauthorized_domain')
 
-  if (error === "unauthorized_domain") goto("/");
+  if (error === 'unauthorized_domain') goto('/')
 
-  const embed = query("embed");
-  const isEmbedded = $derived(embed === "true");
+  const embed = query('embed')
+  const isEmbedded = $derived(embed === 'true')
 
   const navPillBase =
-    "inline-flex h-10 items-center gap-1.5 rounded-xl px-3.5 text-sm font-semibold transition-colors whitespace-nowrap";
+    'inline-flex h-10 items-center gap-1.5 rounded-xl px-3.5 text-sm font-semibold transition-colors whitespace-nowrap'
   const navPillDefault =
-    "border border-slate-200 bg-white text-slate-700 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700";
-  const navPillActive = "border border-cyan-200 bg-cyan-50 text-cyan-700";
+    'border border-slate-200 bg-white text-slate-700 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700'
+  const navPillActive = 'border border-cyan-200 bg-cyan-50 text-cyan-700'
 
   const utilityPillBase =
-    "inline-flex h-10 items-center gap-2 rounded-xl px-4 text-xs sm:text-sm font-semibold transition-colors";
-  const utilityPillDefault = "border border-slate-200 bg-white text-slate-700";
+    'inline-flex h-10 items-center gap-2 rounded-xl px-4 text-xs sm:text-sm font-semibold transition-colors'
+  const utilityPillDefault = 'border border-slate-200 bg-white text-slate-700'
 
   function isRouteActive(href: string, exact = false) {
-    const current = normalizePath(currentPath || "/");
-    const target = normalizePath(href || "/");
-    if (exact) return current === target;
-    return current === target || current.startsWith(`${target}/`);
+    const current = normalizePath(currentPath || '/')
+    const target = normalizePath(href || '/')
+    if (exact) return current === target
+    return current === target || current.startsWith(`${target}/`)
   }
 
   function navPillClass(href: string, exact = false) {
-    return `${navPillBase} ${isRouteActive(href, exact) ? navPillActive : navPillDefault}`;
+    return `${navPillBase} ${isRouteActive(href, exact) ? navPillActive : navPillDefault}`
   }
 
   function utilityPillClass(href: string) {
-    return `${utilityPillBase} ${isRouteActive(href) ? navPillActive : utilityPillDefault}`;
+    return `${utilityPillBase} ${isRouteActive(href) ? navPillActive : utilityPillDefault}`
   }
 
   const routes: RouteConfig[] = [
@@ -161,23 +161,23 @@
       component: Home,
     },
     {
-      path: "register",
+      path: 'register',
       component: Register,
     },
     {
-      path: "dashboard",
+      path: 'dashboard',
       component: Dashboard,
     },
     {
-      path: "classroom",
+      path: 'classroom',
       component: Classroom,
     },
     {
-      path: "create-club",
+      path: 'create-club',
       component: CreateClub,
     },
     {
-      path: "map",
+      path: 'map',
       component: MapPlaceholder,
     },
     {
@@ -240,7 +240,7 @@
       path: /^\/admin\/?$/,
       component: Admin,
     },
-  ];
+  ]
 </script>
 
 <QueryClientProvider client={queryClient}>
@@ -285,7 +285,7 @@
                   <a
                     use:route
                     href="/dashboard"
-                    class={utilityPillClass("/dashboard")}
+                    class={`${utilityPillClass('/dashboard')} hover:bg-emerald-50 hover:text-emerald-700`}
                   >
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"
                     ></span>
@@ -294,11 +294,11 @@
                   <a
                     use:route
                     href="/classroom"
-                    class={utilityPillClass("/classroom")}
+                    class={`${utilityPillClass('/classroom')} hover:bg-emerald-50 hover:text-emerald-700`}
                   >
                     Classroom
                   </a>
-                  {#if currentRole === "admin"}
+                  {#if currentRole === 'admin'}
                     <a
                       use:route
                       href="/admin"
@@ -331,7 +331,7 @@
               </div>
 
               <div class="flex items-center gap-2 overflow-x-auto pb-1 xl:pb-0">
-                <a use:route href="/" class={navPillClass("/", true)}>
+                <a use:route href="/" class={navPillClass('/', true)}>
                   <svg
                     class="w-4 h-4"
                     fill="none"
@@ -347,7 +347,7 @@
                   </svg>
                   Home
                 </a>
-                <a use:route href="/clubs" class={navPillClass("/clubs")}>
+                <a use:route href="/clubs" class={navPillClass('/clubs')}>
                   <svg
                     class="w-4 h-4"
                     fill="none"
@@ -363,7 +363,7 @@
                   </svg>
                   Clubs
                 </a>
-                <a use:route href="/events" class={navPillClass("/events")}>
+                <a use:route href="/events" class={navPillClass('/events')}>
                   <svg
                     class="w-4 h-4"
                     fill="none"
@@ -379,7 +379,7 @@
                   </svg>
                   Events
                 </a>
-                <a use:route href="/books" class={navPillClass("/books")}>
+                <a use:route href="/books" class={navPillClass('/books')}>
                   <svg
                     class="w-4 h-4"
                     fill="none"
@@ -395,7 +395,7 @@
                   </svg>
                   Books
                 </a>
-                <a use:route href="/map" class={navPillClass("/map")}>
+                <a use:route href="/map" class={navPillClass('/map')}>
                   <svg
                     class="w-4 h-4"
                     fill="none"
@@ -412,7 +412,7 @@
                   </svg>
                   Map
                 </a>
-                <a use:route href="/notices" class={navPillClass("/notices")}>
+                <a use:route href="/notices" class={navPillClass('/notices')}>
                   <svg
                     class="w-4 h-4"
                     fill="none"
@@ -466,7 +466,7 @@
           <MapComponent />
         </div>
       {/if}
-      <div class={isMapRoute ? "hidden" : "contents"}>
+      <div class={isMapRoute ? 'hidden' : 'contents'}>
         <Router bind:instance {routes} />
       </div>
     </main>

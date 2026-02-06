@@ -1,85 +1,85 @@
 <script lang="ts">
-  import { getAllEvents, type ClubEvent } from "../lib/api";
-  import LoadingSpinner from "../components/LoadingSpinner.svelte";
-  import EventCard from "../components/EventCard.svelte";
-  import { fade } from "svelte/transition";
-  import { authClient } from "../lib/auth-client";
-  import { goto } from "@mateothegreat/svelte5-router";
-  import { createQuery } from "@tanstack/svelte-query";
-  import { getEventTimeMs, parseEventDateTime } from "../lib/event-dates";
-  import { untrack } from "svelte";
+  import { getAllEvents, type ClubEvent } from '../lib/api'
+  import LoadingSpinner from '../components/LoadingSpinner.svelte'
+  import EventCard from '../components/EventCard.svelte'
+  import { fade } from 'svelte/transition'
+  import { authClient } from '../lib/auth-client'
+  import { goto } from '@mateothegreat/svelte5-router'
+  import { createQuery } from '@tanstack/svelte-query'
+  import { getEventTimeMs, parseEventDateTime } from '../lib/event-dates'
+  import { untrack } from 'svelte'
 
-  const session = authClient.useSession();
-  let hasRedirectedToLogin = $state(false);
+  const session = authClient.useSession()
+  let hasRedirectedToLogin = $state(false)
 
   const query = createQuery(() => ({
-    queryKey: ["events"],
+    queryKey: ['events'],
     queryFn: async () => {
-      const result = await getAllEvents();
+      const result = await getAllEvents()
       if (!result.success || !result.allEvents) {
-        throw new Error(result.message || "Failed to load events");
+        throw new Error(result.message || 'Failed to load events')
       }
-      return result.allEvents;
+      return result.allEvents
     },
-  }));
+  }))
 
   $effect(() => {
-    if (hasRedirectedToLogin) return;
+    if (hasRedirectedToLogin) return
 
     if (!$session.isPending && !$session.error && !$session.data?.user) {
-      hasRedirectedToLogin = true;
+      hasRedirectedToLogin = true
       untrack(() => {
-        goto("/register?message=login_required");
-      });
+        goto('/register?message=login_required')
+      })
     }
-  });
+  })
 
   const categorizedEvents = $derived.by(
     (): {
-      ongoing: ClubEvent[];
-      upcoming: ClubEvent[];
-      completed: ClubEvent[];
+      ongoing: ClubEvent[]
+      upcoming: ClubEvent[]
+      completed: ClubEvent[]
     } => {
       if (!query.data) {
-        return { ongoing: [], upcoming: [], completed: [] };
+        return { ongoing: [], upcoming: [], completed: [] }
       }
-      const now = new Date();
+      const now = new Date()
       const sorted: ClubEvent[] = [...query.data].sort(
         (a, b) =>
           getEventTimeMs(b.eventStartTime) - getEventTimeMs(a.eventStartTime),
-      );
+      )
 
       return {
         ongoing: sorted.filter((e) => {
-          const start = parseEventDateTime(e.eventStartTime);
-          const end = parseEventDateTime(e.eventEndTime);
+          const start = parseEventDateTime(e.eventStartTime)
+          const end = parseEventDateTime(e.eventEndTime)
           return (
-            (e.status === "ongoing" || (start <= now && end >= now)) &&
-            e.status !== "draft" &&
-            e.status !== "completed" &&
-            e.status !== "cancelled"
-          );
+            (e.status === 'ongoing' || (start <= now && end >= now)) &&
+            e.status !== 'draft' &&
+            e.status !== 'completed' &&
+            e.status !== 'cancelled'
+          )
         }),
         upcoming: sorted.filter((e) => {
-          const start = parseEventDateTime(e.eventStartTime);
+          const start = parseEventDateTime(e.eventStartTime)
           return (
             start > now &&
-            e.status !== "draft" &&
-            e.status !== "completed" &&
-            e.status !== "cancelled" &&
-            e.status !== "ongoing"
-          );
+            e.status !== 'draft' &&
+            e.status !== 'completed' &&
+            e.status !== 'cancelled' &&
+            e.status !== 'ongoing'
+          )
         }),
         completed: sorted.filter((e) => {
-          const end = parseEventDateTime(e.eventEndTime);
+          const end = parseEventDateTime(e.eventEndTime)
           return (
-            e.status !== "draft" &&
-            (e.status === "completed" || end < now || e.status === "cancelled")
-          );
+            e.status !== 'draft' &&
+            (e.status === 'completed' || end < now || e.status === 'cancelled')
+          )
         }),
-      };
+      }
     },
-  );
+  )
 </script>
 
 <div class="min-h-[calc(100vh-4rem)] bg-gray-50/30 px-8 py-6 sm:px-6 lg:px-8">
@@ -117,7 +117,7 @@
                 >Live Now</span
               >
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {#each categorizedEvents.ongoing as event, i (event.id)}
                 <EventCard
                   {event}
@@ -154,7 +154,7 @@
               </p>
             </div>
           {:else}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {#each categorizedEvents.upcoming as event, i (event.id)}
                 <EventCard {event} clubId={event.clubId.toString()} index={i} />
               {/each}
@@ -172,7 +172,7 @@
               <div class="h-1 flex-1 bg-gray-100 rounded-full"></div>
             </div>
             <div
-              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-75 grayscale-[0.5] hover:opacity-100 hover:grayscale-0 transition-all duration-500"
+              class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 opacity-75 grayscale-[0.5] hover:opacity-100 hover:grayscale-0 transition-all duration-500"
             >
               {#each categorizedEvents.completed as event, i (event.id)}
                 <EventCard

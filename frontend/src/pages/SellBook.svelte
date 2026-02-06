@@ -3,7 +3,7 @@
     route as routeAction,
     goto,
     query as queryParams,
-  } from "@mateothegreat/svelte5-router";
+  } from '@mateothegreat/svelte5-router'
   import {
     createBookListing,
     updateBookListing,
@@ -12,186 +12,186 @@
     uploadBookImage,
     upsertSellerContactInfo,
     type SellerContactInfo,
-  } from "../lib/api";
-  import LoadingSpinner from "../components/LoadingSpinner.svelte";
-  import { fade, fly } from "svelte/transition";
-  import { authClient } from "../lib/auth-client";
-  import { createQuery, useQueryClient } from "@tanstack/svelte-query";
-  import { untrack } from "svelte";
+  } from '../lib/api'
+  import LoadingSpinner from '../components/LoadingSpinner.svelte'
+  import { fade, fly } from 'svelte/transition'
+  import { authClient } from '../lib/auth-client'
+  import { createQuery, useQueryClient } from '@tanstack/svelte-query'
+  import { untrack } from 'svelte'
 
-  const session = authClient.useSession();
-  const queryClient = useQueryClient();
-  const editId = queryParams("edit");
+  const session = authClient.useSession()
+  const queryClient = useQueryClient()
+  const editId = queryParams('edit')
 
   // Stepper logic
-  let currentStep = $state(1);
-  const totalSteps = 3;
+  let currentStep = $state(1)
+  const totalSteps = 3
 
-  let isSubmitting = $state(false);
-  let errorMessage = $state("");
-  let imageFiles = $state<File[]>([]);
-  let imagePreviews = $state<string[]>([]);
-  let hasRedirectedToLogin = $state(false);
+  let isSubmitting = $state(false)
+  let errorMessage = $state('')
+  let imageFiles = $state<File[]>([])
+  let imagePreviews = $state<string[]>([])
+  let hasRedirectedToLogin = $state(false)
 
   // Form data
-  let title = $state("");
-  let author = $state("");
-  let isbn = $state("");
-  let edition = $state("");
-  let publisher = $state("");
-  let publicationYear = $state<number | undefined>(undefined);
-  let condition = $state<"new" | "like_new" | "good" | "fair" | "poor">("good");
-  let description = $state("");
-  let price = $state("");
-  let courseCode = $state("");
-  let categoryId = $state<number | undefined>(undefined);
+  let title = $state('')
+  let author = $state('')
+  let isbn = $state('')
+  let edition = $state('')
+  let publisher = $state('')
+  let publicationYear = $state<number | undefined>(undefined)
+  let condition = $state<'new' | 'like_new' | 'good' | 'fair' | 'poor'>('good')
+  let description = $state('')
+  let price = $state('')
+  let courseCode = $state('')
+  let categoryId = $state<number | undefined>(undefined)
 
   // Contact info state
   let primaryContactMethod =
-    $state<SellerContactInfo["primaryContactMethod"]>("whatsapp");
-  let whatsappNumber = $state("");
-  let facebookMessenger = $state("");
-  let telegramUsername = $state("");
-  let contactEmail = $state("");
-  let phoneNumber = $state("");
-  let otherContactDetails = $state("");
+    $state<SellerContactInfo['primaryContactMethod']>('whatsapp')
+  let whatsappNumber = $state('')
+  let facebookMessenger = $state('')
+  let telegramUsername = $state('')
+  let contactEmail = $state('')
+  let phoneNumber = $state('')
+  let otherContactDetails = $state('')
 
-  const isEdit = $derived(!!editId);
+  const isEdit = $derived(!!editId)
 
   const categoriesQuery = createQuery(() => ({
-    queryKey: ["book-categories"],
+    queryKey: ['book-categories'],
     queryFn: async () => {
-      const result = await getBookCategories();
-      return result.success && result.data ? result.data : [];
+      const result = await getBookCategories()
+      return result.success && result.data ? result.data : []
     },
-  }));
+  }))
 
   const editQuery = createQuery(() => ({
-    queryKey: ["book-listing-edit", editId],
+    queryKey: ['book-listing-edit', editId],
     queryFn: async () => {
-      if (!editId) return null;
-      const result = await getBookListingById(parseInt(editId));
-      if (result.success && result.data) return result.data;
-      throw new Error(result.message || "Failed to load listing");
+      if (!editId) return null
+      const result = await getBookListingById(parseInt(editId))
+      if (result.success && result.data) return result.data
+      throw new Error(result.message || 'Failed to load listing')
     },
     enabled: !!editId,
-  }));
+  }))
 
   $effect(() => {
     if (editQuery.data && isEdit) {
-      const book = editQuery.data;
-      title = book.title;
-      author = book.author;
-      isbn = book.isbn || "";
-      edition = book.edition || "";
-      publisher = book.publisher || "";
-      publicationYear = book.publicationYear || undefined;
-      condition = book.condition;
-      description = book.description || "";
-      price = book.price;
-      courseCode = book.courseCode || "";
-      categoryId = book.categoryId || undefined;
-      if (book.images) imagePreviews = book.images.map((img) => img.imageUrl);
+      const book = editQuery.data
+      title = book.title
+      author = book.author
+      isbn = book.isbn || ''
+      edition = book.edition || ''
+      publisher = book.publisher || ''
+      publicationYear = book.publicationYear || undefined
+      condition = book.condition
+      description = book.description || ''
+      price = book.price
+      courseCode = book.courseCode || ''
+      categoryId = book.categoryId || undefined
+      if (book.images) imagePreviews = book.images.map((img) => img.imageUrl)
     }
-  });
+  })
 
   $effect(() => {
-    if (hasRedirectedToLogin) return;
+    if (hasRedirectedToLogin) return
 
     if (!$session.isPending && !$session.error && !$session.data?.user) {
-      hasRedirectedToLogin = true;
+      hasRedirectedToLogin = true
       untrack(() => {
-        goto("/register?message=login_required");
-      });
+        goto('/register?message=login_required')
+      })
     }
-  });
+  })
 
   const steps = [
-    { id: 1, title: "Basics", icon: "📚" },
-    { id: 2, title: "Details", icon: "🔍" },
-    { id: 3, title: "Finish", icon: "✨" },
-  ];
+    { id: 1, title: 'Basics', icon: '📚' },
+    { id: 2, title: 'Details', icon: '🔍' },
+    { id: 3, title: 'Finish', icon: '✨' },
+  ]
 
   const conditionOptions = [
-    { value: "new", label: "New", icon: "🌟", desc: "Never opened" },
+    { value: 'new', label: 'New', icon: '🌟', desc: 'Never opened' },
     {
-      value: "like_new",
-      label: "Like New",
-      icon: "✨",
-      desc: "Minimal use",
+      value: 'like_new',
+      label: 'Like New',
+      icon: '✨',
+      desc: 'Minimal use',
     },
-    { value: "good", label: "Good", icon: "👍", desc: "Well kept" },
-    { value: "fair", label: "Fair", icon: "📖", desc: "Used well" },
-    { value: "poor", label: "Poor", icon: "🩹", desc: "Damaged" },
-  ] as const;
+    { value: 'good', label: 'Good', icon: '👍', desc: 'Well kept' },
+    { value: 'fair', label: 'Fair', icon: '📖', desc: 'Used well' },
+    { value: 'poor', label: 'Poor', icon: '🩹', desc: 'Damaged' },
+  ] as const
 
   function nextStep() {
     if (currentStep === 1) {
       if (!title || !author || !categoryId) {
-        errorMessage = "Please fill in the title, author, and category.";
-        return;
+        errorMessage = 'Please fill in the title, author, and category.'
+        return
       }
     }
     if (currentStep < totalSteps) {
-      currentStep++;
-      errorMessage = "";
+      currentStep++
+      errorMessage = ''
     }
   }
 
   function prevStep() {
     if (currentStep > 1) {
-      currentStep--;
-      errorMessage = "";
+      currentStep--
+      errorMessage = ''
     }
   }
 
   function hasValidContactInfo(): boolean {
     switch (primaryContactMethod) {
-      case "whatsapp":
-        return !!whatsappNumber;
-      case "facebook_messenger":
-        return !!facebookMessenger;
-      case "telegram":
-        return !!telegramUsername;
-      case "email":
-        return !!contactEmail;
-      case "phone":
-        return !!phoneNumber;
-      case "other":
-        return !!otherContactDetails;
+      case 'whatsapp':
+        return !!whatsappNumber
+      case 'facebook_messenger':
+        return !!facebookMessenger
+      case 'telegram':
+        return !!telegramUsername
+      case 'email':
+        return !!contactEmail
+      case 'phone':
+        return !!phoneNumber
+      case 'other':
+        return !!otherContactDetails
       default:
-        return false;
+        return false
     }
   }
 
   function handleImageChange(event: Event) {
-    const input = event.target as HTMLInputElement;
+    const input = event.target as HTMLInputElement
     if (input.files) {
-      const newFiles = Array.from(input.files);
-      imageFiles = [...imageFiles, ...newFiles];
+      const newFiles = Array.from(input.files)
+      imageFiles = [...imageFiles, ...newFiles]
       newFiles.forEach((file) => {
-        const reader = new FileReader();
+        const reader = new FileReader()
         reader.onload = (e) =>
-          (imagePreviews = [...imagePreviews, e.target?.result as string]);
-        reader.readAsDataURL(file);
-      });
+          (imagePreviews = [...imagePreviews, e.target?.result as string])
+        reader.readAsDataURL(file)
+      })
     }
   }
 
   function removeImage(index: number) {
-    imageFiles = imageFiles.filter((_, i) => i !== index);
-    imagePreviews = imagePreviews.filter((_, i) => i !== index);
+    imageFiles = imageFiles.filter((_, i) => i !== index)
+    imagePreviews = imagePreviews.filter((_, i) => i !== index)
   }
 
   async function handleSubmit() {
-    if (!$session.data?.user) return;
+    if (!$session.data?.user) return
     if (!price) {
-      errorMessage = "Please set a price for your book.";
-      return;
+      errorMessage = 'Please set a price for your book.'
+      return
     }
 
-    isSubmitting = true;
-    errorMessage = "";
+    isSubmitting = true
+    errorMessage = ''
 
     try {
       const listingData = {
@@ -206,27 +206,27 @@
         price,
         courseCode: courseCode || undefined,
         categoryId: categoryId || undefined,
-      };
+      }
 
       const result =
         isEdit && editId
           ? await updateBookListing(parseInt(editId), listingData)
-          : await createBookListing(listingData);
+          : await createBookListing(listingData)
 
       if (!result.success) {
-        errorMessage = result.message || "Failed to save listing";
-        return;
+        errorMessage = result.message || 'Failed to save listing'
+        return
       }
 
       if (!isEdit && result.data && imageFiles.length > 0) {
         for (const file of imageFiles) {
-          await uploadBookImage(result.data.id, file);
+          await uploadBookImage(result.data.id, file)
         }
       }
 
       // Save contact info
       const listingIdToUse =
-        isEdit && editId ? parseInt(editId) : result.data?.id;
+        isEdit && editId ? parseInt(editId) : result.data?.id
       if (listingIdToUse && hasValidContactInfo()) {
         await upsertSellerContactInfo(listingIdToUse, {
           primaryContactMethod,
@@ -236,24 +236,24 @@
           email: contactEmail || undefined,
           phoneNumber: phoneNumber || undefined,
           otherContactDetails: otherContactDetails || undefined,
-        });
+        })
       }
 
-      queryClient.invalidateQueries({ queryKey: ["book-listings"] });
-      queryClient.invalidateQueries({ queryKey: ["my-book-listings"] });
-      goto(isEdit ? `/books/${editId}` : "/books/my-books");
+      queryClient.invalidateQueries({ queryKey: ['book-listings'] })
+      queryClient.invalidateQueries({ queryKey: ['my-book-listings'] })
+      goto(isEdit ? `/books/${editId}` : '/books/my-books')
     } catch (error: any) {
-      errorMessage = error.message || "An error occurred";
+      errorMessage = error.message || 'An error occurred'
     } finally {
-      isSubmitting = false;
+      isSubmitting = false
     }
   }
 </script>
 
-<div class="min-h-screen bg-[#f8fafc] px-4 py-8 lg:py-12">
-  <div class="max-w-4xl mx-auto">
+<div class="min-h-screen bg-[#f8fafc] px-4 py-5 lg:py-8">
+  <div class="max-w-3xl mx-auto">
     <!-- Back Link & Header -->
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center justify-between mb-5">
       <a
         href="/books"
         use:routeAction
@@ -286,7 +286,7 @@
     </div>
 
     <div
-      class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative"
+      class="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden relative"
     >
       <!-- Sleek Progress Bar -->
       <div class="absolute top-0 left-0 w-full h-1.5 bg-slate-100">
@@ -299,51 +299,53 @@
       <div class="grid grid-cols-1 lg:grid-cols-12">
         <!-- Left Sidebar: Steps Indicator -->
         <div
-          class="lg:col-span-4 bg-slate-50/50 border-r border-slate-100 p-8 pt-12"
+          class="lg:col-span-4 bg-slate-50/50 border-r border-slate-100 p-4 pt-6"
         >
-          <h1 class="text-3xl font-black text-slate-900 mb-8 leading-tight">
-            {isEdit ? "Refine your" : "List your"}
+          <h1 class="text-xl font-bold text-slate-900 mb-4 leading-tight">
+            {isEdit ? 'Refine your' : 'List your'}
             <span
               class="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600"
               >Masterpiece</span
             >
           </h1>
 
-          <div class="space-y-8 relative">
+          <div class="space-y-4 relative">
             <div
               class="absolute left-5.75 top-2 bottom-2 w-0.5 bg-slate-200"
             ></div>
 
             {#each steps as step}
-              <div class="flex items-center gap-4 relative z-10 group">
+              <div class="flex items-center gap-3 relative z-10 group">
                 <div
-                  class="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300
+                  class="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300
                                     {currentStep >= step.id
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-110'
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200 scale-105'
                     : 'bg-white text-slate-400 border border-slate-200'}"
                 >
-                  <span class="text-xl">{step.icon}</span>
+                  <span class="text-sm">{step.icon}</span>
                 </div>
                 <div class="flex flex-col">
                   <span
-                    class="text-xs font-bold uppercase tracking-wider {currentStep >=
+                    class="text-[10px] font-bold uppercase tracking-wide {currentStep >=
                     step.id
                       ? 'text-blue-600'
                       : 'text-slate-400'}">Step {step.id}</span
                   >
-                  <span class="font-bold text-slate-900">{step.title}</span>
+                  <span class="text-sm font-medium text-slate-900"
+                    >{step.title}</span
+                  >
                 </div>
               </div>
             {/each}
           </div>
 
           <div
-            class="mt-12 p-6 rounded-3xl bg-blue-600 text-white relative overflow-hidden group"
+            class="mt-6 p-3 rounded-xl bg-blue-600 text-white relative overflow-hidden group"
           >
             <div
-              class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"
+              class="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"
             ></div>
-            <p class="text-sm font-medium leading-relaxed relative z-10">
+            <p class="text-xs font-medium leading-relaxed relative z-10">
               "Selling your old books helps fellow students and keeps the campus
               cycle moving."
             </p>
@@ -351,14 +353,14 @@
         </div>
 
         <!-- Right Content: Form Steps -->
-        <div class="lg:col-span-8 p-8 lg:p-12">
+        <div class="lg:col-span-8 p-4 lg:p-6">
           {#if errorMessage}
             <div
-              class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-600 rounded-2xl flex items-center gap-3"
+              class="mb-4 p-3 bg-rose-50 border border-rose-100 text-rose-600 rounded-xl flex items-center gap-2"
               in:fade
             >
               <svg
-                class="w-5 h-5 shrink-0"
+                class="w-4 h-4 shrink-0"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -368,26 +370,26 @@
                   clip-rule="evenodd"
                 />
               </svg>
-              <span class="text-sm font-medium">{errorMessage}</span>
+              <span class="text-xs font-medium">{errorMessage}</span>
             </div>
           {/if}
 
           {#if currentStep === 1}
             <div in:fly={{ x: 20, duration: 400 }} out:fade>
-              <div class="mb-8">
-                <h2 class="text-2xl font-bold text-slate-900 mb-2">
+              <div class="mb-5">
+                <h2 class="text-lg font-bold text-slate-900 mb-1">
                   Book Essentials
                 </h2>
-                <p class="text-slate-500">
+                <p class="text-slate-500 text-sm">
                   Let's start with the basics. What are you selling?
                 </p>
               </div>
 
-              <div class="space-y-6">
+              <div class="space-y-4">
                 <div class="group">
                   <label
                     for="title"
-                    class="block text-sm font-bold text-slate-700 mb-2 ml-1"
+                    class="block text-xs font-medium text-slate-700 mb-1.5 ml-1"
                     >Title <span class="text-rose-500">*</span></label
                   >
                   <input
@@ -395,13 +397,13 @@
                     id="title"
                     bind:value={title}
                     placeholder="Enter the full book title"
-                    class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all outline-none text-slate-900 placeholder:text-slate-300 shadow-sm"
+                    class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all outline-none text-slate-900 placeholder:text-slate-300 shadow-sm"
                   />
                 </div>
                 <div class="group">
                   <label
                     for="author"
-                    class="block text-sm font-bold text-slate-700 mb-2 ml-1"
+                    class="block text-xs font-medium text-slate-700 mb-1.5 ml-1"
                     >Author <span class="text-rose-500">*</span></label
                   >
                   <input
@@ -409,14 +411,14 @@
                     id="author"
                     bind:value={author}
                     placeholder="Who wrote this?"
-                    class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all outline-none text-slate-900 placeholder:text-slate-300 shadow-sm"
+                    class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all outline-none text-slate-900 placeholder:text-slate-300 shadow-sm"
                   />
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label
                       for="isbn"
-                      class="block text-sm font-bold text-slate-700 mb-2 ml-1"
+                      class="block text-xs font-medium text-slate-700 mb-1.5 ml-1"
                       >ISBN (Optional)</label
                     >
                     <input
@@ -424,13 +426,13 @@
                       id="isbn"
                       bind:value={isbn}
                       placeholder="978-..."
-                      class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all outline-none text-slate-900 placeholder:text-slate-300 shadow-sm"
+                      class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all outline-none text-slate-900 placeholder:text-slate-300 shadow-sm"
                     />
                   </div>
                   <div>
                     <label
                       for="edition"
-                      class="block text-sm font-bold text-slate-700 mb-2 ml-1"
+                      class="block text-xs font-medium text-slate-700 mb-1.5 ml-1"
                       >Edition</label
                     >
                     <input
@@ -438,21 +440,21 @@
                       id="edition"
                       bind:value={edition}
                       placeholder="e.g. 3rd Edition"
-                      class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all outline-none text-slate-900 placeholder:text-slate-300 shadow-sm"
+                      class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all outline-none text-slate-900 placeholder:text-slate-300 shadow-sm"
                     />
                   </div>
                 </div>
                 <div>
                   <label
                     for="category"
-                    class="block text-sm font-bold text-slate-700 mb-2 ml-1"
+                    class="block text-xs font-medium text-slate-700 mb-1.5 ml-1"
                     >Category <span class="text-rose-500">*</span></label
                   >
                   <div class="relative">
                     <select
                       id="category"
                       bind:value={categoryId}
-                      class="w-full pl-6 pr-12 py-4 rounded-2xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all outline-none text-slate-900 appearance-none bg-white shadow-sm"
+                      class="w-full pl-4 pr-10 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all outline-none text-slate-900 appearance-none bg-white shadow-sm"
                     >
                       <option value={undefined}>Select category</option>
                       {#if categoriesQuery.data}
@@ -478,41 +480,41 @@
             </div>
           {:else if currentStep === 2}
             <div in:fly={{ x: 20, duration: 400 }} out:fade>
-              <div class="mb-8">
-                <h2 class="text-2xl font-bold text-slate-900 mb-2">
+              <div class="mb-5">
+                <h2 class="text-lg font-bold text-slate-900 mb-1">
                   Deeper Details
                 </h2>
-                <p class="text-slate-500">
+                <p class="text-slate-500 text-sm">
                   Provide context to help buyers find your book.
                 </p>
               </div>
 
-              <div class="space-y-8">
+              <div class="space-y-6">
                 <div>
-                  <p class="block text-sm font-bold text-slate-700 mb-4 ml-1">
+                  <p class="block text-xs font-medium text-slate-700 mb-3 ml-1">
                     Condition <span class="text-rose-500">*</span>
                   </p>
-                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {#each conditionOptions as opt}
                       <button
                         type="button"
                         onclick={() => (condition = opt.value)}
-                        class="flex flex-col items-center p-4 rounded-3xl border-2 transition-all duration-300 text-center group
+                        class="flex flex-col items-center p-3 rounded-xl border-2 transition-all duration-300 text-center group
                                                 {condition === opt.value
-                          ? 'border-blue-500 bg-blue-50/50 shadow-md scale-[1.02]'
+                          ? 'border-blue-500 bg-blue-50/50 shadow-sm scale-[1.02]'
                           : 'border-slate-100 hover:border-slate-200 bg-slate-50/30'}"
                       >
                         <span
-                          class="text-2xl mb-2 group-hover:scale-110 transition-transform"
+                          class="text-lg mb-1 group-hover:scale-110 transition-transform"
                           >{opt.icon}</span
                         >
                         <span
-                          class="font-bold text-sm {condition === opt.value
+                          class="font-medium text-xs {condition === opt.value
                             ? 'text-blue-700'
                             : 'text-slate-700'}">{opt.label}</span
                         >
                         <span
-                          class="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tighter"
+                          class="text-[9px] text-slate-400 mt-0.5 uppercase font-medium tracking-tight"
                           >{opt.desc}</span
                         >
                       </button>
@@ -520,11 +522,11 @@
                   </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label
                       for="course"
-                      class="block text-sm font-bold text-slate-700 mb-2 ml-1"
+                      class="block text-xs font-medium text-slate-700 mb-1.5 ml-1"
                       >Course Code</label
                     >
                     <input
@@ -532,7 +534,7 @@
                       id="course"
                       bind:value={courseCode}
                       placeholder="e.g. CS101"
-                      class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all outline-none text-slate-900 shadow-sm"
+                      class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all outline-none text-slate-900 shadow-sm"
                     />
                   </div>
                 </div>
@@ -540,47 +542,47 @@
                 <div>
                   <label
                     for="desc"
-                    class="block text-sm font-bold text-slate-700 mb-2 ml-1"
+                    class="block text-xs font-medium text-slate-700 mb-1.5 ml-1"
                     >About this copy</label
                   >
                   <textarea
                     id="desc"
                     bind:value={description}
-                    rows="3"
+                    rows="2"
                     placeholder="Tell buyers about highlights, missing pages, or extra value..."
-                    class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all outline-none text-slate-900 shadow-sm resize-none"
+                    class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all outline-none text-slate-900 shadow-sm resize-none"
                   ></textarea>
                 </div>
               </div>
             </div>
           {:else}
             <div in:fly={{ x: 20, duration: 400 }} out:fade>
-              <div class="mb-8">
-                <h2 class="text-2xl font-bold text-slate-900 mb-2">
+              <div class="mb-5">
+                <h2 class="text-lg font-bold text-slate-900 mb-1">
                   Final Touches
                 </h2>
-                <p class="text-slate-500">
+                <p class="text-slate-500 text-sm">
                   Set your price and show off your book!
                 </p>
               </div>
 
-              <div class="space-y-8">
+              <div class="space-y-6">
                 <div>
                   <label
                     for="price"
-                    class="block text-sm font-bold text-slate-700 mb-3 ml-1"
+                    class="block text-xs font-medium text-slate-700 mb-2 ml-1"
                     >Price <span class="text-rose-500">*</span></label
                   >
-                  <div class="relative group max-w-60">
+                  <div class="relative group max-w-48">
                     <span
-                      class="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-blue-600 text-lg"
+                      class="absolute left-4 top-1/2 -translate-y-1/2 font-medium text-blue-600 text-sm"
                       >Rs.</span
                     >
                     <input
                       type="number"
                       id="price"
                       bind:value={price}
-                      class="w-full pl-16 pr-6 py-5 rounded-3xl border-2 border-slate-100 focus:border-blue-500 focus:ring-8 focus:ring-blue-50 transition-all outline-none text-2xl font-black text-slate-900 shadow-sm"
+                      class="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all outline-none text-xl font-bold text-slate-900 shadow-sm"
                     />
                   </div>
                 </div>
@@ -656,29 +658,29 @@
                 {/if}
 
                 <!-- Contact Info Section -->
-                <div class="space-y-4 pt-6 border-t border-slate-100">
+                <div class="space-y-3 pt-4 border-t border-slate-100">
                   <div>
-                    <p class="text-sm font-bold text-slate-700 mb-3 ml-1">
+                    <p class="text-xs font-medium text-slate-700 mb-2 ml-1">
                       How can buyers reach you? <span class="text-rose-500"
                         >*</span
                       >
                     </p>
-                    <p class="text-xs text-slate-400 mb-4 ml-1">
+                    <p class="text-[10px] text-slate-400 mb-3 ml-1">
                       🔒 Contact info is only shared after you approve a buyer's
                       request
                     </p>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       <button
                         type="button"
-                        onclick={() => (primaryContactMethod = "whatsapp")}
-                        class="p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 group
+                        onclick={() => (primaryContactMethod = 'whatsapp')}
+                        class="p-2.5 rounded-xl border transition-all flex flex-col items-center gap-1.5 group
                                                 {primaryContactMethod ===
                         'whatsapp'
                           ? 'border-green-500 bg-green-50'
                           : 'border-slate-100 hover:border-slate-200'}"
                       >
                         <svg
-                          class="w-7 h-7 {primaryContactMethod === 'whatsapp'
+                          class="w-5 h-5 {primaryContactMethod === 'whatsapp'
                             ? 'text-green-600'
                             : 'text-slate-400'}"
                           viewBox="0 0 24 24"
@@ -689,7 +691,7 @@
                           />
                         </svg>
                         <span
-                          class="text-xs font-bold {primaryContactMethod ===
+                          class="text-[10px] font-medium {primaryContactMethod ===
                           'whatsapp'
                             ? 'text-green-700'
                             : 'text-slate-600'}">WhatsApp</span
@@ -699,15 +701,15 @@
                       <button
                         type="button"
                         onclick={() =>
-                          (primaryContactMethod = "facebook_messenger")}
-                        class="p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 group
+                          (primaryContactMethod = 'facebook_messenger')}
+                        class="p-2.5 rounded-xl border transition-all flex flex-col items-center gap-1.5 group
                                                 {primaryContactMethod ===
                         'facebook_messenger'
                           ? 'border-blue-500 bg-blue-50'
                           : 'border-slate-100 hover:border-slate-200'}"
                       >
                         <svg
-                          class="w-7 h-7 {primaryContactMethod ===
+                          class="w-5 h-5 {primaryContactMethod ===
                           'facebook_messenger'
                             ? 'text-blue-600'
                             : 'text-slate-400'}"
@@ -719,7 +721,7 @@
                           />
                         </svg>
                         <span
-                          class="text-xs font-bold {primaryContactMethod ===
+                          class="text-[10px] font-medium {primaryContactMethod ===
                           'facebook_messenger'
                             ? 'text-blue-700'
                             : 'text-slate-600'}">Messenger</span
@@ -728,15 +730,15 @@
 
                       <button
                         type="button"
-                        onclick={() => (primaryContactMethod = "telegram")}
-                        class="p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 group
+                        onclick={() => (primaryContactMethod = 'telegram')}
+                        class="p-2.5 rounded-xl border transition-all flex flex-col items-center gap-1.5 group
                                                 {primaryContactMethod ===
                         'telegram'
                           ? 'border-sky-500 bg-sky-50'
                           : 'border-slate-100 hover:border-slate-200'}"
                       >
                         <svg
-                          class="w-7 h-7 {primaryContactMethod === 'telegram'
+                          class="w-5 h-5 {primaryContactMethod === 'telegram'
                             ? 'text-sky-600'
                             : 'text-slate-400'}"
                           viewBox="0 0 24 24"
@@ -747,7 +749,7 @@
                           />
                         </svg>
                         <span
-                          class="text-xs font-bold {primaryContactMethod ===
+                          class="text-[10px] font-medium {primaryContactMethod ===
                           'telegram'
                             ? 'text-sky-700'
                             : 'text-slate-600'}">Telegram</span
@@ -756,15 +758,15 @@
 
                       <button
                         type="button"
-                        onclick={() => (primaryContactMethod = "email")}
-                        class="p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 group
+                        onclick={() => (primaryContactMethod = 'email')}
+                        class="p-2.5 rounded-xl border transition-all flex flex-col items-center gap-1.5 group
                                                 {primaryContactMethod ===
                         'email'
                           ? 'border-purple-500 bg-purple-50'
                           : 'border-slate-100 hover:border-slate-200'}"
                       >
                         <svg
-                          class="w-7 h-7 {primaryContactMethod === 'email'
+                          class="w-5 h-5 {primaryContactMethod === 'email'
                             ? 'text-purple-600'
                             : 'text-slate-400'}"
                           fill="none"
@@ -779,7 +781,7 @@
                           />
                         </svg>
                         <span
-                          class="text-xs font-bold {primaryContactMethod ===
+                          class="text-[10px] font-medium {primaryContactMethod ===
                           'email'
                             ? 'text-purple-700'
                             : 'text-slate-600'}">Email</span
@@ -788,15 +790,15 @@
 
                       <button
                         type="button"
-                        onclick={() => (primaryContactMethod = "phone")}
-                        class="p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 group
+                        onclick={() => (primaryContactMethod = 'phone')}
+                        class="p-2.5 rounded-xl border transition-all flex flex-col items-center gap-1.5 group
                                                 {primaryContactMethod ===
                         'phone'
                           ? 'border-emerald-500 bg-emerald-50'
                           : 'border-slate-100 hover:border-slate-200'}"
                       >
                         <svg
-                          class="w-7 h-7 {primaryContactMethod === 'phone'
+                          class="w-5 h-5 {primaryContactMethod === 'phone'
                             ? 'text-emerald-600'
                             : 'text-slate-400'}"
                           fill="none"
@@ -811,7 +813,7 @@
                           />
                         </svg>
                         <span
-                          class="text-xs font-bold {primaryContactMethod ===
+                          class="text-[10px] font-medium {primaryContactMethod ===
                           'phone'
                             ? 'text-emerald-700'
                             : 'text-slate-600'}">Phone</span
@@ -820,15 +822,15 @@
 
                       <button
                         type="button"
-                        onclick={() => (primaryContactMethod = "other")}
-                        class="p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 group
+                        onclick={() => (primaryContactMethod = 'other')}
+                        class="p-2.5 rounded-xl border transition-all flex flex-col items-center gap-1.5 group
                                                 {primaryContactMethod ===
                         'other'
                           ? 'border-orange-500 bg-orange-50'
                           : 'border-slate-100 hover:border-slate-200'}"
                       >
                         <svg
-                          class="w-7 h-7 {primaryContactMethod === 'other'
+                          class="w-5 h-5 {primaryContactMethod === 'other'
                             ? 'text-orange-600'
                             : 'text-slate-400'}"
                           fill="none"
@@ -843,7 +845,7 @@
                           />
                         </svg>
                         <span
-                          class="text-xs font-bold {primaryContactMethod ===
+                          class="text-[10px] font-medium {primaryContactMethod ===
                           'other'
                             ? 'text-orange-700'
                             : 'text-slate-600'}">Other</span
@@ -853,48 +855,48 @@
                   </div>
 
                   <!-- Dynamic Contact Input -->
-                  <div class="mt-4">
-                    {#if primaryContactMethod === "whatsapp"}
+                  <div class="mt-3">
+                    {#if primaryContactMethod === 'whatsapp'}
                       <input
                         type="tel"
                         bind:value={whatsappNumber}
                         placeholder="+977 98XXXXXXXX"
-                        class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:border-green-500 focus:ring-4 focus:ring-green-50 transition-all outline-none text-slate-900 shadow-sm"
+                        class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-green-500 focus:ring-2 focus:ring-green-50 transition-all outline-none text-slate-900 shadow-sm"
                       />
-                    {:else if primaryContactMethod === "facebook_messenger"}
+                    {:else if primaryContactMethod === 'facebook_messenger'}
                       <input
                         type="text"
                         bind:value={facebookMessenger}
                         placeholder="m.me/username or Messenger link"
-                        class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all outline-none text-slate-900 shadow-sm"
+                        class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all outline-none text-slate-900 shadow-sm"
                       />
-                    {:else if primaryContactMethod === "telegram"}
+                    {:else if primaryContactMethod === 'telegram'}
                       <input
                         type="text"
                         bind:value={telegramUsername}
                         placeholder="@username"
-                        class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:border-sky-500 focus:ring-4 focus:ring-sky-50 transition-all outline-none text-slate-900 shadow-sm"
+                        class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-50 transition-all outline-none text-slate-900 shadow-sm"
                       />
-                    {:else if primaryContactMethod === "email"}
+                    {:else if primaryContactMethod === 'email'}
                       <input
                         type="email"
                         bind:value={contactEmail}
                         placeholder="your@email.com"
-                        class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-50 transition-all outline-none text-slate-900 shadow-sm"
+                        class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-50 transition-all outline-none text-slate-900 shadow-sm"
                       />
-                    {:else if primaryContactMethod === "phone"}
+                    {:else if primaryContactMethod === 'phone'}
                       <input
                         type="tel"
                         bind:value={phoneNumber}
                         placeholder="+977 01-XXXXXXX"
-                        class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all outline-none text-slate-900 shadow-sm"
+                        class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 transition-all outline-none text-slate-900 shadow-sm"
                       />
                     {:else}
                       <textarea
                         bind:value={otherContactDetails}
                         placeholder="Describe how buyers can contact you..."
                         rows="2"
-                        class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all outline-none text-slate-900 shadow-sm resize-none"
+                        class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-50 transition-all outline-none text-slate-900 shadow-sm resize-none"
                       ></textarea>
                     {/if}
                   </div>
@@ -905,13 +907,13 @@
 
           <!-- Navigation Footer -->
           <div
-            class="mt-12 pt-8 border-t border-slate-50 flex items-center justify-between gap-4"
+            class="mt-8 pt-5 border-t border-slate-50 flex items-center justify-between gap-3"
           >
             <button
               type="button"
               onclick={prevStep}
               disabled={currentStep === 1 || isSubmitting}
-              class="px-8 py-3.5 rounded-2xl font-bold text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-0 disabled:pointer-events-none"
+              class="px-5 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-0 disabled:pointer-events-none"
             >
               Previous
             </button>
@@ -921,11 +923,11 @@
                 <button
                   type="button"
                   onclick={nextStep}
-                  class="px-10 py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl transition-all active:scale-95 flex items-center gap-3 shadow-xl shadow-slate-200"
+                  class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-xl transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-slate-200"
                 >
                   Continue
                   <svg
-                    class="w-5 h-5"
+                    class="w-4 h-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -942,16 +944,16 @@
                   type="button"
                   onclick={handleSubmit}
                   disabled={isSubmitting}
-                  class="w-full sm:w-auto px-12 py-5 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-3xl transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-2xl shadow-blue-200 flex items-center justify-center gap-3"
+                  class="w-full sm:w-auto px-8 py-3 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-blue-200 flex items-center justify-center gap-2"
                 >
                   {#if isSubmitting}
                     <div
-                      class="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"
+                      class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
                     ></div>
                     <span>Saving...</span>
                   {:else}
                     <svg
-                      class="w-6 h-6"
+                      class="w-4 h-4"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -963,7 +965,7 @@
                       /></svg
                     >
                     <span
-                      >{isEdit ? "Publish Changes" : "Post Listing Now"}</span
+                      >{isEdit ? 'Publish Changes' : 'Post Listing Now'}</span
                     >
                   {/if}
                 </button>
@@ -974,8 +976,8 @@
       </div>
     </div>
 
-    <div class="mt-8 text-center">
-      <p class="text-sm text-slate-400 font-medium pb-8">
+    <div class="mt-5 text-center">
+      <p class="text-xs text-slate-400 font-medium pb-6">
         Your listing will be visible to students in the marketplace immediately
         after posting.
       </p>

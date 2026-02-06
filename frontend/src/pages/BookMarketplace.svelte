@@ -1,113 +1,113 @@
 <script lang="ts">
-  import { route as routeAction, goto } from "@mateothegreat/svelte5-router";
+  import { route as routeAction, goto } from '@mateothegreat/svelte5-router'
   import {
     getBookListings,
     getBookCategories,
     type BookListing,
     type BookCategory,
     type BookFilters,
-  } from "../lib/api";
-  import LoadingSpinner from "../components/LoadingSpinner.svelte";
-  import { fade, fly, slide } from "svelte/transition";
-  import { authClient } from "../lib/auth-client";
-  import { createQuery } from "@tanstack/svelte-query";
-  import { untrack } from "svelte";
+  } from '../lib/api'
+  import LoadingSpinner from '../components/LoadingSpinner.svelte'
+  import { fade, slide } from 'svelte/transition'
+  import { authClient } from '../lib/auth-client'
+  import { createQuery } from '@tanstack/svelte-query'
+  import { untrack } from 'svelte'
 
-  const session = authClient.useSession();
-  let hasRedirectedToLogin = $state(false);
+  const session = authClient.useSession()
+  let hasRedirectedToLogin = $state(false)
 
-  let searchQuery = $state("");
-  let authorFilter = $state("");
-  let isbnFilter = $state("");
-  let selectedCategory = $state<number | undefined>(undefined);
-  let selectedCondition = $state("");
-  let minPrice = $state<number | undefined>(undefined);
-  let maxPrice = $state<number | undefined>(undefined);
-  let sortBy = $state<BookFilters["sortBy"]>("newest");
-  let currentPage = $state(1);
-  let showFilters = $state(false);
+  let searchQuery = $state('')
+  let authorFilter = $state('')
+  let isbnFilter = $state('')
+  let selectedCategory = $state<number | undefined>(undefined)
+  let selectedCondition = $state('')
+  let minPrice = $state<number | undefined>(undefined)
+  let maxPrice = $state<number | undefined>(undefined)
+  let sortBy = $state<BookFilters['sortBy']>('newest')
+  let currentPage = $state(1)
+  let showFilters = $state(false)
 
   type QuickFilter =
-    | { label: string; value: number | undefined; type: "category" }
-    | { label: string; value: number | undefined; type: "price" }
-    | { label: string; value: BookFilters["sortBy"]; type: "sort" };
+    | { label: string; value: number | undefined; type: 'category' }
+    | { label: string; value: number | undefined; type: 'price' }
+    | { label: string; value: BookFilters['sortBy']; type: 'sort' }
 
   const quickFilters = $derived.by(() => {
-    const categories = categoriesQuery.data || [];
-    const insights = categories.find((c) => c.name === "Insights");
-    const manual = categories.find((c) => c.name === "Manual");
-    const textbook = categories.find((c) => c.name === "Text Book");
+    const categories = categoriesQuery.data || []
+    const insights = categories.find((c) => c.name === 'Insights')
+    const manual = categories.find((c) => c.name === 'Manual')
+    const textbook = categories.find((c) => c.name === 'Text Book')
 
     const filters: QuickFilter[] = [
-      { label: "All", value: undefined, type: "category" },
-    ];
+      { label: 'All', value: undefined, type: 'category' },
+    ]
 
     if (textbook)
       filters.push({
-        label: "Text Books",
+        label: 'Text Books',
         value: textbook.id,
-        type: "category",
-      });
+        type: 'category',
+      })
     if (insights)
       filters.push({
-        label: "Insights",
+        label: 'Insights',
         value: insights.id,
-        type: "category",
-      });
+        type: 'category',
+      })
     if (manual)
       filters.push({
-        label: "Manuals",
+        label: 'Manuals',
         value: manual.id,
-        type: "category",
-      });
+        type: 'category',
+      })
 
-    filters.push({ label: "Under 500", value: 500, type: "price" });
-    filters.push({ label: "Newest", value: "newest", type: "sort" });
+    filters.push({ label: 'Under 500', value: 500, type: 'price' })
+    filters.push({ label: 'Newest', value: 'newest', type: 'sort' })
 
-    return filters;
-  });
+    return filters
+  })
 
   $effect(() => {
-    if (hasRedirectedToLogin) return;
+    if (hasRedirectedToLogin) return
 
     if (!$session.isPending && !$session.error && !$session.data?.user) {
-      hasRedirectedToLogin = true;
+      hasRedirectedToLogin = true
       untrack(() => {
-        goto("/register?message=login_required");
-      });
+        goto('/register?message=login_required')
+      })
     }
-  });
+  })
 
   const conditionLabels: Record<string, string> = {
-    new: "New",
-    like_new: "Like New",
-    good: "Good",
-    fair: "Fair",
-    poor: "Poor",
-  };
+    new: 'New',
+    like_new: 'Like New',
+    good: 'Good',
+    fair: 'Fair',
+    poor: 'Poor',
+  }
 
   const conditionColors: Record<string, string> = {
-    new: "bg-emerald-100 text-emerald-700",
-    like_new: "bg-blue-100 text-blue-700",
-    good: "bg-amber-100 text-amber-700",
-    fair: "bg-orange-100 text-orange-700",
-    poor: "bg-red-100 text-red-700",
-  };
+    new: 'bg-emerald-100 text-emerald-700',
+    like_new: 'bg-blue-100 text-blue-700',
+    good: 'bg-amber-100 text-amber-700',
+    fair: 'bg-orange-100 text-orange-700',
+    poor: 'bg-red-100 text-red-700',
+  }
 
   const categoriesQuery = createQuery(() => ({
-    queryKey: ["book-categories"],
+    queryKey: ['book-categories'],
     queryFn: async () => {
-      const result = await getBookCategories();
+      const result = await getBookCategories()
       if (result.success && result.data) {
-        return result.data;
+        return result.data
       }
-      return [];
+      return []
     },
-  }));
+  }))
 
   const listingsQuery = createQuery(() => ({
     queryKey: [
-      "book-listings",
+      'book-listings',
       searchQuery,
       authorFilter,
       isbnFilter,
@@ -123,49 +123,49 @@
         page: currentPage,
         limit: 12,
         sortBy,
-      };
-      if (searchQuery) filters.search = searchQuery;
-      if (authorFilter) filters.author = authorFilter;
-      if (isbnFilter) filters.isbn = isbnFilter;
-      if (selectedCategory) filters.categoryId = selectedCategory;
-      if (selectedCondition) filters.condition = selectedCondition;
-      if (minPrice !== undefined) filters.minPrice = minPrice;
-      if (maxPrice !== undefined) filters.maxPrice = maxPrice;
-
-      const result = await getBookListings(filters);
-      if (result.success && result.data) {
-        return result.data;
       }
-      throw new Error(result.message || "Failed to load listings");
+      if (searchQuery) filters.search = searchQuery
+      if (authorFilter) filters.author = authorFilter
+      if (isbnFilter) filters.isbn = isbnFilter
+      if (selectedCategory) filters.categoryId = selectedCategory
+      if (selectedCondition) filters.condition = selectedCondition
+      if (minPrice !== undefined) filters.minPrice = minPrice
+      if (maxPrice !== undefined) filters.maxPrice = maxPrice
+
+      const result = await getBookListings(filters)
+      if (result.success && result.data) {
+        return result.data
+      }
+      throw new Error(result.message || 'Failed to load listings')
     },
-  }));
+  }))
 
   function clearFilters() {
-    searchQuery = "";
-    authorFilter = "";
-    isbnFilter = "";
-    selectedCategory = undefined;
-    selectedCondition = "";
-    minPrice = undefined;
-    maxPrice = undefined;
-    sortBy = "newest";
-    currentPage = 1;
+    searchQuery = ''
+    authorFilter = ''
+    isbnFilter = ''
+    selectedCategory = undefined
+    selectedCondition = ''
+    minPrice = undefined
+    maxPrice = undefined
+    sortBy = 'newest'
+    currentPage = 1
   }
 
   function formatPrice(price: string) {
-    return `Rs. ${parseFloat(price).toLocaleString()}`;
+    return `Rs. ${parseFloat(price).toLocaleString()}`
   }
 
   function getTimeAgo(dateStr: string) {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return "Today";
-    if (days === 1) return "Yesterday";
-    if (days < 7) return `${days} days ago`;
-    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
-    return `${Math.floor(days / 30)} months ago`;
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diff = now.getTime() - date.getTime()
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+    if (days === 0) return 'Today'
+    if (days === 1) return 'Yesterday'
+    if (days < 7) return `${days} days ago`
+    if (days < 30) return `${Math.floor(days / 7)} weeks ago`
+    return `${Math.floor(days / 30)} months ago`
   }
 
   const activeFiltersCount = $derived(
@@ -177,28 +177,27 @@
       selectedCondition,
       minPrice,
       maxPrice,
-    ].filter((v) => v !== "" && v !== undefined).length,
-  );
+    ].filter((v) => v !== '' && v !== undefined).length,
+  )
 
   function getCategoryName(id: number | undefined) {
-    if (!id || !categoriesQuery.data) return "";
-    return categoriesQuery.data.find((c) => c.id === id)?.name || "";
+    if (!id || !categoriesQuery.data) return ''
+    return categoriesQuery.data.find((c) => c.id === id)?.name || ''
   }
 </script>
 
 <div class="min-h-[calc(100vh-4rem)] bg-gray-50/50 px-4 py-8 sm:px-6 lg:px-8">
   <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="text-center mb-10 animate-fade-in">
+    <div class="text-center mb-6 animate-fade-in">
       {#if $session.data?.user}
         <a
           href="/books/sell"
           use:routeAction
-          class="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 active:scale-95 group"
-          in:fly={{ y: 10, duration: 400, delay: 200 }}
+          class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 active:scale-95 group"
         >
           <svg
-            class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300"
+            class="w-4 h-4 group-hover:rotate-90 transition-transform duration-300"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -216,16 +215,15 @@
     </div>
 
     <!-- Search and Filters Section -->
-    <div class="relative z-30 mb-8">
+    <div class="relative z-30 mb-5">
       <!-- Main Search Shell -->
-      <div class="max-w-4xl mx-auto space-y-4">
+      <div class="max-w-3xl mx-auto space-y-3">
         <div
-          class="bg-white rounded-[2.5rem] shadow-2xl shadow-blue-100/50 border border-slate-100 p-2 flex flex-col sm:flex-row items-center gap-2 group focus-within:ring-4 focus-within:ring-blue-500/10 transition-all duration-500"
-          in:fly={{ y: 20, duration: 600 }}
+          class="bg-white rounded-2xl shadow-lg shadow-blue-100/50 border border-slate-100 p-1.5 flex flex-col sm:flex-row items-center gap-1.5 group focus-within:ring-2 focus-within:ring-blue-500/10 transition-all duration-500"
         >
           <div class="relative flex-1 w-full">
             <svg
-              class="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400 group-focus-within:text-blue-600 transition-colors"
+              class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -241,11 +239,11 @@
               type="text"
               placeholder="What book are you looking for?"
               bind:value={searchQuery}
-              class="w-full pl-16 pr-12 py-5 bg-transparent border-none focus:ring-0 text-xl font-semibold text-slate-900 placeholder:text-slate-300"
+              class="w-full pl-10 pr-8 py-3 bg-transparent border-none focus:ring-0 text-sm font-semibold text-slate-900 placeholder:text-slate-300"
             />
             {#if searchQuery}
               <button
-                onclick={() => (searchQuery = "")}
+                onclick={() => (searchQuery = '')}
                 aria-label="Clear search"
                 class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-slate-600 transition-colors"
               >
@@ -261,7 +259,7 @@
           <div class="flex items-center gap-2 w-full sm:w-auto p-1">
             <button
               onclick={() => (showFilters = !showFilters)}
-              class="relative flex-1 sm:flex-none flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all {showFilters
+              class="relative flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all {showFilters
                 ? 'bg-blue-600 text-white shadow-xl shadow-blue-200'
                 : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-100'}"
             >
@@ -289,7 +287,7 @@
             </button>
             <button
               onclick={() => listingsQuery.refetch()}
-              class="flex-1 sm:flex-none px-10 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all active:scale-95 shadow-xl shadow-slate-200/50"
+              class="flex-1 sm:flex-none px-6 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-200/50"
             >
               Search
             </button>
@@ -306,7 +304,7 @@
 
             {#if searchQuery}
               <button
-                onclick={() => (searchQuery = "")}
+                onclick={() => (searchQuery = '')}
                 class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg border border-slate-200 flex items-center gap-2 hover:bg-slate-200 transition-colors"
               >
                 Search: {searchQuery}
@@ -320,7 +318,7 @@
 
             {#if authorFilter}
               <button
-                onclick={() => (authorFilter = "")}
+                onclick={() => (authorFilter = '')}
                 class="px-3 py-1 bg-violet-50 text-violet-600 text-xs font-bold rounded-lg border border-violet-100 flex items-center gap-2 hover:bg-violet-100 transition-colors"
               >
                 Author: {authorFilter}
@@ -334,7 +332,7 @@
 
             {#if isbnFilter}
               <button
-                onclick={() => (isbnFilter = "")}
+                onclick={() => (isbnFilter = '')}
                 class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-lg border border-indigo-100 flex items-center gap-2 hover:bg-indigo-100 transition-colors"
               >
                 ISBN: {isbnFilter}
@@ -362,7 +360,7 @@
 
             {#if selectedCondition}
               <button
-                onclick={() => (selectedCondition = "")}
+                onclick={() => (selectedCondition = '')}
                 class="px-3 py-1 bg-emerald-50 text-emerald-600 text-xs font-bold rounded-lg border border-emerald-100 flex items-center gap-2 hover:bg-emerald-100 transition-colors"
               >
                 {conditionLabels[selectedCondition]}
@@ -377,12 +375,12 @@
             {#if minPrice || maxPrice}
               <button
                 onclick={() => {
-                  minPrice = undefined;
-                  maxPrice = undefined;
+                  minPrice = undefined
+                  maxPrice = undefined
                 }}
                 class="px-3 py-1 bg-amber-50 text-amber-600 text-xs font-bold rounded-lg border border-amber-100 flex items-center gap-2 hover:bg-amber-100 transition-colors"
               >
-                {minPrice || 0} - {maxPrice || "Any"}
+                {minPrice || 0} - {maxPrice || 'Any'}
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"
                   ><path
                     d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -405,20 +403,18 @@
       {#if showFilters}
         <div
           transition:slide={{ duration: 500 }}
-          class="mt-6 max-w-5xl mx-auto bg-white rounded-[3rem] border border-slate-100 shadow-2xl shadow-blue-900/5 overflow-hidden ring-1 ring-black/5"
+          class="mt-4 max-w-4xl mx-auto bg-white rounded-2xl border border-slate-100 shadow-xl shadow-blue-900/5 overflow-hidden ring-1 ring-black/5"
         >
-          <div
-            class="p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-          >
+          <div class="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             <!-- Metadata Group -->
-            <div class="space-y-6">
-              <div class="space-y-4">
-                <div class="flex items-center gap-3">
+            <div class="space-y-4">
+              <div class="space-y-3">
+                <div class="flex items-center gap-2">
                   <div
-                    class="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center text-violet-600"
+                    class="w-7 h-7 bg-violet-50 rounded-lg flex items-center justify-center text-violet-600"
                   >
                     <svg
-                      class="w-5 h-5"
+                      class="w-4 h-4"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -432,36 +428,36 @@
                     </svg>
                   </div>
                   <div
-                    class="text-sm font-black text-slate-900 uppercase tracking-widest"
+                    class="text-xs font-bold text-slate-900 uppercase tracking-wide"
                   >
                     Book Meta
                   </div>
                 </div>
-                <div class="space-y-2">
+                <div class="space-y-1.5">
                   <input
                     type="text"
                     placeholder="Author Name"
                     bind:value={authorFilter}
-                    class="w-full px-5 py-3 bg-slate-50 border-none rounded-xl focus:ring-4 focus:ring-violet-500/5 font-bold text-slate-700 placeholder:text-slate-300 transition-all text-sm"
+                    class="w-full px-3 py-2 bg-slate-50 border-none rounded-lg focus:ring-2 focus:ring-violet-500/10 font-medium text-slate-700 placeholder:text-slate-300 transition-all text-sm"
                   />
                   <input
                     type="text"
                     placeholder="ISBN Code"
                     bind:value={isbnFilter}
-                    class="w-full px-5 py-3 bg-slate-50 border-none rounded-xl focus:ring-4 focus:ring-indigo-500/5 font-bold text-slate-700 placeholder:text-slate-300 transition-all text-sm"
+                    class="w-full px-3 py-2 bg-slate-50 border-none rounded-lg focus:ring-2 focus:ring-indigo-500/10 font-medium text-slate-700 placeholder:text-slate-300 transition-all text-sm"
                   />
                 </div>
               </div>
             </div>
 
             <!-- Category Group -->
-            <div class="space-y-4">
-              <div class="flex items-center gap-3">
+            <div class="space-y-3">
+              <div class="flex items-center gap-2">
                 <div
-                  class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600"
+                  class="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600"
                 >
                   <svg
-                    class="w-5 h-5"
+                    class="w-4 h-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -475,15 +471,15 @@
                   </svg>
                 </div>
                 <div
-                  class="text-sm font-black text-slate-900 uppercase tracking-widest"
+                  class="text-xs font-bold text-slate-900 uppercase tracking-wide"
                 >
                   Library Genre
                 </div>
               </div>
-              <div class="grid grid-cols-1 gap-2">
+              <div class="grid grid-cols-1 gap-1.5">
                 <select
                   bind:value={selectedCategory}
-                  class="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-blue-500/5 transition-all font-bold text-slate-700 appearance-none cursor-pointer"
+                  class="w-full px-3 py-2 bg-slate-50 border-none rounded-lg focus:ring-2 focus:ring-blue-500/10 transition-all font-medium text-slate-700 text-sm appearance-none cursor-pointer"
                 >
                   <option value={undefined}>All Categories</option>
                   {#if categoriesQuery.data}
@@ -496,13 +492,13 @@
             </div>
 
             <!-- Condition Group -->
-            <div class="space-y-4">
-              <div class="flex items-center gap-3">
+            <div class="space-y-3">
+              <div class="flex items-center gap-2">
                 <div
-                  class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600"
+                  class="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600"
                 >
                   <svg
-                    class="w-5 h-5"
+                    class="w-4 h-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -516,21 +512,21 @@
                   </svg>
                 </div>
                 <div
-                  class="text-sm font-black text-slate-900 uppercase tracking-widest"
+                  class="text-xs font-bold text-slate-900 uppercase tracking-wide"
                 >
                   Quality Standard
                 </div>
               </div>
-              <div class="grid grid-cols-2 gap-2">
-                {#each ["new", "good", "fair", "poor"] as cond}
+              <div class="grid grid-cols-2 gap-1.5">
+                {#each ['new', 'good', 'fair', 'poor'] as cond}
                   <button
                     onclick={() =>
                       (selectedCondition =
-                        selectedCondition === cond ? "" : cond)}
-                    class="px-4 py-3 rounded-2xl border-2 transition-all font-bold text-xs flex items-center justify-center gap-2
+                        selectedCondition === cond ? '' : cond)}
+                    class="px-3 py-2 rounded-lg border transition-all font-medium text-xs flex items-center justify-center gap-1.5
                                         {selectedCondition === cond
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-lg shadow-emerald-100'
-                      : 'border-slate-50 bg-slate-50 text-slate-500 hover:border-slate-200'}"
+                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm'
+                      : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200'}"
                   >
                     <div
                       class="w-2 h-2 rounded-full {selectedCondition === cond
@@ -544,13 +540,13 @@
             </div>
 
             <!-- Price Group -->
-            <div class="space-y-4">
-              <div class="flex items-center gap-3">
+            <div class="space-y-3">
+              <div class="flex items-center gap-2">
                 <div
-                  class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600"
+                  class="w-7 h-7 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600"
                 >
                   <svg
-                    class="w-5 h-5"
+                    class="w-4 h-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -564,34 +560,34 @@
                   </svg>
                 </div>
                 <div
-                  class="text-sm font-black text-slate-900 uppercase tracking-widest"
+                  class="text-xs font-bold text-slate-900 uppercase tracking-wide"
                 >
                   Budgeting
                 </div>
               </div>
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2">
                 <div class="relative flex-1">
                   <span
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-400"
                     >MIN</span
                   >
                   <input
                     type="number"
                     bind:value={minPrice}
-                    class="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-amber-500/5 font-bold text-slate-700 placeholder:text-slate-300"
+                    class="w-full pl-10 pr-3 py-2 bg-slate-50 border-none rounded-lg focus:ring-2 focus:ring-amber-500/10 font-medium text-slate-700 text-sm placeholder:text-slate-300"
                     placeholder="0"
                   />
                 </div>
                 <div class="w-2 h-0.5 bg-slate-200 rounded-full"></div>
                 <div class="relative flex-1">
                   <span
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-400"
                     >MAX</span
                   >
                   <input
                     type="number"
                     bind:value={maxPrice}
-                    class="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-amber-500/5 font-bold text-slate-700 placeholder:text-slate-300"
+                    class="w-full pl-10 pr-3 py-2 bg-slate-50 border-none rounded-lg focus:ring-2 focus:ring-amber-500/10 font-medium text-slate-700 text-sm placeholder:text-slate-300"
                     placeholder="Any"
                   />
                 </div>
@@ -600,7 +596,7 @@
           </div>
 
           <div
-            class="bg-slate-50/80 px-10 py-6 flex items-center justify-between border-t border-slate-100"
+            class="bg-slate-50/80 px-5 py-3 flex items-center justify-between border-t border-slate-100"
           >
             <div class="flex items-center gap-8">
               <div class="flex items-center gap-2">
@@ -643,18 +639,15 @@
       {/if}
 
       <!-- Quick Filter Presets -->
-      <div
-        class="mt-8 flex flex-wrap justify-center items-center gap-3"
-        in:fade={{ delay: 600 }}
-      >
+      <div class="mt-5 flex flex-wrap justify-center items-center gap-2">
         {#each quickFilters as chip}
           <button
             onclick={() => {
-              if (chip.type === "category") selectedCategory = chip.value;
-              else if (chip.type === "price") maxPrice = chip.value;
-              else if (chip.type === "sort") sortBy = chip.value;
+              if (chip.type === 'category') selectedCategory = chip.value
+              else if (chip.type === 'price') maxPrice = chip.value
+              else if (chip.type === 'sort') sortBy = chip.value
             }}
-            class="px-6 py-3 bg-white border border-slate-100 rounded-2xl text-sm font-bold text-slate-500 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-100 hover:shadow-lg hover:shadow-blue-500/5 transition-all active:scale-95"
+            class="px-4 py-2 bg-white border border-slate-100 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-100 hover:shadow-md hover:shadow-blue-500/5 transition-all active:scale-95"
           >
             {chip.label}
           </button>
@@ -664,14 +657,14 @@
 
     <!-- Results Info -->
     {#if listingsQuery.data}
-      <div class="flex items-center justify-between mb-8 px-2" transition:fade>
+      <div class="flex items-center justify-between mb-4 px-2" transition:fade>
         <div class="flex items-center gap-3">
           <div
-            class="px-3 py-1 bg-blue-600 text-white text-[10px] font-black rounded-full shadow-lg shadow-blue-200 uppercase tracking-widest"
+            class="px-2 py-0.5 bg-blue-600 text-white text-[8px] font-black rounded-full shadow-md shadow-blue-200 uppercase tracking-widest"
           >
             Results
           </div>
-          <p class="text-slate-500 font-bold">
+          <p class="text-sm text-slate-500 font-bold">
             {listingsQuery.data.pagination.totalCount} items discovered
           </p>
         </div>
@@ -702,7 +695,7 @@
 
     <!-- Listings Grid -->
     {#if listingsQuery.isLoading}
-      <div class="flex flex-col items-center justify-center py-32" in:fade>
+      <div class="flex flex-col items-center justify-center py-32">
         <LoadingSpinner size="lg" text="Analyzing Marketplace..." />
         <p class="mt-4 text-slate-400 font-medium animate-pulse">
           Syncing with Pulchowk database...
@@ -711,7 +704,6 @@
     {:else if listingsQuery.error}
       <div
         class="max-w-md mx-auto p-10 bg-white border border-rose-100 rounded-[3rem] shadow-2xl text-center"
-        in:fly={{ y: 20, duration: 400 }}
       >
         <div
           class="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner"
@@ -746,7 +738,6 @@
     {:else if !listingsQuery.data || listingsQuery.data.listings.length === 0}
       <div
         class="text-center py-32 bg-white rounded-[4rem] shadow-xl border border-slate-50 p-12 max-w-2xl mx-auto"
-        in:fade
       >
         <div
           class="w-32 h-32 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-inner group"
@@ -780,18 +771,17 @@
       </div>
     {:else}
       <div
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3"
       >
         {#each listingsQuery.data.listings as book, i (book.id)}
           <a
             href="/books/{book.id}"
             use:routeAction
-            class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300 transform hover:-translate-y-1 animate-slide-up"
-            style="animation-delay: {i * 50}ms"
+            class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300 transform hover:-translate-y-1"
           >
             <!-- Book Image -->
             <div
-              class="relative h-48 bg-linear-to-br from-blue-50 to-indigo-100 overflow-hidden"
+              class="relative h-28 bg-linear-to-br from-blue-50 to-indigo-100 overflow-hidden"
             >
               {#if book.images && book.images.length > 0}
                 <img
@@ -802,7 +792,7 @@
               {:else}
                 <div class="w-full h-full flex items-center justify-center">
                   <svg
-                    class="w-16 h-16 text-blue-200"
+                    class="w-8 h-8 text-blue-200"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -818,9 +808,9 @@
               {/if}
 
               <!-- Condition Badge -->
-              <div class="absolute top-3 left-3">
+              <div class="absolute top-2 left-2">
                 <span
-                  class="px-2.5 py-1 text-xs font-semibold rounded-full {conditionColors[
+                  class="px-1.5 py-0.5 text-[8px] font-semibold rounded-full {conditionColors[
                     book.condition
                   ]}"
                 >
@@ -829,9 +819,9 @@
               </div>
 
               <!-- Price Badge -->
-              <div class="absolute top-3 right-3">
+              <div class="absolute top-2 right-2">
                 <span
-                  class="px-3 py-1.5 bg-white/90 backdrop-blur-sm text-gray-900 text-sm font-bold rounded-full shadow-sm"
+                  class="px-1.5 py-0.5 bg-white/90 backdrop-blur-sm text-gray-900 text-[10px] font-bold rounded-full shadow-sm"
                 >
                   {formatPrice(book.price)}
                 </span>
@@ -839,26 +829,26 @@
             </div>
 
             <!-- Book Info -->
-            <div class="p-4">
+            <div class="p-3">
               <h3
-                class="font-bold text-gray-900 line-clamp-1 group-hover:text-blue-600 transition-colors mb-1"
+                class="text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-blue-600 transition-colors mb-0.5"
               >
                 {book.title}
               </h3>
-              <p class="text-sm text-gray-500 line-clamp-1 mb-3">
+              <p class="text-xs text-gray-500 line-clamp-1 mb-2">
                 by {book.author}
               </p>
 
               {#if book.category}
                 <span
-                  class="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-md mb-3"
+                  class="inline-block px-1.5 py-0.5 bg-gray-100 text-gray-600 text-[10px] rounded-md mb-2"
                 >
                   {book.category.name}
                 </span>
               {/if}
 
               <div
-                class="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-gray-50"
+                class="flex items-center justify-between text-[10px] text-gray-400 pt-2 border-t border-gray-50"
               >
                 {#if book.seller}
                   <div class="flex items-center gap-1.5">
@@ -866,7 +856,7 @@
                       <img
                         src={book.seller.image}
                         alt=""
-                        class="w-5 h-5 rounded-full"
+                        class="w-4 h-4 rounded-full"
                       />
                     {:else}
                       <div
