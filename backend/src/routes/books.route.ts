@@ -50,6 +50,15 @@ import {
     CancelRequest,
     DeleteRequest,
 } from "../controllers/purchaseRequest.controller.js";
+import {
+    BlockUser,
+    CreateMarketplaceReport,
+    GetBlockedUsers,
+    GetMyMarketplaceReports,
+    GetSellerReputation,
+    RateSeller,
+    UnblockUser,
+} from "../controllers/trust.controller.js";
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -87,6 +96,14 @@ router.get("/my-requests", requireAuth, GetMyRequests);
 router.put("/requests/:requestId/respond", requireAuth, RespondToRequest);
 router.delete("/requests/:requestId", requireAuth, CancelRequest);
 router.delete("/requests/:requestId/delete", requireAuth, DeleteRequest);
+
+router.get("/trust/sellers/:sellerId/reputation", optionalAuth, GetSellerReputation);
+router.post("/trust/sellers/:sellerId/rate", requireAuth, RateSeller);
+router.get("/trust/blocked-users", requireAuth, GetBlockedUsers);
+router.post("/trust/users/:userId/block", requireAuth, BlockUser);
+router.delete("/trust/users/:userId/block", requireAuth, UnblockUser);
+router.post("/trust/reports", requireAuth, CreateMarketplaceReport);
+router.get("/trust/reports/my", requireAuth, GetMyMarketplaceReports);
 
 router.get("/categories", GetAllCategories);
 router.get("/categories/:id", GetCategoriesById);

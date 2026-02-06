@@ -934,6 +934,7 @@ export interface BookListing {
     name: string
     email?: string
     image: string | null
+    isVerifiedSeller?: boolean
   }
   images?: BookImage[]
   category?: BookCategory
@@ -1782,6 +1783,372 @@ export async function markNoticeAsRead(
     }
 
     return { success: false, message: 'Invalid server response' }
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+// ============ TRUST + ADMIN + GLOBAL SEARCH ============
+const API_BOOK_TRUST = '/api/books/trust'
+const API_ADMIN = '/api/admin'
+const API_SEARCH = '/api/search'
+
+export interface SellerRatingReview {
+  id: number
+  sellerId: string
+  raterId: string
+  listingId: number
+  rating: number
+  review: string | null
+  createdAt: string
+  updatedAt: string
+  rater?: {
+    id: string
+    name: string
+    image: string | null
+  }
+  listing?: {
+    id: number
+    title: string
+  }
+}
+
+export interface SellerReputation {
+  averageRating: number
+  totalRatings: number
+  distribution: Record<number, number>
+  recentRatings: SellerRatingReview[]
+}
+
+export interface BlockedUser {
+  id: number
+  blockerId: string
+  blockedUserId: string
+  reason: string | null
+  createdAt: string
+  blockedUser?: {
+    id: string
+    name: string
+    email: string
+    image: string | null
+  }
+}
+
+export interface MarketplaceReport {
+  id: number
+  reporterId: string
+  reportedUserId: string
+  listingId: number | null
+  category:
+    | 'spam'
+    | 'fraud'
+    | 'abusive'
+    | 'fake_listing'
+    | 'suspicious_payment'
+    | 'other'
+  description: string
+  status: 'open' | 'in_review' | 'resolved' | 'rejected'
+  resolutionNotes: string | null
+  reviewedBy: string | null
+  reviewedAt: string | null
+  createdAt: string
+  updatedAt: string
+  reporter?: { id: string; name: string; email: string }
+  reportedUser?: { id: string; name: string; email: string }
+  reviewer?: { id: string; name: string }
+  listing?: { id: number; title: string }
+}
+
+export async function getSellerReputation(sellerId: string): Promise<{
+  success: boolean
+  data?: SellerReputation
+  message?: string
+}> {
+  try {
+    const res = await fetch(`${API_BOOK_TRUST}/sellers/${sellerId}/reputation`, {
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function rateSeller(
+  sellerId: string,
+  data: { listingId: number; rating: number; review?: string },
+): Promise<{ success: boolean; data?: SellerRatingReview; message?: string }> {
+  try {
+    const res = await fetch(`${API_BOOK_TRUST}/sellers/${sellerId}/rate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function blockMarketplaceUser(
+  userId: string,
+  reason?: string,
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    const res = await fetch(`${API_BOOK_TRUST}/users/${userId}/block`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ reason }),
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function unblockMarketplaceUser(
+  userId: string,
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    const res = await fetch(`${API_BOOK_TRUST}/users/${userId}/block`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function getBlockedMarketplaceUsers(): Promise<{
+  success: boolean
+  data?: BlockedUser[]
+  message?: string
+}> {
+  try {
+    const res = await fetch(`${API_BOOK_TRUST}/blocked-users`, {
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function createMarketplaceReport(data: {
+  reportedUserId: string
+  listingId?: number
+  category: MarketplaceReport['category']
+  description: string
+}): Promise<{ success: boolean; data?: MarketplaceReport; message?: string }> {
+  try {
+    const res = await fetch(`${API_BOOK_TRUST}/reports`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function getMyMarketplaceReports(): Promise<{
+  success: boolean
+  data?: MarketplaceReport[]
+  message?: string
+}> {
+  try {
+    const res = await fetch(`${API_BOOK_TRUST}/reports/my`, {
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export interface AdminUser {
+  id: string
+  name: string
+  email: string
+  image: string | null
+  role: string
+  isVerifiedSeller: boolean
+  createdAt: string
+  updatedAt: string
+  reputation: {
+    averageRating: number
+    totalRatings: number
+  }
+}
+
+export interface AdminOverview {
+  users: number
+  admins: number
+  teachers: number
+  listingsAvailable: number
+  openReports: number
+  activeBlocks: number
+  ratingsCount: number
+  averageSellerRating: number
+}
+
+export async function getAdminOverview(): Promise<{
+  success: boolean
+  data?: AdminOverview
+  message?: string
+}> {
+  try {
+    const res = await fetch(`${API_ADMIN}/overview`, {
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function getAdminUsers(filters?: {
+  search?: string
+  role?: string
+  limit?: number
+}): Promise<{ success: boolean; data?: AdminUser[]; message?: string }> {
+  try {
+    const params = new URLSearchParams()
+    if (filters?.search) params.set('search', filters.search)
+    if (filters?.role) params.set('role', filters.role)
+    if (filters?.limit) params.set('limit', String(filters.limit))
+
+    const qs = params.toString()
+    const url = qs ? `${API_ADMIN}/users?${qs}` : `${API_ADMIN}/users`
+    const res = await fetch(url, {
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function updateAdminUserRole(
+  userId: string,
+  role: string,
+): Promise<{ success: boolean; data?: AdminUser; message?: string }> {
+  try {
+    const res = await fetch(`${API_ADMIN}/users/${userId}/role`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ role }),
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function toggleSellerVerification(
+  userId: string,
+  verified: boolean,
+): Promise<{ success: boolean; data?: AdminUser; message?: string }> {
+  try {
+    const res = await fetch(`${API_ADMIN}/users/${userId}/verify-seller`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ verified }),
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function getModerationReports(status?: string): Promise<{
+  success: boolean
+  data?: MarketplaceReport[]
+  message?: string
+}> {
+  try {
+    const qs = status ? `?status=${encodeURIComponent(status)}` : ''
+    const res = await fetch(`${API_ADMIN}/reports${qs}`, {
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function updateModerationReport(
+  reportId: number,
+  payload: { status: MarketplaceReport['status']; resolutionNotes?: string },
+): Promise<{ success: boolean; data?: MarketplaceReport; message?: string }> {
+  try {
+    const res = await fetch(`${API_ADMIN}/reports/${reportId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export interface GlobalSearchResponse {
+  query: string
+  clubs: Club[]
+  events: Array<
+    Pick<ClubEvent, 'id' | 'title' | 'description' | 'eventStartTime' | 'eventEndTime' | 'venue' | 'clubId'> & {
+      club?: Pick<Club, 'id' | 'name' | 'logoUrl'>
+    }
+  >
+  books: Array<
+    Pick<BookListing, 'id' | 'title' | 'author' | 'price' | 'status'> & {
+      images?: Array<{ imageUrl: string }>
+      seller?: {
+        id: string
+        name: string
+        image: string | null
+        isVerifiedSeller?: boolean
+      }
+    }
+  >
+  notices: Array<
+    Pick<
+      Notice,
+      'id' | 'title' | 'content' | 'section' | 'subsection' | 'attachmentUrl' | 'createdAt'
+    >
+  >
+  places: Array<{
+    id: string
+    name: string
+    description: string
+    coordinates: { lat: number; lng: number }
+    services: Array<{ name: string; purpose: string; location: string }>
+  }>
+  total: number
+}
+
+export async function searchEverything(
+  query: string,
+  limit = 6,
+): Promise<{ success: boolean; data?: GlobalSearchResponse; message?: string }> {
+  try {
+    const params = new URLSearchParams()
+    params.set('q', query)
+    params.set('limit', String(limit))
+
+    const res = await fetch(`${API_SEARCH}?${params.toString()}`, {
+      credentials: 'include',
+    })
+    return await res.json()
   } catch (error: any) {
     return { success: false, message: error.message }
   }

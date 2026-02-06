@@ -14,9 +14,16 @@
         respondToPurchaseRequest,
         cancelPurchaseRequest,
         deletePurchaseRequest,
+        getSellerReputation,
+        rateSeller,
+        blockMarketplaceUser,
+        unblockMarketplaceUser,
+        getBlockedMarketplaceUsers,
+        createMarketplaceReport,
         type BookListing,
         type PurchaseRequest,
         type SellerContactInfo,
+        type MarketplaceReport,
     } from "../lib/api";
     import LoadingSpinner from "../components/LoadingSpinner.svelte";
     import { fade, fly, slide } from "svelte/transition";
@@ -42,6 +49,15 @@
     let respondingToRequest = $state<number | null>(null);
     let showRequestModal = $state(false);
     let requestMessage = $state("");
+    let showRatingModal = $state(false);
+    let ratingValue = $state(5);
+    let ratingReview = $state("");
+    let submittingRating = $state(false);
+    let showReportModal = $state(false);
+    let reportCategory = $state<MarketplaceReport["category"]>("fraud");
+    let reportDescription = $state("");
+    let submittingReport = $state(false);
+    let isSellerBlocked = $state(false);
 
     $effect(() => {
         if (!$session.isPending && !$session.error && !$session.data?.user) {
@@ -208,10 +224,45 @@
         },
     }));
 
+    const sellerReputationQuery = createQuery(() => ({
+        queryKey: ["seller-reputation", query.data?.seller?.id],
+        queryFn: async () => {
+            if (!query.data?.seller?.id) return null;
+            const result = await getSellerReputation(query.data.seller.id);
+            return result.success ? result.data || null : null;
+        },
+        enabled: !!query.data?.seller?.id,
+    }));
+
+    const blockedUsersQuery = createQuery(() => ({
+        queryKey: ["blocked-marketplace-users"],
+        queryFn: async () => {
+            const result = await getBlockedMarketplaceUsers();
+            return result.success ? result.data || [] : [];
+        },
+        enabled: !!$session.data?.user && !query.data?.isOwner,
+    }));
+
+    $effect(() => {
+        const sellerId = query.data?.seller?.id;
+        if (!sellerId || !blockedUsersQuery.data) {
+            isSellerBlocked = false;
+            return;
+        }
+
+        isSellerBlocked = blockedUsersQuery.data.some(
+            (entry) => entry.blockedUserId === sellerId,
+        );
+    });
+
     async function handleRequestToBuy() {
         if (!$session.data?.user) return;
         requestingBook = true;
         try {
+            if (isSellerBlocked) {
+                alert("Unblock this seller before sending a purchase request.");
+                return;
+            }
             const result = await createPurchaseRequest(
                 bookId,
                 requestMessage || undefined,
@@ -229,6 +280,87 @@
             console.error("Error requesting book:", error);
         } finally {
             requestingBook = false;
+        }
+    }
+
+    async function handleSubmitRating() {
+        if (!query.data?.seller?.id || !query.data?.id) return;
+
+        submittingRating = true;
+        try {
+            const result = await rateSeller(query.data.seller.id, {
+                listingId: query.data.id,
+                rating: Number(ratingValue),
+                review: ratingReview,
+            });
+
+            if (!result.success) {
+                alert(result.message || "Could not submit rating.");
+                return;
+            }
+
+            showRatingModal = false;
+            ratingReview = "";
+            await queryClient.invalidateQueries({
+                queryKey: ["seller-reputation", query.data.seller.id],
+            });
+        } catch (error) {
+            console.error("Error submitting rating:", error);
+        } finally {
+            submittingRating = false;
+        }
+    }
+
+    async function handleToggleSellerBlock() {
+        const sellerId = query.data?.seller?.id;
+        if (!sellerId) return;
+
+        const action = isSellerBlocked
+            ? unblockMarketplaceUser(sellerId)
+            : blockMarketplaceUser(
+                  sellerId,
+                  "Blocked from trust controls in book marketplace.",
+              );
+
+        const result = await action;
+        if (!result.success) {
+            alert(result.message || "Failed to update block status.");
+            return;
+        }
+
+        await queryClient.invalidateQueries({
+            queryKey: ["blocked-marketplace-users"],
+        });
+    }
+
+    async function handleSubmitReport() {
+        if (!query.data?.seller?.id) return;
+        if (!reportDescription.trim()) {
+            alert("Please provide report details.");
+            return;
+        }
+
+        submittingReport = true;
+        try {
+            const result = await createMarketplaceReport({
+                reportedUserId: query.data.seller.id,
+                listingId: query.data.id,
+                category: reportCategory,
+                description: reportDescription,
+            });
+
+            if (!result.success) {
+                alert(result.message || "Failed to submit report.");
+                return;
+            }
+
+            showReportModal = false;
+            reportDescription = "";
+            alert("Report submitted to moderation team.");
+        } catch (error) {
+            console.error("Error submitting report:", error);
+        } finally {
+            submittingReport = false;
         }
     }
 
@@ -564,12 +696,38 @@
 
                         <!-- Seller Info -->
                         {#if book.seller && book.status !== "sold"}
-                            <div class="p-4 bg-gray-50 rounded-xl mb-6">
-                                <h3
-                                    class="text-sm font-medium text-gray-500 mb-3"
+                            <div
+                                class="p-4 bg-linear-to-br from-slate-50 via-cyan-50 to-blue-50 rounded-2xl mb-6 border border-cyan-100"
+                            >
+                                <div
+                                    class="flex flex-wrap items-center justify-between gap-2 mb-3"
                                 >
-                                    Seller
-                                </h3>
+                                    <h3
+                                        class="text-sm font-semibold text-slate-600"
+                                    >
+                                        Seller Trust Profile
+                                    </h3>
+                                    {#if book.seller.isVerifiedSeller}
+                                        <span
+                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200"
+                                        >
+                                            <svg
+                                                class="w-3.5 h-3.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2.5"
+                                                    d="M5 13l4 4L19 7"
+                                                />
+                                            </svg>
+                                            Verified Seller
+                                        </span>
+                                    {/if}
+                                </div>
                                 <div class="flex items-center gap-3">
                                     {#if book.seller.image}
                                         <img
@@ -584,20 +742,86 @@
                                             {book.seller.name.charAt(0)}
                                         </div>
                                     {/if}
-                                    <div>
-                                        <p class="font-medium text-gray-900">
+                                    <div class="min-w-0">
+                                        <p class="font-semibold text-slate-900">
                                             {book.seller.name}
                                         </p>
                                         {#if book.seller.email}
                                             <a
                                                 href="mailto:{book.seller
                                                     .email}"
-                                                class="text-sm text-blue-600 hover:underline"
+                                                class="text-sm text-cyan-700 hover:underline break-all"
                                                 >{book.seller.email}</a
                                             >
                                         {/if}
                                     </div>
                                 </div>
+
+                                <div class="mt-4 grid grid-cols-2 gap-3">
+                                    <div
+                                        class="rounded-xl bg-white p-3 border border-cyan-100"
+                                    >
+                                        <p
+                                            class="text-xs uppercase tracking-[0.14em] text-slate-400 font-bold"
+                                        >
+                                            Reputation
+                                        </p>
+                                        <p
+                                            class="text-2xl font-black text-slate-900 mt-1"
+                                        >
+                                            {sellerReputationQuery.data
+                                                ?.averageRating || 0}
+                                            <span
+                                                class="text-sm font-bold text-slate-500"
+                                                >/5</span
+                                            >
+                                        </p>
+                                    </div>
+                                    <div
+                                        class="rounded-xl bg-white p-3 border border-cyan-100"
+                                    >
+                                        <p
+                                            class="text-xs uppercase tracking-[0.14em] text-slate-400 font-bold"
+                                        >
+                                            Total Ratings
+                                        </p>
+                                        <p
+                                            class="text-2xl font-black text-slate-900 mt-1"
+                                        >
+                                            {sellerReputationQuery.data
+                                                ?.totalRatings || 0}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {#if !book.isOwner && $session.data?.user}
+                                    <div class="mt-4 flex flex-wrap gap-2">
+                                        <button
+                                            onclick={() =>
+                                                (showRatingModal = true)}
+                                            class="px-3 py-2 rounded-lg text-xs font-semibold bg-white border border-cyan-200 text-cyan-700 hover:bg-cyan-50 transition"
+                                        >
+                                            Rate seller
+                                        </button>
+                                        <button
+                                            onclick={() =>
+                                                (showReportModal = true)}
+                                            class="px-3 py-2 rounded-lg text-xs font-semibold bg-white border border-amber-200 text-amber-700 hover:bg-amber-50 transition"
+                                        >
+                                            Report seller
+                                        </button>
+                                        <button
+                                            onclick={handleToggleSellerBlock}
+                                            class="px-3 py-2 rounded-lg text-xs font-semibold border transition {isSellerBlocked
+                                                ? 'bg-rose-100 border-rose-200 text-rose-700 hover:bg-rose-200'
+                                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'}"
+                                        >
+                                            {isSellerBlocked
+                                                ? "Unblock seller"
+                                                : "Block seller"}
+                                        </button>
+                                    </div>
+                                {/if}
                             </div>
                         {/if}
 
@@ -693,6 +917,14 @@
                                 {/if}
                             {:else if $session.data?.user && book.status === "available"}
                                 <!-- Buyer Actions -->
+                                {#if isSellerBlocked}
+                                    <div
+                                        class="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700"
+                                    >
+                                        You blocked this seller. Unblock to
+                                        request, contact, or chat.
+                                    </div>
+                                {:else}
                                 <div class="flex flex-col sm:flex-row gap-3">
                                     <button
                                         onclick={handleSaveBook}
@@ -815,6 +1047,7 @@
                                         </button>
                                     {/if}
                                 </div>
+                                {/if}
                             {:else if !$session.data?.user && book.status !== "sold"}
                                 <a
                                     href="/register"
@@ -827,7 +1060,7 @@
                         </div>
 
                         <!-- Contact Info Section - Below the buttons -->
-                        {#if book.status !== "sold" && requestStatusQuery.data?.status === "accepted" && (contactInfoQuery.data?.data || book.seller?.email)}
+                        {#if book.status !== "sold" && !isSellerBlocked && requestStatusQuery.data?.status === "accepted" && (contactInfoQuery.data?.data || book.seller?.email)}
                             <div
                                 class="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 mt-4"
                                 in:slide
@@ -1330,6 +1563,111 @@
                     {:else}
                         Send Request
                     {/if}
+                </button>
+            </div>
+        </div>
+    </div>
+{/if}
+
+{#if showRatingModal}
+    <div
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        in:fade
+    >
+        <div
+            class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6"
+            in:fly={{ y: 20, duration: 300 }}
+        >
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Rate Seller</h3>
+            <p class="text-sm text-slate-600 mb-4">
+                Share your experience to help keep the marketplace trusted.
+            </p>
+            <label for="seller-rating" class="text-xs font-bold text-slate-500 uppercase tracking-wide"
+                >Rating</label
+            >
+            <select
+                id="seller-rating"
+                bind:value={ratingValue}
+                class="mt-2 w-full px-4 py-3 border border-slate-200 rounded-xl"
+            >
+                <option value={5}>5 - Excellent</option>
+                <option value={4}>4 - Good</option>
+                <option value={3}>3 - Average</option>
+                <option value={2}>2 - Poor</option>
+                <option value={1}>1 - Bad</option>
+            </select>
+            <textarea
+                bind:value={ratingReview}
+                placeholder="Optional note about communication, honesty, and response quality."
+                rows="3"
+                class="mt-3 w-full px-4 py-3 border border-slate-200 rounded-xl resize-none"
+            ></textarea>
+            <div class="mt-4 flex gap-3">
+                <button
+                    onclick={() => (showRatingModal = false)}
+                    class="flex-1 px-4 py-3 border border-slate-200 text-slate-600 font-medium rounded-xl hover:bg-slate-50"
+                >
+                    Cancel
+                </button>
+                <button
+                    onclick={handleSubmitRating}
+                    disabled={submittingRating}
+                    class="flex-1 px-4 py-3 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-700 disabled:opacity-50"
+                >
+                    {submittingRating ? "Saving..." : "Submit Rating"}
+                </button>
+            </div>
+        </div>
+    </div>
+{/if}
+
+{#if showReportModal}
+    <div
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        in:fade
+    >
+        <div
+            class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6"
+            in:fly={{ y: 20, duration: 300 }}
+        >
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Report Seller</h3>
+            <p class="text-sm text-slate-600 mb-4">
+                Reports go to the moderation queue for admin review.
+            </p>
+            <label for="report-category" class="text-xs font-bold text-slate-500 uppercase tracking-wide"
+                >Category</label
+            >
+            <select
+                id="report-category"
+                bind:value={reportCategory}
+                class="mt-2 w-full px-4 py-3 border border-slate-200 rounded-xl"
+            >
+                <option value="fraud">Fraud</option>
+                <option value="fake_listing">Fake listing</option>
+                <option value="abusive">Abusive behavior</option>
+                <option value="spam">Spam</option>
+                <option value="suspicious_payment">Suspicious payment</option>
+                <option value="other">Other</option>
+            </select>
+            <textarea
+                bind:value={reportDescription}
+                placeholder="Describe what happened with clear details."
+                rows="4"
+                class="mt-3 w-full px-4 py-3 border border-slate-200 rounded-xl resize-none"
+            ></textarea>
+            <div class="mt-4 flex gap-3">
+                <button
+                    onclick={() => (showReportModal = false)}
+                    class="flex-1 px-4 py-3 border border-slate-200 text-slate-600 font-medium rounded-xl hover:bg-slate-50"
+                >
+                    Cancel
+                </button>
+                <button
+                    onclick={handleSubmitReport}
+                    disabled={submittingReport}
+                    class="flex-1 px-4 py-3 bg-amber-600 text-white font-bold rounded-xl hover:bg-amber-700 disabled:opacity-50"
+                >
+                    {submittingReport ? "Submitting..." : "Submit Report"}
                 </button>
             </div>
         </div>

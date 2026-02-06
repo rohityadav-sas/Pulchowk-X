@@ -31,6 +31,9 @@
   import MyBooks from './pages/MyBooks.svelte'
   import Messages from './pages/Messages.svelte'
   import Notices from './pages/Notices.svelte'
+  import Search from './pages/Search.svelte'
+  import Admin from './pages/Admin.svelte'
+  import GlobalSearch from './components/GlobalSearch.svelte'
   import { onMount, type Component } from 'svelte'
 
   let MapComponent: Component | any = $state(null)
@@ -54,6 +57,9 @@
   const isMapRoute = $derived(instance?.current?.route?.path === '/map')
 
   const session = authClient.useSession()
+  const currentRole = $derived(($session.data?.user as any)?.role as
+    | string
+    | undefined)
 
   const error = query('message')
   let showError = $state(error === 'unauthorized_domain')
@@ -141,88 +147,110 @@
       path: /^\/notices\/?$/,
       component: Notices,
     },
+    {
+      path: /^\/search\/?$/,
+      component: Search,
+    },
+    {
+      path: /^\/admin\/?$/,
+      component: Admin,
+    },
   ]
 </script>
 
 <QueryClientProvider client={queryClient}>
   {#if !isEmbedded}
     <nav
-      class="bg-white/80 border-b border-gray-200 sticky top-0 z-50 backdrop-blur-md"
+      class="bg-white/85 border-b border-slate-200 sticky top-0 z-50 backdrop-blur-xl"
     >
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 space-y-3">
+        <div class="flex items-center justify-between gap-3">
           <a href="/" class="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" class="size-8" />
+            <img src="/logo.png" alt="Logo" class="size-8 rounded-lg shadow-sm" />
             <span
-              class="text-xl mt-0.5 font-bold text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors"
+              class="text-xl mt-0.5 font-black text-slate-900 tracking-tight"
               >Smart Pulchowk</span
             >
           </a>
-          <div class="flex items-center gap-1 sm:gap-2">
-            <a
-              use:route
-              href="/"
-              class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
-              >Home</a
-            >
-            <a
-              use:route
-              href="/clubs"
-              class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
-              >Clubs</a
-            >
-            <a
-              use:route
-              href="/events"
-              class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
-              >Events</a
-            >
-            <a
-              use:route
-              href="/books"
-              class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
-              >Books</a
-            >
-            <a
-              use:route
-              href="/map"
-              class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
-              >Map</a
-            >
-            <a
-              use:route
-              href="/notices"
-              class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
-              >Notices</a
-            >
+          <div class="flex items-center gap-2">
             {#if $session.isPending}
-              <div
-                class="px-4 py-2 flex items-center justify-center min-w-22.5"
-              >
+              <div class="px-3 py-2">
                 <div
-                  class="w-4 h-4 border-2 border-gray-200 border-t-gray-600 rounded-full animate-spin"
+                  class="w-4 h-4 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin"
                 ></div>
               </div>
             {:else if $session.data?.user}
               <a
                 use:route
                 href="/dashboard"
-                class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
+                class="px-3 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all"
                 >Dashboard</a
               >
               <a
                 use:route
                 href="/classroom"
-                class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
+                class="px-3 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all"
                 >Classroom</a
               >
+              {#if currentRole === 'admin'}
+                <a
+                  use:route
+                  href="/admin"
+                  class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-all"
+                  >Admin</a
+                >
+              {/if}
             {:else}
               <a
                 href="/register"
-                class="ml-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95"
+                class="px-4 py-2 text-sm font-semibold text-white bg-cyan-600 hover:bg-cyan-700 rounded-lg shadow-sm transition-all active:scale-95"
                 >Sign In</a
               >
             {/if}
+          </div>
+        </div>
+
+        <div class="flex flex-col xl:flex-row xl:items-center gap-3">
+          <div class="flex-1">
+            <GlobalSearch />
+          </div>
+          <div class="flex flex-wrap items-center gap-1">
+            <a
+              use:route
+              href="/"
+              class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all"
+              >Home</a
+            >
+            <a
+              use:route
+              href="/clubs"
+              class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all"
+              >Clubs</a
+            >
+            <a
+              use:route
+              href="/events"
+              class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all"
+              >Events</a
+            >
+            <a
+              use:route
+              href="/books"
+              class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all"
+              >Books</a
+            >
+            <a
+              use:route
+              href="/map"
+              class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all"
+              >Map</a
+            >
+            <a
+              use:route
+              href="/notices"
+              class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all"
+              >Notices</a
+            >
           </div>
         </div>
       </div>

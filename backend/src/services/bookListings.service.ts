@@ -1,8 +1,9 @@
 import { db } from "../lib/db.js";
-import { and, desc, eq, ilike, or, sql, asc, gte, lte } from "drizzle-orm";
+import { and, desc, eq, ilike, or, sql, asc, gte, lte, notInArray } from "drizzle-orm";
 import { bookListings, bookImages, bookCategories, savedBooks, listingViews } from "../models/book_buy_sell-schema.js";
 import { sendToTopic } from "./notification.service.js";
 import { unwrapOne } from "../lib/type-utils.js";
+import { userBlocks } from "../models/trust-schema.js";
 
 
 export interface CreateListingData {
@@ -106,7 +107,10 @@ export const createBookListing = async (
     }
 };
 
-export const getBookListings = async (filters: ListingFilters = {}) => {
+export const getBookListings = async (
+    filters: ListingFilters = {},
+    userId?: string,
+) => {
     try {
         const {
             search,
@@ -168,6 +172,28 @@ export const getBookListings = async (filters: ListingFilters = {}) => {
             conditions.push(lte(bookListings.price, maxPrice.toString()));
         }
 
+        if (userId) {
+            const blocks = await db.query.userBlocks.findMany({
+                where: or(eq(userBlocks.blockerId, userId), eq(userBlocks.blockedUserId, userId)),
+                columns: {
+                    blockerId: true,
+                    blockedUserId: true,
+                },
+            });
+
+            const blockedUserIds = [
+                ...new Set(
+                    blocks.map((row) =>
+                        row.blockerId === userId ? row.blockedUserId : row.blockerId,
+                    ),
+                ),
+            ];
+
+            if (blockedUserIds.length > 0) {
+                conditions.push(notInArray(bookListings.sellerId, blockedUserIds));
+            }
+        }
+
 
         let orderBy;
         switch (sortBy) {
@@ -198,6 +224,7 @@ export const getBookListings = async (filters: ListingFilters = {}) => {
                         id: true,
                         name: true,
                         image: true,
+                        isVerifiedSeller: true,
                     },
                 },
                 images: {
@@ -238,6 +265,36 @@ export const getBookListings = async (filters: ListingFilters = {}) => {
 
 export const getBookListingById = async (id: number, userId?: string) => {
     try {
+        if (userId) {
+            const listingOwner = await db.query.bookListings.findFirst({
+                where: eq(bookListings.id, id),
+                columns: { sellerId: true },
+            });
+
+            if (listingOwner) {
+                const blocked = await db.query.userBlocks.findFirst({
+                    where: or(
+                        and(
+                            eq(userBlocks.blockerId, userId),
+                            eq(userBlocks.blockedUserId, listingOwner.sellerId),
+                        ),
+                        and(
+                            eq(userBlocks.blockerId, listingOwner.sellerId),
+                            eq(userBlocks.blockedUserId, userId),
+                        ),
+                    ),
+                    columns: { id: true },
+                });
+
+                if (blocked) {
+                    return {
+                        success: false,
+                        message: "This listing is unavailable due to trust settings.",
+                    };
+                }
+            }
+        }
+
         const listing = await db.query.bookListings.findFirst({
             where: eq(bookListings.id, id),
             with: {
@@ -247,6 +304,7 @@ export const getBookListingById = async (id: number, userId?: string) => {
                         name: true,
                         email: true,
                         image: true,
+                        isVerifiedSeller: true,
                     },
                 },
                 images: true,

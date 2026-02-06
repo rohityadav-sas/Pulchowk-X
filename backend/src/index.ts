@@ -12,6 +12,8 @@ import bookRoutes from './routes/books.route.js'
 import classroomRoutes from './routes/classroom.route.js'
 import chatRoutes from './routes/chat.route.js'
 import noticeRoutes from './routes/notice.route.js'
+import adminRoutes from './routes/admin.route.js'
+import searchRoutes from './routes/search.route.js'
 
 const app = express()
 const httpServer = createServer(app)
@@ -28,6 +30,8 @@ app.use("/api/books", bookRoutes);
 app.use("/api/classroom", classroomRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/notices", noticeRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/search", searchRoutes);
 
 app.use(express.static(path.join(__dirname, '../../frontend/dist')))
 

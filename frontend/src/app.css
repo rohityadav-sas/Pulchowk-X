@@ -1,9 +1,18 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Space+Grotesk:wght@500;700&display=swap");
 @import "tailwindcss";
 @plugin "flowbite/plugin";
 @source "../node_modules/flowbite-svelte";
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    font-family: "Manrope", sans-serif;
+    @apply text-gray-900 antialiased;
+    background: radial-gradient(circle at top left, #ecfeff 0%, #f8fafc 35%, #eef2ff 100%);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: "Space Grotesk", "Manrope", sans-serif;
   }
 }

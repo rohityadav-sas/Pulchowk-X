@@ -4,6 +4,7 @@ import { user } from "../models/auth-schema.js";
 import { bookListings, bookPurchaseRequests } from "../models/book_buy_sell-schema.js";
 import { eq, and, or, desc } from "drizzle-orm";
 import { sendToUser } from "./notification.service.js";
+import { isUserBlockedBetween } from "./trust.service.js";
 
 export const sendMessage = async (senderId: string, listingId: number, content: string, buyerId?: string) => {
     try {
@@ -23,6 +24,15 @@ export const sendMessage = async (senderId: string, listingId: number, content: 
             return {
                 success: false,
                 message: "Recipient (buyer) must be specified when the seller sends a message."
+            };
+        }
+
+        const prospectiveRecipientId = senderId === sellerId ? targetBuyerId : sellerId;
+        const blocked = await isUserBlockedBetween(senderId, prospectiveRecipientId);
+        if (blocked) {
+            return {
+                success: false,
+                message: "Messaging is blocked due to trust settings between users.",
             };
         }
 
@@ -184,6 +194,17 @@ export const sendMessageToConversation = async (conversationId: number, senderId
 
         if (!conversation) {
             return { success: false, message: "Conversation not found or access denied." };
+        }
+
+        const participantRecipientId = senderId === conversation.buyerId
+            ? conversation.sellerId
+            : conversation.buyerId;
+        const blocked = await isUserBlockedBetween(senderId, participantRecipientId);
+        if (blocked) {
+            return {
+                success: false,
+                message: "Messaging is blocked due to trust settings between users.",
+            };
         }
 
 

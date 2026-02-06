@@ -79,6 +79,7 @@ export const CreateListing = async (req: Request, res: Response) => {
 
 export const GetListings = async (req: Request, res: Response) => {
     try {
+        const userId = getUserId(req);
         const {
             search,
             author,
@@ -93,19 +94,22 @@ export const GetListings = async (req: Request, res: Response) => {
             limit,
         } = req.query;
 
-        const result = await getBookListings({
-            search: search as string,
-            author: author as string,
-            isbn: isbn as string,
-            categoryId: categoryId ? parseInt(categoryId as string) : undefined,
-            condition: condition as string,
-            minPrice: minPrice ? parseFloat(minPrice as string) : undefined,
-            maxPrice: maxPrice ? parseFloat(maxPrice as string) : undefined,
-            status: status as string,
-            sortBy: sortBy as any,
-            page: page ? parseInt(page as string) : 1,
-            limit: limit ? parseInt(limit as string) : 20,
-        });
+        const result = await getBookListings(
+            {
+                search: search as string,
+                author: author as string,
+                isbn: isbn as string,
+                categoryId: categoryId ? parseInt(categoryId as string) : undefined,
+                condition: condition as string,
+                minPrice: minPrice ? parseFloat(minPrice as string) : undefined,
+                maxPrice: maxPrice ? parseFloat(maxPrice as string) : undefined,
+                status: status as string,
+                sortBy: sortBy as any,
+                page: page ? parseInt(page as string) : 1,
+                limit: limit ? parseInt(limit as string) : 20,
+            },
+            userId || undefined,
+        );
 
         if (!result.success) {
             return res.status(400).json(result);

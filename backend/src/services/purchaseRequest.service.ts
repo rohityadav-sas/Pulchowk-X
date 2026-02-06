@@ -3,6 +3,7 @@ import { eq, and, desc } from "drizzle-orm";
 import { bookPurchaseRequests, bookListings } from "../models/book_buy_sell-schema.js";
 import { sendToUser } from "./notification.service.js";
 import { unwrapOne } from "../lib/type-utils.js";
+import { isUserBlockedBetween } from "./trust.service.js";
 
 export const createPurchaseRequest = async (
     listingId: number,
@@ -21,6 +22,14 @@ export const createPurchaseRequest = async (
 
         if (listing.sellerId === buyerId) {
             return { success: false, message: "You cannot request to buy your own book." };
+        }
+
+        const blocked = await isUserBlockedBetween(buyerId, listing.sellerId);
+        if (blocked) {
+            return {
+                success: false,
+                message: "Request is blocked due to trust settings between users.",
+            };
         }
 
         if (listing.status !== "available") {

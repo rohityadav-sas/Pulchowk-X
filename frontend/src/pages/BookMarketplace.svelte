@@ -881,6 +881,26 @@
                       </div>
                     {/if}
                     <span class="truncate max-w-20">{book.seller.name}</span>
+                    {#if book.seller.isVerifiedSeller}
+                      <span
+                        class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-100 text-emerald-700"
+                        title="Verified seller"
+                      >
+                        <svg
+                          class="w-2.5 h-2.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="3"
+                            d="M5 13l4 4L19 7"
+                          ></path>
+                        </svg>
+                      </span>
+                    {/if}
                   </div>
                 {/if}
                 <span>{getTimeAgo(book.createdAt)}</span>
