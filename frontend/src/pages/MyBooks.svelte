@@ -155,16 +155,16 @@
   }
 </script>
 
-<div class="min-h-[calc(100vh-4rem)] bg-gray-50/50 px-4 py-8 sm:px-6 lg:px-8">
-  <div class="max-w-5xl mx-auto">
+<div class="min-h-[calc(100vh-4rem)] bg-gray-50/50 px-3 py-4 sm:px-5 lg:px-6">
+  <div class="max-w-4xl mx-auto">
     <!-- Back Button -->
     <a
       href="/books"
       use:routeAction
-      class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors group"
+      class="inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-900 mb-3 transition-colors group"
     >
       <svg
-        class="w-5 h-5 transition-transform group-hover:-translate-x-1"
+        class="w-4 h-4 transition-transform group-hover:-translate-x-1"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -180,24 +180,26 @@
     </a>
 
     <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center justify-between mb-4">
       <div>
         <a href="/books" use:routeAction class="group block">
           <h1
-            class="text-2xl lg:text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors"
+            class="text-lg lg:text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors"
           >
             My <span class="text-blue-600">Books</span>
           </h1>
         </a>
-        <p class="text-gray-600 mt-1">Manage your listings and saved books</p>
+        <p class="text-xs text-gray-600 mt-1">
+          Manage your listings and saved books
+        </p>
       </div>
       <a
         href="/books/sell"
         use:routeAction
-        class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
       >
         <svg
-          class="w-5 h-5"
+          class="w-4 h-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -215,11 +217,11 @@
 
     <!-- Tabs -->
     <div
-      class="flex gap-2 mb-6 bg-white p-1.5 rounded-xl border border-gray-100 w-fit"
+      class="flex gap-1 mb-3 bg-white p-1 rounded-lg border border-gray-100 w-fit"
     >
       <button
         onclick={() => (activeTab = 'listings')}
-        class="px-6 py-2.5 rounded-lg font-medium transition-all {activeTab ===
+        class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all {activeTab ===
         'listings'
           ? 'bg-blue-600 text-white shadow-sm'
           : 'text-gray-600 hover:bg-gray-50'}"
@@ -227,7 +229,7 @@
         My Listings
         {#if myListingsQuery.data}
           <span
-            class="ml-2 px-2 py-0.5 text-xs rounded-full {activeTab ===
+            class="ml-1.5 px-1.5 py-0.5 text-[10px] rounded-full {activeTab ===
             'listings'
               ? 'bg-blue-500'
               : 'bg-gray-100'}"
@@ -238,7 +240,7 @@
       </button>
       <button
         onclick={() => (activeTab = 'saved')}
-        class="px-6 py-2.5 rounded-lg font-medium transition-all {activeTab ===
+        class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all {activeTab ===
         'saved'
           ? 'bg-blue-600 text-white shadow-sm'
           : 'text-gray-600 hover:bg-gray-50'}"
@@ -246,7 +248,7 @@
         Saved Books
         {#if savedBooksQuery.data}
           <span
-            class="ml-2 px-2 py-0.5 text-xs rounded-full {activeTab === 'saved'
+            class="ml-1.5 px-1.5 py-0.5 text-[10px] rounded-full {activeTab === 'saved'
               ? 'bg-blue-500'
               : 'bg-gray-100'}"
           >
@@ -256,7 +258,7 @@
       </button>
       <button
         onclick={() => (activeTab = 'requests')}
-        class="px-6 py-2.5 rounded-lg font-medium transition-all {activeTab ===
+        class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all {activeTab ===
         'requests'
           ? 'bg-blue-600 text-white shadow-sm'
           : 'text-gray-600 hover:bg-gray-50'}"
@@ -264,7 +266,7 @@
         My Requests
         {#if myRequestsQuery.data}
           <span
-            class="ml-2 px-2 py-0.5 text-xs rounded-full {activeTab ===
+            class="ml-1.5 px-1.5 py-0.5 text-[10px] rounded-full {activeTab ===
             'requests'
               ? 'bg-blue-500'
               : 'bg-gray-100'}"
@@ -275,7 +277,7 @@
       </button>
       <button
         onclick={() => (activeTab = 'messages')}
-        class="px-6 py-2.5 rounded-lg font-medium transition-all {activeTab ===
+        class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all {activeTab ===
         'messages'
           ? 'bg-blue-600 text-white shadow-sm'
           : 'text-gray-600 hover:bg-gray-50'}"
@@ -283,7 +285,7 @@
         Messages
         {#if conversationsQuery.data && conversationsQuery.data.length > 0}
           <span
-            class="ml-2 px-2 py-0.5 text-xs rounded-full {activeTab ===
+            class="ml-1.5 px-1.5 py-0.5 text-[10px] rounded-full {activeTab ===
             'messages'
               ? 'bg-blue-500'
               : 'bg-gray-100 font-bold text-blue-600'}"
@@ -297,28 +299,30 @@
     <!-- My Listings Tab -->
     {#if activeTab === 'listings'}
       {#if myListingsQuery.isLoading}
-        <div class="flex items-center justify-center py-20" in:fade>
+        <div class="flex items-center justify-center py-10" in:fade>
           <LoadingSpinner size="lg" text="Loading your listings..." />
         </div>
       {:else if myListingsQuery.error}
-        <div class="p-6 bg-white border border-red-100 rounded-2xl text-center">
-          <p class="text-red-600 mb-4">
+        <div
+          class="p-4 bg-white border border-red-100 rounded-2xl text-center text-sm"
+        >
+          <p class="text-red-600 mb-3">
             {myListingsQuery.error.message}
           </p>
           <button
             onclick={() => myListingsQuery.refetch()}
-            class="px-4 py-2 bg-red-600 text-white rounded-lg"
+            class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm"
           >
             Try Again
           </button>
         </div>
       {:else if !myListingsQuery.data || myListingsQuery.data.length === 0}
         <div
-          class="text-center py-16 bg-white rounded-2xl border border-gray-100"
+          class="text-center py-10 bg-white rounded-2xl border border-gray-100"
           in:fade
         >
           <svg
-            class="w-16 h-16 text-gray-200 mx-auto mb-4"
+            class="w-12 h-12 text-gray-200 mx-auto mb-3"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -330,30 +334,30 @@
               d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
             ></path>
           </svg>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">
+          <h3 class="text-base font-medium text-gray-900 mb-2">
             No listings yet
           </h3>
-          <p class="text-gray-500 mb-6">
+          <p class="text-sm text-gray-500 mb-5">
             Start selling your books to other students.
           </p>
           <a
             href="/books/sell"
             use:routeAction
-            class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors"
+            class="inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors"
           >
             Create Your First Listing
           </a>
         </div>
       {:else}
-        <div class="space-y-4" in:fade>
+        <div class="space-y-2.5" in:fade>
           {#each myListingsQuery.data as book (book.id)}
             <div
-              class="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition-shadow"
+              class="bg-white rounded-xl border border-gray-100 p-2.5 hover:shadow-md transition-shadow"
             >
-              <div class="flex gap-4">
+              <div class="flex gap-2.5">
                 <!-- Image -->
                 <a href="/books/{book.id}" use:routeAction class="shrink-0">
-                  <div class="w-20 h-24 rounded-lg overflow-hidden bg-gray-100">
+                  <div class="w-14 h-[4.5rem] rounded-md overflow-hidden bg-gray-100">
                     {#if book.images && book.images.length > 0}
                       <img
                         src={book.images[0].imageUrl}
@@ -389,16 +393,16 @@
                       <a
                         href="/books/{book.id}"
                         use:routeAction
-                        class="font-medium text-gray-900 hover:text-blue-600 transition-colors line-clamp-1"
+                        class="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors line-clamp-1"
                       >
                         {book.title}
                       </a>
-                      <p class="text-sm text-gray-500">
+                      <p class="text-xs text-gray-500">
                         {book.author}
                       </p>
                     </div>
                     <span
-                      class="px-2.5 py-1 text-xs font-medium rounded-full {statusColors[
+                      class="px-1.5 py-0.5 text-[9px] font-medium rounded-full {statusColors[
                         book.status
                       ]}"
                     >
@@ -407,8 +411,8 @@
                     </span>
                   </div>
 
-                  <div class="flex items-center gap-3 mt-2">
-                    <span class="text-lg font-bold text-blue-600"
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="text-sm font-bold text-blue-600"
                       >{formatPrice(book.price)}</span
                     >
                     <span
@@ -420,31 +424,31 @@
                     </span>
                   </div>
 
-                  <div class="flex items-center justify-between mt-3">
-                    <span class="text-xs text-gray-400">
+                  <div class="flex items-center justify-between mt-2.5">
+                    <span class="text-[10px] text-gray-400">
                       Listed {formatDate(book.createdAt)} •
                       {book.viewCount} views
                     </span>
                     <div
-                      class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-50"
+                      class="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-slate-50"
                     >
                       {#if book.status === 'available'}
                         <button
                           onclick={() => handleMarkSold(book.id)}
-                          class="inline-flex shrink-0 items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl transition-all shadow-sm shadow-emerald-200 hover:shadow-md active:scale-95 whitespace-nowrap"
+                          class="inline-flex shrink-0 items-center justify-center gap-1 px-2.5 py-1 text-[10px] font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition-all shadow-sm shadow-emerald-200 hover:shadow-md active:scale-95 whitespace-nowrap"
                         >
                           Mark Sold
                         </button>
                         <a
                           href="/books/sell?edit={book.id}"
                           use:routeAction
-                          class="inline-flex shrink-0 items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 rounded-xl transition-all shadow-sm shadow-blue-200 hover:shadow-md active:scale-95 whitespace-nowrap"
+                          class="inline-flex shrink-0 items-center justify-center gap-1 px-2.5 py-1 text-[10px] font-bold text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-all shadow-sm shadow-blue-200 hover:shadow-md active:scale-95 whitespace-nowrap"
                         >
                           Edit
                         </a>
                       {:else if book.status === 'sold'}
                         <div
-                          class="flex-1 flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100"
+                          class="flex-1 flex items-center gap-1.5 px-2 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-100"
                         >
                           <svg
                             class="w-3.5 h-3.5"
@@ -469,8 +473,8 @@
                       <button
                         onclick={() => handleDelete(book.id)}
                         class="{book.status === 'sold'
-                          ? 'px-4'
-                          : 'px-3'} inline-flex shrink-0 items-center justify-center gap-1.5 py-2 text-xs font-bold text-rose-500 hover:text-white border border-rose-100 hover:bg-rose-500 rounded-xl transition-all active:scale-95 whitespace-nowrap"
+                          ? 'px-3'
+                          : 'px-2'} inline-flex shrink-0 items-center justify-center gap-1 py-1 text-[10px] font-bold text-rose-500 hover:text-white border border-rose-100 hover:bg-rose-500 rounded-lg transition-all active:scale-95 whitespace-nowrap"
                         title="Delete listing"
                       >
                         <svg
@@ -500,28 +504,30 @@
     <!-- Saved Books Tab -->
     {#if activeTab === 'saved'}
       {#if savedBooksQuery.isLoading}
-        <div class="flex items-center justify-center py-20" in:fade>
+        <div class="flex items-center justify-center py-10" in:fade>
           <LoadingSpinner size="lg" text="Loading saved books..." />
         </div>
       {:else if savedBooksQuery.error}
-        <div class="p-6 bg-white border border-red-100 rounded-2xl text-center">
-          <p class="text-red-600 mb-4">
+        <div
+          class="p-4 bg-white border border-red-100 rounded-2xl text-center text-sm"
+        >
+          <p class="text-red-600 mb-3">
             {savedBooksQuery.error.message}
           </p>
           <button
             onclick={() => savedBooksQuery.refetch()}
-            class="px-4 py-2 bg-red-600 text-white rounded-lg"
+            class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm"
           >
             Try Again
           </button>
         </div>
       {:else if !savedBooksQuery.data || savedBooksQuery.data.length === 0}
         <div
-          class="text-center py-16 bg-white rounded-2xl border border-gray-100"
+          class="text-center py-10 bg-white rounded-2xl border border-gray-100"
           in:fade
         >
           <svg
-            class="w-16 h-16 text-gray-200 mx-auto mb-4"
+            class="w-12 h-12 text-gray-200 mx-auto mb-3"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -533,29 +539,33 @@
               d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
             />
           </svg>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No saved books</h3>
-          <p class="text-gray-500 mb-6">Books you save will appear here.</p>
+          <h3 class="text-base font-medium text-gray-900 mb-2">
+            No saved books
+          </h3>
+          <p class="text-sm text-gray-500 mb-5">
+            Books you save will appear here.
+          </p>
           <a
             href="/books"
             use:routeAction
-            class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors"
+            class="inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors"
           >
             Browse Marketplace
           </a>
         </div>
       {:else}
         <div
-          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5"
           in:fade
         >
           {#each savedBooksQuery.data as saved (saved.id)}
             {#if saved.listing}
               {@const book = saved.listing}
               <div
-                class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
+                class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
               >
                 <a href="/books/{book.id}" use:routeAction>
-                  <div class="h-28 bg-linear-to-br from-blue-50 to-indigo-100">
+                  <div class="h-20 bg-linear-to-br from-blue-50 to-indigo-100">
                     {#if book.images && book.images.length > 0}
                       <img
                         src={book.images[0].imageUrl}
@@ -583,28 +593,28 @@
                     {/if}
                   </div>
                 </a>
-                <div class="p-3">
+                <div class="p-2">
                   <a
                     href="/books/{book.id}"
                     use:routeAction
-                    class="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors line-clamp-1"
+                    class="text-[11px] font-medium text-gray-900 hover:text-blue-600 transition-colors line-clamp-1"
                   >
                     {book.title}
                   </a>
-                  <p class="text-xs text-gray-500 mb-1.5">
+                  <p class="text-[10px] text-gray-500 mb-1">
                     {book.author}
                   </p>
                   <div class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-blue-600"
+                    <span class="text-[11px] sm:text-xs font-bold text-blue-600"
                       >{formatPrice(book.price)}</span
                     >
                     <button
                       onclick={() => handleUnsave(book.id)}
-                      class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      class="p-1 text-red-500 hover:bg-red-50 rounded-md transition-colors"
                       title="Remove from saved"
                     >
                       <svg
-                        class="w-4 h-4"
+                        class="w-3.5 h-3.5"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
@@ -625,28 +635,30 @@
     <!-- My Requests Tab -->
     {#if activeTab === 'requests'}
       {#if myRequestsQuery.isLoading}
-        <div class="flex items-center justify-center py-20" in:fade>
+        <div class="flex items-center justify-center py-10" in:fade>
           <LoadingSpinner size="lg" text="Loading your requests..." />
         </div>
       {:else if myRequestsQuery.error}
-        <div class="p-6 bg-white border border-red-100 rounded-2xl text-center">
-          <p class="text-red-600 mb-4">
+        <div
+          class="p-4 bg-white border border-red-100 rounded-2xl text-center text-sm"
+        >
+          <p class="text-red-600 mb-3">
             {myRequestsQuery.error.message}
           </p>
           <button
             onclick={() => myRequestsQuery.refetch()}
-            class="px-4 py-2 bg-red-600 text-white rounded-lg"
+            class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm"
           >
             Try Again
           </button>
         </div>
       {:else if !myRequestsQuery.data || myRequestsQuery.data.length === 0}
         <div
-          class="text-center py-16 bg-white rounded-2xl border border-gray-100"
+          class="text-center py-10 bg-white rounded-2xl border border-gray-100"
           in:fade
         >
           <svg
-            class="w-16 h-16 text-gray-200 mx-auto mb-4"
+            class="w-12 h-12 text-gray-200 mx-auto mb-3"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -658,29 +670,29 @@
               d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">
+          <h3 class="text-base font-medium text-gray-900 mb-2">
             No requests yet
           </h3>
-          <p class="text-gray-500 mb-6">
+          <p class="text-sm text-gray-500 mb-5">
             Books you request to buy will appear here.
           </p>
           <a
             href="/books"
             use:routeAction
-            class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors"
+            class="inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors"
           >
             Browse Books
           </a>
         </div>
       {:else}
-        <div class="space-y-4" in:fade>
+        <div class="space-y-2.5" in:fade>
           {#each myRequestsQuery.data as request (request.id)}
             {#if request.listing}
               {@const book = request.listing}
               <div
-                class="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition-all group relative overflow-hidden"
+                class="bg-white rounded-xl border border-gray-100 p-2.5 hover:shadow-md transition-all group relative overflow-hidden"
               >
-                <div class="flex gap-4">
+                <div class="flex gap-2.5">
                   <!-- Image -->
                   <a
                     href="/books/{book.id}"
@@ -688,7 +700,7 @@
                     class="flex-shrink-0"
                   >
                     <div
-                      class="w-20 h-24 rounded-lg overflow-hidden bg-gray-100 relative"
+                      class="w-14 h-[4.5rem] rounded-md overflow-hidden bg-gray-100 relative"
                     >
                       {#if book.images && book.images.length > 0}
                         <img
@@ -736,11 +748,11 @@
                         <a
                           href="/books/{book.id}"
                           use:routeAction
-                          class="font-medium text-gray-900 hover:text-blue-600 transition-colors line-clamp-1"
+                          class="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors line-clamp-1"
                         >
                           {book.title}
                         </a>
-                        <p class="text-sm text-gray-500">
+                        <p class="text-[11px] text-gray-500">
                           by {book.author}
                         </p>
                       </div>
@@ -748,7 +760,7 @@
                       <div class="flex flex-col items-end gap-1">
                         {#if request.status === 'requested'}
                           <span
-                            class="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-100 flex items-center gap-1.5"
+                            class="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-100 flex items-center gap-1"
                           >
                             <span
                               class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"
@@ -757,7 +769,7 @@
                           </span>
                         {:else if request.status === 'accepted'}
                           <span
-                            class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1.5"
+                            class="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1"
                           >
                             <svg
                               class="w-3 h-3"
@@ -775,30 +787,30 @@
                           </span>
                         {:else if request.status === 'rejected'}
                           <span
-                            class="px-2.5 py-1 text-xs font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-100"
+                            class="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-100"
                           >
                             Declined
                           </span>
                         {:else}
                           <span
-                            class="px-2.5 py-1 text-xs font-bold rounded-full bg-gray-50 text-gray-600 border border-gray-100"
+                            class="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-gray-50 text-gray-600 border border-gray-100"
                           >
                             {request.status.charAt(0).toUpperCase() +
                               request.status.slice(1)}
                           </span>
                         {/if}
-                        <span class="text-[10px] text-gray-400">
+                        <span class="text-[9px] text-gray-400">
                           Requested {formatDate(request.createdAt)}
                         </span>
                       </div>
                     </div>
 
-                    <div class="flex items-center gap-3 mt-1.5">
-                      <span class="text-lg font-bold text-blue-600"
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-sm font-bold text-blue-600"
                         >{formatPrice(book.price)}</span
                       >
                       <span
-                        class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-gray-100 text-gray-600"
+                        class="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded bg-gray-100 text-gray-600"
                       >
                         {conditionLabels[book.condition]}
                       </span>
@@ -806,18 +818,18 @@
 
                     {#if request.message}
                       <div
-                        class="mt-2 p-2 bg-gray-50 rounded-lg text-xs text-gray-600 italic"
+                        class="mt-1.5 p-1.5 bg-gray-50 rounded-lg text-[11px] text-gray-600 italic"
                       >
                         "{request.message}"
                       </div>
                     {/if}
 
-                    <div class="flex items-center justify-between mt-3">
+                    <div class="flex items-center justify-between mt-2">
                       {#if request.status === 'accepted'}
                         <a
                           href="/books/{book.id}"
                           use:routeAction
-                          class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+                          class="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
                         >
                           <svg
                             class="w-3.5 h-3.5"
@@ -839,7 +851,7 @@
 
                       <button
                         onclick={() => handleDeleteRequest(request.id)}
-                        class="p-2 text-gray-300 hover:text-rose-500 transition-colors rounded-lg hover:bg-rose-50 group/delete"
+                        class="p-1.5 text-gray-300 hover:text-rose-500 transition-colors rounded-lg hover:bg-rose-50 group/delete"
                         title="Delete from history"
                       >
                         <svg
@@ -883,3 +895,4 @@
     overflow: hidden;
   }
 </style>
+

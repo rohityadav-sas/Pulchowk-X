@@ -271,23 +271,23 @@
 </script>
 
 <div
-    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
-    style="height: calc(100vh - 12rem);"
+    class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+    style="height: calc(100vh - 14rem);"
     in:fly={{ y: 20, duration: 400 }}
 >
     <div class="flex h-full">
         <!-- Conversations List (Left Panel) -->
         <div
-            class="w-full md:w-80 lg:w-96 border-r border-gray-100 flex flex-col {selectedConversationId
+            class="w-full md:w-72 lg:w-80 border-r border-gray-100 flex flex-col {selectedConversationId
                 ? 'hidden md:flex'
                 : 'flex'}"
         >
             <!-- Header -->
             <div
-                class="p-4 border-b border-gray-100 bg-linear-to-r from-blue-50 to-indigo-50"
+                class="p-3 border-b border-gray-100 bg-linear-to-r from-blue-50 to-indigo-50"
             >
-                <h1 class="text-lg font-bold text-gray-900">Messages</h1>
-                <p class="text-sm text-gray-500">
+                <h1 class="text-base font-bold text-gray-900">Messages</h1>
+                <p class="text-xs text-gray-500">
                     Chat with buyers and sellers
                 </p>
             </div>
@@ -295,13 +295,13 @@
             <!-- Conversations -->
             <div class="flex-1 overflow-y-auto">
                 {#if conversationsQuery.isLoading}
-                    <div class="flex items-center justify-center py-12">
+                    <div class="flex items-center justify-center py-8">
                         <LoadingSpinner text="Loading conversations..." />
                     </div>
                 {:else if conversationsQuery.data && conversationsQuery.data.length === 0}
-                    <div class="p-6 text-center text-gray-500">
+                    <div class="p-4 text-center text-gray-500">
                         <svg
-                            class="w-16 h-16 mx-auto mb-4 text-gray-200"
+                            class="w-12 h-12 mx-auto mb-3 text-gray-200"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -313,8 +313,8 @@
                                 d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                             ></path>
                         </svg>
-                        <p class="font-medium">No conversations yet</p>
-                        <p class="text-sm mt-1">
+                        <p class="text-sm font-medium">No conversations yet</p>
+                        <p class="text-xs mt-1">
                             Start a chat from a book listing
                         </p>
                     </div>
@@ -332,7 +332,7 @@
                             onkeydown={(e) =>
                                 (e.key === "Enter" || e.key === " ") &&
                                 selectConversation(conv.id)}
-                            class="w-full p-4 flex items-start gap-3 text-left hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 relative group {selectedConversationId ===
+                            class="w-full p-3 flex items-start gap-2.5 text-left hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 relative group {selectedConversationId ===
                             conv.id
                                 ? 'bg-blue-50'
                                 : ''}"
@@ -342,11 +342,11 @@
                                 <img
                                     src={other.image}
                                     alt=""
-                                    class="w-12 h-12 rounded-full flex-shrink-0"
+                                    class="w-10 h-10 rounded-full flex-shrink-0"
                                 />
                             {:else}
                                 <div
-                                    class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+                                    class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
                                 >
                                     {other?.name?.charAt(0) || "?"}
                                 </div>
@@ -357,12 +357,12 @@
                                     class="flex items-center justify-between gap-2"
                                 >
                                     <span
-                                        class="font-medium text-gray-900 truncate"
+                                        class="text-sm font-medium text-gray-900 truncate"
                                         >{other?.name || "Unknown"}</span
                                     >
                                     {#if lastMessage}
                                         <span
-                                            class="text-xs text-gray-400 flex-shrink-0"
+                                            class="text-[10px] text-gray-400 flex-shrink-0"
                                             >{formatTime(
                                                 lastMessage.createdAt,
                                             )}</span
@@ -371,14 +371,14 @@
                                 </div>
                                 {#if conv.listing}
                                     <p
-                                        class="text-xs text-blue-600 truncate mt-0.5"
+                                        class="text-[10px] text-blue-600 truncate mt-0.5"
                                     >
                                         Book: {conv.listing.title}
                                     </p>
                                 {/if}
                                 {#if lastMessage}
                                     <p
-                                        class="text-sm text-gray-500 truncate mt-1"
+                                        class="text-xs text-gray-500 truncate mt-1"
                                     >
                                         {lastMessage.content}
                                     </p>
@@ -388,11 +388,11 @@
                             <!-- Delete Button -->
                             <button
                                 onclick={(e) => openDeleteModal(conv, e)}
-                                class="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
                                 title="Delete"
                             >
                                 <svg
-                                    class="w-5 h-5"
+                                    class="w-4 h-4"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -420,16 +420,16 @@
             {#if selectedConversationId && selectedConversation}
                 <!-- Chat Header -->
                 <div
-                    class="p-4 border-b border-gray-100 bg-white flex items-center gap-3"
+                    class="p-3 border-b border-gray-100 bg-white flex items-center gap-2.5"
                 >
                     <!-- Back button (mobile) -->
                     <button
                         onclick={() => (selectedConversationId = null)}
                         aria-label="Back"
-                        class="md:hidden p-2 -ml-2 text-gray-500 hover:text-gray-700"
+                        class="md:hidden p-1.5 -ml-1 text-gray-500 hover:text-gray-700"
                     >
                         <svg
-                            class="w-5 h-5"
+                            class="w-4 h-4"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -448,21 +448,21 @@
                             <img
                                 src={otherUser?.image}
                                 alt=""
-                                class="w-10 h-10 rounded-full"
+                                class="w-9 h-9 rounded-full"
                             />
                         {:else}
                             <div
-                                class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold"
+                                class="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-bold"
                             >
                                 {otherUser?.name?.charAt(0) || "?"}
                             </div>
                         {/if}
                         <div class="flex-1 min-w-0">
-                            <p class="font-medium text-gray-900">
+                            <p class="text-sm font-medium text-gray-900">
                                 {otherUser?.name}
                             </p>
                             {#if selectedConversation.listing}
-                                <p class="text-xs text-gray-500 truncate">
+                                <p class="text-[10px] text-gray-500 truncate">
                                     {isBuyer ? "Seller" : "Buyer"} • {selectedConversation
                                         .listing.title}
                                 </p>
@@ -474,7 +474,7 @@
                     {#if selectedConversation.listing}
                         <a
                             href="/books/{selectedConversation.listingId}"
-                            class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors"
+                            class="px-2.5 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md text-gray-600 transition-colors"
                         >
                             View Book
                         </a>
@@ -484,7 +484,7 @@
                 <!-- Messages -->
                 <div
                     bind:this={messagesContainer}
-                    class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50"
+                    class="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50/50"
                 >
                     {#if messagesQuery.isLoading}
                         <div class="flex items-center justify-center py-8">
@@ -510,12 +510,12 @@
                                         : 'order-1'}"
                                 >
                                     <div
-                                        class="px-4 py-2.5 rounded-2xl {isOwn
-                                            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-md'
-                                            : 'bg-white border border-gray-100 text-gray-900 rounded-bl-md shadow-sm'}"
+                                        class="px-3 py-2 rounded-xl {isOwn
+                                            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-sm'
+                                            : 'bg-white border border-gray-100 text-gray-900 rounded-bl-sm shadow-sm'}"
                                     >
                                         <p
-                                            class="text-sm whitespace-pre-wrap break-words"
+                                            class="text-xs whitespace-pre-wrap break-words"
                                         >
                                             {message.content}
                                         </p>
@@ -534,25 +534,25 @@
                 </div>
 
                 <!-- Message Input -->
-                <div class="p-4 border-t border-gray-100 bg-white">
+                <div class="p-3 border-t border-gray-100 bg-white">
                     <form
                         onsubmit={(e) => {
                             e.preventDefault();
                             handleSendMessage();
                         }}
-                        class="flex items-center gap-3"
+                        class="flex items-center gap-2"
                     >
                         <input
                             type="text"
                             bind:value={messageInput}
                             placeholder="Type a message..."
                             disabled={sendingMessage}
-                            class="flex-1 px-4 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none text-sm disabled:opacity-50"
+                            class="flex-1 px-3 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none text-xs disabled:opacity-50"
                         />
                         <button
                             type="submit"
                             disabled={!messageInput.trim() || sendingMessage}
-                            class="p-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            class="p-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
                             {#if sendingMessage}
                                 <div
@@ -560,7 +560,7 @@
                                 ></div>
                             {:else}
                                 <svg
-                                    class="w-5 h-5"
+                                    class="w-4 h-4"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -580,13 +580,13 @@
                 <!-- New conversation view (Same as original) -->
                 <div class="flex-1 flex flex-col">
                     <div
-                        class="p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center gap-3"
+                        class="p-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center gap-2.5"
                     >
                         <div
-                            class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white"
+                            class="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white"
                         >
                             <svg
-                                class="w-5 h-5"
+                                class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -600,23 +600,23 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="font-medium text-gray-900">
+                            <p class="text-sm font-medium text-gray-900">
                                 Start New Chat
                             </p>
-                            <p class="text-xs text-gray-500">
+                            <p class="text-[10px] text-gray-500">
                                 Send your first message to the seller
                             </p>
                         </div>
                     </div>
                     <div
-                        class="flex-1 flex items-center justify-center p-8 bg-gray-50/50"
+                        class="flex-1 flex items-center justify-center p-5 bg-gray-50/50"
                     >
                         <div class="text-center max-w-sm">
                             <div
-                                class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"
+                                class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3"
                             >
                                 <svg
-                                    class="w-10 h-10 text-blue-600"
+                                    class="w-7 h-7 text-blue-600"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -629,36 +629,36 @@
                                     />
                                 </svg>
                             </div>
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">
+                            <h3 class="text-base font-bold text-gray-900 mb-1.5">
                                 Ready to chat!
                             </h3>
-                            <p class="text-gray-500 text-sm">
+                            <p class="text-gray-500 text-xs">
                                 Type your message below to start a conversation
                                 about this book listing.
                             </p>
                         </div>
                     </div>
                     <!-- Message Input -->
-                    <div class="p-4 border-t border-gray-100 bg-white">
+                    <div class="p-3 border-t border-gray-100 bg-white">
                         <form
                             onsubmit={(e) => {
                                 e.preventDefault();
                                 handleSendMessage();
                             }}
-                            class="flex items-center gap-3"
+                            class="flex items-center gap-2"
                         >
                             <input
                                 type="text"
                                 bind:value={messageInput}
                                 placeholder="Type your first message..."
                                 disabled={sendingMessage}
-                                class="flex-1 px-4 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none text-sm"
+                                class="flex-1 px-3 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none text-xs"
                             />
                             <button
                                 type="submit"
                                 disabled={!messageInput.trim() ||
                                     sendingMessage}
-                                class="px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all"
+                                class="px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all"
                             >
                                 Send
                             </button>
@@ -667,11 +667,11 @@
                 </div>
             {:else}
                 <div
-                    class="flex-1 flex items-center justify-center text-gray-400 p-8 text-center bg-gray-50/50"
+                    class="flex-1 flex items-center justify-center text-gray-400 p-5 text-center bg-gray-50/50"
                 >
                     <div class="max-w-xs transition-opacity duration-300">
                         <svg
-                            class="w-20 h-20 mx-auto mb-4 opacity-10"
+                            class="w-14 h-14 mx-auto mb-3 opacity-10"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -683,10 +683,10 @@
                                 d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                             />
                         </svg>
-                        <p class="font-bold text-lg text-gray-500">
+                        <p class="font-bold text-base text-gray-500">
                             Pick a chat
                         </p>
-                        <p class="text-sm mt-1 opacity-70">
+                        <p class="text-xs mt-1 opacity-70">
                             Choose a conversation from the left to start
                             messaging.
                         </p>
@@ -704,15 +704,15 @@
         in:fade={{ duration: 200 }}
     >
         <div
-            class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8"
+            class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6"
             in:fly={{ y: 20, duration: 300 }}
         >
             <div class="text-center">
                 <div
-                    class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4"
+                    class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3"
                 >
                     <svg
-                        class="w-8 h-8 text-red-500"
+                        class="w-6 h-6 text-red-500"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -725,25 +725,25 @@
                         />
                     </svg>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-2">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">
                     Delete Chat?
                 </h3>
-                <p class="text-sm text-gray-500 mb-8">
+                <p class="text-xs text-gray-500 mb-6">
                     This will remove the conversation record for you. It's
                     permanent!
                 </p>
             </div>
-            <div class="flex gap-4">
+            <div class="flex gap-3">
                 <button
                     onclick={closeDeleteModal}
-                    class="flex-1 px-4 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                    class="flex-1 px-3 py-2 bg-gray-100 text-gray-600 text-sm font-bold rounded-lg hover:bg-gray-200 transition-colors"
                 >
                     Cancel
                 </button>
                 <button
                     onclick={handleDeleteConversation}
                     disabled={deletingConversation}
-                    class="flex-1 px-4 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors shadow-lg shadow-red-100 disabled:opacity-50"
+                    class="flex-1 px-3 py-2 bg-red-500 text-white text-sm font-bold rounded-lg hover:bg-red-600 transition-colors shadow-lg shadow-red-100 disabled:opacity-50"
                 >
                     {#if deletingConversation}
                         <div
