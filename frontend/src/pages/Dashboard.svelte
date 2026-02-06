@@ -108,27 +108,27 @@
   }
 </script>
 
-<div class="min-h-[calc(100vh-4rem)] px-4 py-8 sm:px-6 lg:px-8">
-  <div class="mx-auto max-w-7xl space-y-6">
+<div class="min-h-[calc(100vh-4rem)] px-4 py-6 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-7xl space-y-5">
     {#if $session.isPending}
       <section
-        class="rounded-3xl border border-cyan-100/80 bg-white/80 p-12 text-center backdrop-blur-sm"
+        class="rounded-3xl border border-cyan-100/80 bg-white/80 p-10 text-center backdrop-blur-sm"
       >
-        <div class="mx-auto flex w-fit items-center gap-2.5">
+        <div class="mx-auto flex w-fit items-center gap-2">
           <div
-            class="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-500"
+            class="h-2 w-2 animate-bounce rounded-full bg-cyan-500"
             style="animation-delay: 0ms"
           ></div>
           <div
-            class="h-2.5 w-2.5 animate-bounce rounded-full bg-blue-500"
+            class="h-2 w-2 animate-bounce rounded-full bg-blue-500"
             style="animation-delay: 140ms"
           ></div>
           <div
-            class="h-2.5 w-2.5 animate-bounce rounded-full bg-indigo-500"
+            class="h-2 w-2 animate-bounce rounded-full bg-indigo-500"
             style="animation-delay: 280ms"
           ></div>
         </div>
-        <p class="mt-4 text-sm font-semibold text-slate-500">
+        <p class="mt-3 text-[13px] font-semibold text-slate-500">
           Loading your dashboard...
         </p>
       </section>
@@ -136,11 +136,11 @@
       <section
         class="overflow-hidden rounded-3xl border border-cyan-100/80 bg-white/82 backdrop-blur-xl"
       >
-        <div class="p-6 sm:p-8">
-          <div class="flex flex-wrap items-start justify-between gap-4">
-            <div class="flex min-w-0 items-center gap-4">
+        <div class="p-5 sm:p-6">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="flex min-w-0 items-center gap-3">
               <div
-                class="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-cyan-100 bg-cyan-50 text-cyan-700 shadow-sm"
+                class="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-cyan-100 bg-cyan-50 text-cyan-700 shadow-sm"
               >
                 {#if $session.data.user.image}
                   <img
@@ -150,7 +150,7 @@
                   />
                 {:else}
                   <div
-                    class="flex h-full w-full items-center justify-center text-2xl font-black"
+                    class="flex h-full w-full items-center justify-center text-xl font-black"
                   >
                     {userInitial}
                   </div>
@@ -158,14 +158,14 @@
               </div>
               <div class="min-w-0">
                 <p
-                  class="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-cyan-700"
+                  class="inline-flex items-center gap-1.5 rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-cyan-700"
                 >
                   Student Dashboard
                 </p>
-                <h1 class="mt-2 truncate text-2xl font-black text-slate-900">
+                <h1 class="mt-1.5 truncate text-xl font-black text-slate-900">
                   {$session.data.user.name}
                 </h1>
-                <p class="truncate text-sm text-slate-500">
+                <p class="truncate text-[13px] text-slate-500">
                   {$session.data.user.email}
                 </p>
               </div>
@@ -175,14 +175,14 @@
               <a
                 href="/classroom"
                 use:route
-                class="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
+                class="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-[13px] font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
               >
                 Classroom
               </a>
               <button
                 onclick={handleSignOut}
                 disabled={loading}
-                class="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                class="inline-flex h-9 items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 text-[13px] font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? "Signing Out..." : "Sign Out"}
               </button>
@@ -191,10 +191,10 @@
 
           {#if error}
             <div
-              class="mt-5 flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3"
+              class="mt-4 flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3.5 py-2.5"
             >
               <svg
-                class="mt-0.5 h-4 w-4 shrink-0 text-rose-600"
+                class="mt-0.5 h-3.5 w-3.5 shrink-0 text-rose-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -206,32 +206,32 @@
                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 ></path>
               </svg>
-              <p class="text-sm font-medium text-rose-700">{error}</p>
+              <p class="text-[13px] font-medium text-rose-700">{error}</p>
             </div>
           {/if}
 
-          <div class="mt-6 grid gap-3 sm:grid-cols-3">
-            <div class="rounded-2xl border border-cyan-100 bg-white p-4">
-              <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+          <div class="mt-5 grid gap-2 sm:grid-cols-3">
+            <div class="rounded-2xl border border-cyan-100 bg-white p-3">
+              <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
                 Total Enrollments
               </p>
-              <p class="mt-1 text-3xl font-black text-slate-900">
+              <p class="mt-1 text-2xl font-black text-slate-900">
                 {totalEnrollments}
               </p>
             </div>
-            <div class="rounded-2xl border border-blue-100 bg-white p-4">
-              <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+            <div class="rounded-2xl border border-blue-100 bg-white p-3">
+              <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
                 Upcoming Events
               </p>
-              <p class="mt-1 text-3xl font-black text-blue-700">
+              <p class="mt-1 text-2xl font-black text-blue-700">
                 {upcomingEnrollments}
               </p>
             </div>
-            <div class="rounded-2xl border border-emerald-100 bg-white p-4">
-              <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+            <div class="rounded-2xl border border-emerald-100 bg-white p-3">
+              <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
                 Attended
               </p>
-              <p class="mt-1 text-3xl font-black text-emerald-700">
+              <p class="mt-1 text-2xl font-black text-emerald-700">
                 {attendedEnrollments}
               </p>
             </div>
@@ -239,16 +239,16 @@
 
           {#if nextEnrollment}
             <div
-              class="mt-5 rounded-2xl border border-cyan-200 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(14,165,233,0.12),rgba(255,255,255,0.95)_50%,rgba(56,189,248,0.06)_100%)] p-4"
+              class="mt-4 rounded-2xl border border-cyan-200 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(14,165,233,0.12),rgba(255,255,255,0.95)_50%,rgba(56,189,248,0.06)_100%)] p-3"
             >
-              <p class="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">
+              <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-700">
                 Next Up
               </p>
               <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
-                <p class="text-sm font-bold text-slate-900">
+                <p class="text-[13px] font-bold text-slate-900">
                   {nextEnrollment.event?.title || "Upcoming event"}
                 </p>
-                <p class="text-xs font-medium text-slate-500">
+                <p class="text-[11px] font-medium text-slate-500">
                   {nextEnrollment.event?.eventStartTime
                     ? `${formatDate(nextEnrollment.event.eventStartTime)} at ${formatTime(nextEnrollment.event.eventStartTime)}`
                     : "Schedule to be announced"}
@@ -263,11 +263,11 @@
         class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white/85 backdrop-blur-sm"
       >
         <div
-          class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-6 py-5"
+          class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4"
         >
-          <h2 class="flex items-center gap-2 text-lg font-black text-slate-900">
+          <h2 class="flex items-center gap-2 text-base font-black text-slate-900">
             <svg
-              class="h-5 w-5 text-blue-600"
+              class="h-4 w-4 text-blue-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -282,18 +282,18 @@
             My Event Enrollments
           </h2>
           <span
-            class="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-500"
+            class="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500"
           >
             {totalEnrollments} total
           </span>
         </div>
 
-        <div class="p-5 sm:p-6">
+        <div class="p-4 sm:p-5">
           {#if query.isLoading}
             <div class="space-y-3">
               {#each Array(3) as _}
                 <div
-                  class="h-24 animate-pulse rounded-2xl border border-slate-100 bg-slate-50"
+                  class="h-20 animate-pulse rounded-2xl border border-slate-100 bg-slate-50"
                 ></div>
               {/each}
             </div>
@@ -303,10 +303,10 @@
                 <a
                   href={getEnrollmentHref(registration)}
                   use:route
-                  class="group flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-blue-200 hover:bg-blue-50/40 sm:flex-row sm:items-center"
+                  class="group flex flex-col gap-2.5 rounded-2xl border border-slate-200 bg-white p-3 transition hover:border-blue-200 hover:bg-blue-50/40 sm:flex-row sm:items-center"
                 >
                   <div
-                    class="h-14 w-20 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100"
+                    class="h-12 w-16 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100"
                   >
                     {#if registration.event?.bannerUrl}
                       <img
@@ -345,16 +345,16 @@
 
                   <div class="min-w-0 flex-1">
                     <h3
-                      class="truncate text-base font-bold text-slate-900 transition group-hover:text-blue-700"
+                      class="truncate text-[15px] font-bold text-slate-900 transition group-hover:text-blue-700"
                     >
                       {registration.event?.title || "Event"}
                     </h3>
-                    <p class="truncate text-sm text-slate-500">
+                    <p class="truncate text-[13px] text-slate-500">
                       {registration.event?.club?.name || "Campus Club"}
                     </p>
 
                     <div
-                      class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-slate-500"
+                      class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium text-slate-500"
                     >
                       <span>
                         {registration.event?.eventStartTime
@@ -369,12 +369,12 @@
 
                   <div class="flex items-center gap-2 sm:ml-4">
                     <span
-                      class={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${getStatusClasses(registration.status)}`}
+                      class={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${getStatusClasses(registration.status)}`}
                     >
                       {registration.status}
                     </span>
                     <svg
-                      class="hidden h-4 w-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-blue-600 sm:block"
+                      class="hidden h-3.5 w-3.5 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-blue-600 sm:block"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -391,12 +391,12 @@
               {/each}
             </div>
           {:else}
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center">
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
               <div
-                class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-400"
+                class="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-400"
               >
                 <svg
-                  class="h-6 w-6"
+                  class="h-5 w-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -409,17 +409,17 @@
                   ></path>
                 </svg>
               </div>
-              <p class="text-sm font-medium text-slate-600">
+              <p class="text-[13px] font-medium text-slate-600">
                 You have not registered for any events yet.
               </p>
               <a
                 href="/events"
                 use:route
-                class="mt-4 inline-flex h-10 items-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-700"
+                class="mt-4 inline-flex h-9 items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-[13px] font-semibold text-white transition hover:bg-blue-700"
               >
                 Explore Events
                 <svg
-                  class="h-4 w-4"
+                  class="h-3.5 w-3.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -437,17 +437,17 @@
         </div>
       </section>
 
-      <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <a
           href="/events"
           use:route
-          class="group rounded-2xl border border-blue-100 bg-white/85 p-5 transition hover:border-blue-200 hover:bg-blue-50/40"
+          class="group rounded-2xl border border-blue-100 bg-white/85 p-4 transition hover:border-blue-200 hover:bg-blue-50/40"
         >
           <div
-            class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-700"
+            class="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-700"
           >
             <svg
-              class="h-5 w-5"
+              class="h-4 w-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -460,10 +460,10 @@
               ></path>
             </svg>
           </div>
-          <h3 class="text-base font-bold text-slate-900 group-hover:text-blue-700">
+          <h3 class="text-[15px] font-bold text-slate-900 group-hover:text-blue-700">
             Events
           </h3>
-          <p class="mt-1 text-sm text-slate-500">
+          <p class="mt-1 text-[13px] text-slate-500">
             Discover upcoming competitions and workshops.
           </p>
         </a>
@@ -471,13 +471,13 @@
         <a
           href="/clubs"
           use:route
-          class="group rounded-2xl border border-cyan-100 bg-white/85 p-5 transition hover:border-cyan-200 hover:bg-cyan-50/40"
+          class="group rounded-2xl border border-cyan-100 bg-white/85 p-4 transition hover:border-cyan-200 hover:bg-cyan-50/40"
         >
           <div
-            class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700"
+            class="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-100 text-cyan-700"
           >
             <svg
-              class="h-5 w-5"
+              class="h-4 w-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -490,10 +490,10 @@
               ></path>
             </svg>
           </div>
-          <h3 class="text-base font-bold text-slate-900 group-hover:text-cyan-700">
+          <h3 class="text-[15px] font-bold text-slate-900 group-hover:text-cyan-700">
             Clubs
           </h3>
-          <p class="mt-1 text-sm text-slate-500">
+          <p class="mt-1 text-[13px] text-slate-500">
             Follow communities and join the right team.
           </p>
         </a>
@@ -501,13 +501,13 @@
         <a
           href="/map"
           use:route
-          class="group rounded-2xl border border-indigo-100 bg-white/85 p-5 transition hover:border-indigo-200 hover:bg-indigo-50/40"
+          class="group rounded-2xl border border-indigo-100 bg-white/85 p-4 transition hover:border-indigo-200 hover:bg-indigo-50/40"
         >
           <div
-            class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700"
+            class="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700"
           >
             <svg
-              class="h-5 w-5"
+              class="h-4 w-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -520,10 +520,10 @@
               ></path>
             </svg>
           </div>
-          <h3 class="text-base font-bold text-slate-900 group-hover:text-indigo-700">
+          <h3 class="text-[15px] font-bold text-slate-900 group-hover:text-indigo-700">
             Campus Map
           </h3>
-          <p class="mt-1 text-sm text-slate-500">
+          <p class="mt-1 text-[13px] text-slate-500">
             Find departments, labs, and offices quickly.
           </p>
         </a>
@@ -531,13 +531,13 @@
         <a
           href="/classroom"
           use:route
-          class="group rounded-2xl border border-emerald-100 bg-white/85 p-5 transition hover:border-emerald-200 hover:bg-emerald-50/40"
+          class="group rounded-2xl border border-emerald-100 bg-white/85 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/40"
         >
           <div
-            class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700"
+            class="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700"
           >
             <svg
-              class="h-5 w-5"
+              class="h-4 w-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -556,23 +556,23 @@
               ></path>
             </svg>
           </div>
-          <h3 class="text-base font-bold text-slate-900 group-hover:text-emerald-700">
+          <h3 class="text-[15px] font-bold text-slate-900 group-hover:text-emerald-700">
             Classroom
           </h3>
-          <p class="mt-1 text-sm text-slate-500">
+          <p class="mt-1 text-[13px] text-slate-500">
             Continue learning, assignments, and updates.
           </p>
         </a>
       </section>
     {:else}
       <section
-        class="mx-auto max-w-xl rounded-3xl border border-slate-200 bg-white/85 p-10 text-center backdrop-blur-sm"
+        class="mx-auto max-w-xl rounded-3xl border border-slate-200 bg-white/85 p-8 text-center backdrop-blur-sm"
       >
         <div
-          class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"
+          class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"
         >
           <svg
-            class="h-7 w-7"
+            class="h-6 w-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -585,14 +585,14 @@
             ></path>
           </svg>
         </div>
-        <h2 class="text-2xl font-black text-slate-900">Access Restricted</h2>
-        <p class="mt-2 text-sm text-slate-500">
+        <h2 class="text-xl font-black text-slate-900">Access Restricted</h2>
+        <p class="mt-2 text-[13px] text-slate-500">
           Sign in to access your personalized dashboard and event activity.
         </p>
         <a
           href="/register"
           use:route
-          class="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white transition hover:bg-blue-700"
+          class="mt-5 inline-flex h-10 items-center justify-center rounded-xl bg-blue-600 px-5 text-[13px] font-semibold text-white transition hover:bg-blue-700"
         >
           Sign In
         </a>

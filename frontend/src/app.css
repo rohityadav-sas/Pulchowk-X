@@ -12,7 +12,12 @@
   body {
     font-family: var(--font-body);
     @apply text-gray-900 antialiased;
-    background: radial-gradient(circle at top left, #ecfeff 0%, #f8fafc 35%, #eef2ff 100%);
+    background: radial-gradient(
+      circle at top left,
+      #ecfeff 0%,
+      #f8fafc 35%,
+      #eef2ff 100%
+    );
   }
 
   h1,

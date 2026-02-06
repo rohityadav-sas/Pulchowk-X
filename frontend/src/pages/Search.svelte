@@ -51,11 +51,11 @@
 
 </script>
 
-<div class="min-h-[calc(100vh-4rem)] bg-linear-to-b from-cyan-50 via-white to-blue-50 px-4 py-8 sm:px-6 lg:px-8">
-  <div class="max-w-6xl mx-auto space-y-8">
-    <section class="rounded-3xl border border-cyan-100 bg-white/80 backdrop-blur-sm p-8 shadow-xl shadow-cyan-100/50" in:fly={{ y: 16, duration: 300 }}>
-      <p class="text-xs uppercase tracking-[0.2em] text-cyan-600 font-bold inline-flex items-center gap-2">
-        <svg class="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="min-h-[calc(100vh-4rem)] bg-linear-to-b from-cyan-50 via-white to-blue-50 px-4 py-6 sm:px-6 lg:px-8">
+  <div class="max-w-6xl mx-auto space-y-6">
+    <section class="rounded-3xl border border-cyan-100 bg-white/80 backdrop-blur-sm p-6 shadow-lg shadow-cyan-100/45" in:fly={{ y: 16, duration: 300 }}>
+      <p class="text-[11px] uppercase tracking-[0.18em] text-cyan-600 font-bold inline-flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -65,18 +65,18 @@
         </svg>
         Global Search
       </p>
-      <h1 class="mt-2 text-3xl sm:text-4xl font-black text-slate-900">
+      <h1 class="mt-2 text-2xl sm:text-3xl font-black text-slate-900">
         Results for <span class="text-cyan-600">"{searchTerm || '...'}"</span>
       </h1>
-      <p class="mt-3 text-slate-500 max-w-3xl">
+      <p class="mt-2 text-sm text-slate-500 max-w-3xl">
         Unified search across clubs, events, books, notices, and campus places.
       </p>
     </section>
 
     {#if searchTerm.length < 2}
-      <section class="rounded-3xl border border-slate-200 bg-white p-10 text-center" in:fade>
-        <div class="mx-auto mb-4 w-14 h-14 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <section class="rounded-3xl border border-slate-200 bg-white p-8 text-center" in:fade>
+        <div class="mx-auto mb-3 w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -85,25 +85,25 @@
             />
           </svg>
         </div>
-        <h2 class="text-2xl font-bold text-slate-900">Type at least 2 characters</h2>
-        <p class="mt-2 text-slate-500">Try searching "robotics", "library", "civil", or "results".</p>
+        <h2 class="text-xl font-bold text-slate-900">Type at least 2 characters</h2>
+        <p class="mt-2 text-sm text-slate-500">Try searching "robotics", "library", "civil", or "results".</p>
       </section>
     {:else if searchQuery.isLoading}
-      <section class="rounded-3xl border border-slate-200 bg-white p-16 flex justify-center" in:fade>
+      <section class="rounded-3xl border border-slate-200 bg-white p-12 flex justify-center" in:fade>
         <LoadingSpinner size="lg" text="Searching all modules..." />
       </section>
     {:else if searchQuery.error}
-      <section class="rounded-3xl border border-rose-200 bg-rose-50 p-10" in:fade>
-        <h2 class="text-2xl font-bold text-rose-700">Search failed</h2>
-        <p class="mt-2 text-rose-600">{searchQuery.error.message}</p>
+      <section class="rounded-3xl border border-rose-200 bg-rose-50 p-8" in:fade>
+        <h2 class="text-xl font-bold text-rose-700">Search failed</h2>
+        <p class="mt-2 text-sm text-rose-600">{searchQuery.error.message}</p>
       </section>
     {:else if searchQuery.data}
       {@const data = searchQuery.data}
-      <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" transition:fade>
-        <article class="rounded-2xl border border-cyan-100 bg-white p-5 shadow-sm">
-          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <span class="w-8 h-8 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" transition:fade>
+        <article class="rounded-2xl border border-cyan-100 bg-white p-4 shadow-sm">
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -114,21 +114,21 @@
             </span>
             Clubs ({data.clubs.length})
           </h3>
-          <div class="mt-3 space-y-2">
+          <div class="mt-2.5 space-y-1.5">
             {#if data.clubs.length === 0}
-              <p class="text-sm text-slate-500">No matches.</p>
+              <p class="text-[13px] text-slate-500">No matches.</p>
             {:else}
               {#each data.clubs as club}
-                <a use:route href={`/clubs/${club.id}`} class="group flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-cyan-50 text-slate-700 hover:text-cyan-700 transition">
-                  <div class="w-9 h-9 rounded-xl bg-cyan-100 overflow-hidden flex items-center justify-center shrink-0">
+                <a use:route href={`/clubs/${club.id}`} class="group flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 hover:bg-cyan-50 text-slate-700 hover:text-cyan-700 transition">
+                  <div class="w-8 h-8 rounded-lg bg-cyan-100 overflow-hidden flex items-center justify-center shrink-0">
                     {#if club.logoUrl}
                       <img src={club.logoUrl} alt={club.name} class="w-full h-full object-cover" />
                     {:else}
-                      <span class="text-sm font-bold text-cyan-700">{club.name.charAt(0).toUpperCase()}</span>
+                      <span class="text-[13px] font-bold text-cyan-700">{club.name.charAt(0).toUpperCase()}</span>
                     {/if}
                   </div>
-                  <span class="truncate flex-1">{club.name}</span>
-                  <svg class="w-4 h-4 text-slate-300 group-hover:text-cyan-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span class="truncate flex-1 text-[13px]">{club.name}</span>
+                  <svg class="w-3.5 h-3.5 text-slate-300 group-hover:text-cyan-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </a>
@@ -137,10 +137,10 @@
           </div>
         </article>
 
-        <article class="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm">
-          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <span class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <article class="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -151,13 +151,13 @@
             </span>
             Events ({data.events.length})
           </h3>
-          <div class="mt-3 space-y-2">
+          <div class="mt-2.5 space-y-1.5">
             {#if data.events.length === 0}
-              <p class="text-sm text-slate-500">No matches.</p>
+              <p class="text-[13px] text-slate-500">No matches.</p>
             {:else}
               {#each data.events as event}
-                <a use:route href={`/clubs/${event.clubId}/events/${event.id}`} class="group flex items-start gap-3 rounded-lg px-3 py-2 hover:bg-blue-50 transition">
-                  <div class="w-16 h-12 mt-0.5 rounded-xl border border-blue-100 bg-blue-50 overflow-hidden flex items-center justify-center shrink-0">
+                <a use:route href={`/clubs/${event.clubId}/events/${event.id}`} class="group flex items-start gap-2.5 rounded-lg px-2.5 py-1.5 hover:bg-blue-50 transition">
+                  <div class="w-14 h-10 mt-0.5 rounded-lg border border-blue-100 bg-blue-50 overflow-hidden flex items-center justify-center shrink-0">
                     {#if event.bannerUrl}
                       <img
                         src={event.bannerUrl}
@@ -166,7 +166,7 @@
                         loading="lazy"
                       />
                     {:else}
-                      <svg class="w-4 h-4 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-3.5 h-3.5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                           stroke-linecap="round"
                           stroke-linejoin="round"
@@ -178,13 +178,13 @@
                     {/if}
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="font-semibold text-slate-800 flex items-center justify-between gap-2">
+                    <p class="text-[13px] font-semibold text-slate-800 flex items-center justify-between gap-2">
                       <span class="truncate">{event.title}</span>
-                      <svg class="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                       </svg>
                     </p>
-                    <p class="text-xs text-slate-500 truncate">{event.club?.name || 'Event'}</p>
+                    <p class="text-[11px] text-slate-500 truncate">{event.club?.name || 'Event'}</p>
                   </div>
                 </a>
               {/each}
@@ -192,10 +192,10 @@
           </div>
         </article>
 
-        <article class="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
-          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <article class="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm">
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -206,14 +206,14 @@
             </span>
             Books ({data.books.length})
           </h3>
-          <div class="mt-3 space-y-2">
+          <div class="mt-2.5 space-y-1.5">
             {#if data.books.length === 0}
-              <p class="text-sm text-slate-500">No matches.</p>
+              <p class="text-[13px] text-slate-500">No matches.</p>
             {:else}
               {#each data.books as book}
-                <a use:route href={`/books/${book.id}`} class="group flex items-start gap-3 rounded-lg px-3 py-2 hover:bg-emerald-50 transition">
-                  <div class="w-9 h-9 mt-0.5 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a use:route href={`/books/${book.id}`} class="group flex items-start gap-2.5 rounded-lg px-2.5 py-1.5 hover:bg-emerald-50 transition">
+                  <div class="w-8 h-8 mt-0.5 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -223,13 +223,13 @@
                     </svg>
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="font-semibold text-slate-800 flex items-center justify-between gap-2">
+                    <p class="text-[13px] font-semibold text-slate-800 flex items-center justify-between gap-2">
                       <span class="truncate">{book.title}</span>
-                      <svg class="w-4 h-4 text-slate-300 group-hover:text-emerald-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-3.5 h-3.5 text-slate-300 group-hover:text-emerald-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                       </svg>
                     </p>
-                    <p class="text-xs text-slate-500 truncate">by {book.author}</p>
+                    <p class="text-[11px] text-slate-500 truncate">by {book.author}</p>
                   </div>
                 </a>
               {/each}
@@ -237,10 +237,10 @@
           </div>
         </article>
 
-        <article class="rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
-          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <article class="rounded-2xl border border-amber-100 bg-white p-4 shadow-sm">
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -251,14 +251,14 @@
             </span>
             Notices ({data.notices.length})
           </h3>
-          <div class="mt-3 space-y-2">
+          <div class="mt-2.5 space-y-1.5">
             {#if data.notices.length === 0}
-              <p class="text-sm text-slate-500">No matches.</p>
+              <p class="text-[13px] text-slate-500">No matches.</p>
             {:else}
               {#each data.notices as notice}
-                <a use:route href="/notices" class="group flex items-start gap-3 rounded-lg px-3 py-2 hover:bg-amber-50 transition">
-                  <div class="w-9 h-9 mt-0.5 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a use:route href="/notices" class="group flex items-start gap-2.5 rounded-lg px-2.5 py-1.5 hover:bg-amber-50 transition">
+                  <div class="w-8 h-8 mt-0.5 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -269,13 +269,13 @@
                     </svg>
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="font-semibold text-slate-800 flex items-center justify-between gap-2">
+                    <p class="text-[13px] font-semibold text-slate-800 flex items-center justify-between gap-2">
                       <span class="truncate">{notice.title}</span>
-                      <svg class="w-4 h-4 text-slate-300 group-hover:text-amber-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-3.5 h-3.5 text-slate-300 group-hover:text-amber-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                       </svg>
                     </p>
-                    <p class="text-xs text-slate-500 line-clamp-2">{notice.section.toUpperCase()} / {notice.subsection.toUpperCase()}</p>
+                    <p class="text-[11px] text-slate-500 line-clamp-2">{notice.section.toUpperCase()} / {notice.subsection.toUpperCase()}</p>
                   </div>
                 </a>
               {/each}
@@ -283,10 +283,10 @@
           </div>
         </article>
 
-        <article class="rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm md:col-span-2 xl:col-span-2">
-          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <article class="rounded-2xl border border-indigo-100 bg-white p-4 shadow-sm md:col-span-2 xl:col-span-2">
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -298,28 +298,28 @@
             </span>
             Campus Locations ({data.places.length})
           </h3>
-          <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div class="mt-2.5 grid grid-cols-1 md:grid-cols-2 gap-1.5">
             {#if data.places.length === 0}
-              <p class="text-sm text-slate-500">No matches.</p>
+              <p class="text-[13px] text-slate-500">No matches.</p>
             {:else}
               {#each data.places as place}
-                <a use:route href={getMapLocationHref(place)} class="group flex items-start gap-3 rounded-lg px-3 py-2 hover:bg-indigo-50 transition">
-                  <div class="w-9 h-9 mt-0.5 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0 overflow-hidden">
+                <a use:route href={getMapLocationHref(place)} class="group flex items-start gap-2.5 rounded-lg px-2.5 py-1.5 hover:bg-indigo-50 transition">
+                  <div class="w-8 h-8 mt-0.5 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0 overflow-hidden">
                     <img
                       src={getLocationIconUrlFor(place)}
                       alt={`${place.name} icon`}
-                      class="w-5 h-5 object-contain"
+                      class="w-4 h-4 object-contain"
                       loading="lazy"
                     />
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="font-semibold text-slate-800 flex items-center justify-between gap-2">
+                    <p class="text-[13px] font-semibold text-slate-800 flex items-center justify-between gap-2">
                       <span class="truncate">{place.name}</span>
-                      <svg class="w-4 h-4 text-slate-300 group-hover:text-indigo-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                       </svg>
                     </p>
-                    <p class="text-xs text-slate-500 line-clamp-2">{place.description}</p>
+                    <p class="text-[11px] text-slate-500 line-clamp-2">{place.description}</p>
                   </div>
                 </a>
               {/each}

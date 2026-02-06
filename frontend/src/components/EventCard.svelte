@@ -49,11 +49,11 @@
 <a
   href="/clubs/{clubId}/events/{event.id}"
   use:route
-  class="group relative bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl hover:border-blue-200 transition-all duration-500 transform hover:-translate-y-2 flex flex-col h-full"
+  class="group relative bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-500 transform hover:-translate-y-1.5 flex flex-col h-full"
   in:fly={{ y: 20, duration: 600, delay: index * 50 }}
 >
   <!-- Banner -->
-  <div class="relative h-56 overflow-hidden bg-gray-900">
+  <div class="relative h-44 overflow-hidden bg-gray-900">
     {#if event.bannerUrl}
       <img
         src={event.bannerUrl}
@@ -64,7 +64,7 @@
       <div
         class="w-full h-full bg-linear-to-br from-gray-800 to-gray-900 flex items-center justify-center"
       >
-        <span class="text-2xl font-semibold text-white/70">Event</span>
+        <span class="text-xl font-semibold text-white/70">Event</span>
       </div>
     {/if}
 
@@ -72,17 +72,17 @@
     {#if isOngoing}
       <div class="absolute inset-0 bg-blue-600/10"></div>
       <div
-        class="absolute top-4 left-4 flex items-center gap-2 px-3 py-1 bg-blue-600 text-white text-[10px] font-bold rounded-full uppercase shadow-lg animate-pulse"
+        class="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-blue-600 text-white text-[9px] font-bold rounded-full uppercase shadow-lg animate-pulse"
       >
-        <span class="w-2 h-2 bg-white rounded-full"></span>
+        <span class="w-1.5 h-1.5 bg-white rounded-full"></span>
         Live
       </div>
     {/if}
 
     <!-- Status Badge -->
-    <div class="absolute top-4 right-4">
+    <div class="absolute top-3 right-3">
       <span
-        class={`px-3 py-1 text-[10px] font-bold rounded-full shadow-sm border ${getStatusColor(event.status)} uppercase tracking-widest backdrop-blur-md bg-white/90`}
+        class={`px-2.5 py-1 text-[9px] font-bold rounded-full shadow-sm border ${getStatusColor(event.status)} uppercase tracking-wider backdrop-blur-md bg-white/90`}
       >
         {getEventStatusLabel(event.status)}
       </span>
@@ -90,12 +90,12 @@
 
     <!-- Date Block -->
     <div
-      class="absolute bottom-4 left-4 right-4 flex items-end justify-between"
+      class="absolute bottom-3 left-3 right-3 flex items-end justify-between"
     >
       <div
-        class="bg-white/95 backdrop-blur-sm px-3 py-2 rounded-2xl shadow-xl flex items-center"
+        class="bg-white/95 backdrop-blur-sm px-2.5 py-1.5 rounded-xl shadow-lg flex items-center"
       >
-        <span class="text-[11px] font-bold text-blue-600 uppercase whitespace-nowrap">
+        <span class="text-[10px] font-bold text-blue-600 uppercase whitespace-nowrap">
           {parseEventDateTime(event.eventStartTime).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
@@ -106,31 +106,31 @@
   </div>
 
   <!-- Content -->
-  <div class="p-6 flex flex-col flex-1">
+  <div class="p-5 flex flex-col flex-1">
     {#if event.club?.name}
-      <div class="mb-2">
+      <div class="mb-1.5">
         <span
-          class="text-[10px] font-bold text-blue-600 uppercase tracking-widest"
+          class="text-[9px] font-bold text-blue-600 uppercase tracking-wider"
           >{event.club.name}</span
         >
       </div>
     {/if}
     <h3
-      class="text-xl font-extrabold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2"
+      class="text-lg font-extrabold text-gray-900 mb-1.5 group-hover:text-blue-600 transition-colors line-clamp-2"
     >
       {event.title}
     </h3>
-    <p class="text-gray-500 text-sm leading-relaxed mb-6 line-clamp-2 flex-1">
+    <p class="text-gray-500 text-[13px] leading-relaxed mb-5 line-clamp-2 flex-1">
       {event.description ||
         "Join us for an experience that's unlike anything you've seen before. Innovation meets community."}
     </p>
 
     <!-- Metadata -->
-    <div class="space-y-3 pt-4 border-t border-gray-50">
-      <div class="flex items-center justify-between text-xs text-gray-500">
+    <div class="space-y-2.5 pt-3 border-t border-gray-50">
+      <div class="flex items-center justify-between text-[11px] text-gray-500">
         <div class="flex items-center gap-1.5">
           <svg
-            class="w-4 h-4 text-blue-500"
+            class="w-3.5 h-3.5 text-blue-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -147,7 +147,7 @@
         {#if event.venue}
           <div class="flex items-center gap-1.5">
             <svg
-              class="w-4 h-4 text-rose-500"
+              class="w-3.5 h-3.5 text-rose-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -167,7 +167,7 @@
       <!-- Registration Progress -->
       <div class="flex flex-col gap-1.5">
         <div
-          class="flex items-center justify-between text-[10px] font-bold uppercase tracking-tight text-gray-400"
+          class="flex items-center justify-between text-[9px] font-bold uppercase tracking-tight text-gray-400"
         >
           <span>Registration</span>
           <span

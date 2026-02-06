@@ -190,18 +190,6 @@
   <div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="text-center mb-10 animate-fade-in">
-      <h1
-        class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 mb-6 tracking-tight"
-      >
-        Find your next <span
-          class="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600"
-          >Great Read</span
-        >
-      </h1>
-      <p class="text-slate-500 text-lg max-w-2xl mx-auto mb-8 font-medium">
-        The most trusted marketplace for Pulchowk students to trade textbooks
-        and engineering materials.
-      </p>
       {#if $session.data?.user}
         <a
           href="/books/sell"
