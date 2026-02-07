@@ -6,6 +6,7 @@ import { user } from '../models/auth-schema.js'
 import { UPLOAD_CONSTANTS, generatePublicId } from '../config/cloudinary.js'
 import { uploadAssignmentFileToCloudinary } from '../services/cloudinary.service.js'
 import { createInAppNotificationForAudience } from '../services/inAppNotification.service.js'
+import { sendToTopic } from '../services/notification.service.js'
 
 type AuthedRequest = Request & { user?: { id: string; role?: string | null } }
 
@@ -199,6 +200,20 @@ export async function createNotice(req: AuthedRequest, res: Response) {
       console.error('Failed to create notice in-app notification:', error),
     )
 
+    // Send FCM push notification to 'announcements' topic
+    sendToTopic('announcements', {
+      title: 'New Notice Published',
+      body: title,
+      data: {
+        noticeId: created.id.toString(),
+        type: 'notice_created',
+        section,
+        subsection,
+        publisherId: req.user.id,
+        iconKey: 'notice',
+      },
+    }).catch((error) => console.error('Failed to send notice FCM topic notification:', error))
+
     return res.json({
       success: true,
       message: 'Notice created successfully',
@@ -281,6 +296,20 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
     }).catch((error) =>
       console.error('Failed to create notice update notification:', error),
     )
+
+    // Send FCM push notification to 'announcements' topic
+    sendToTopic('announcements', {
+      title: 'Notice Updated',
+      body: updated.title,
+      data: {
+        noticeId: updated.id.toString(),
+        type: 'notice_updated',
+        section: updated.section,
+        subsection: updated.subsection,
+        publisherId: req.user.id,
+        iconKey: 'notice',
+      },
+    }).catch((error) => console.error('Failed to send notice update FCM topic notification:', error))
 
     return res.json({
       success: true,
@@ -419,6 +448,20 @@ export async function deleteNotice(req: AuthedRequest, res: Response) {
     }).catch((error) =>
       console.error('Failed to create notice delete notification:', error),
     )
+
+    // Send FCM push notification to 'announcements' topic
+    sendToTopic('announcements', {
+      title: 'Notice Removed',
+      body: deleted.title,
+      data: {
+        noticeId: deleted.id.toString(),
+        type: 'notice_deleted',
+        section: deleted.section,
+        subsection: deleted.subsection,
+        publisherId: req.user.id,
+        iconKey: 'notice',
+      },
+    }).catch((error) => console.error('Failed to send notice delete FCM topic notification:', error))
 
     return res.json({
       success: true,
