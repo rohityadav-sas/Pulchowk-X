@@ -356,7 +356,7 @@
 </script>
 
 <div
-  class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-purple-50 px-4 py-8 sm:px-6 lg:px-8"
+  class="create-event-compact min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-purple-50 px-4 py-8 sm:px-6 lg:px-8"
 >
   <div class="max-w-6xl mx-auto">
     <!-- Breadcrumb -->
@@ -747,13 +747,13 @@
                           required
                           class="rounded-2xl flex-1 shadow-sm"
                         />
-                        <div class="w-32 shadow-sm">
+                        <div class="w-36">
                           <label class="sr-only" for="event-start-time">Start time</label>
                           <Timepicker
                             id="event-start-time"
                             bind:value={startTime}
                             required
-                            inputClass="rounded-2xl"
+                            inputClass="w-full rounded-2xl border border-gray-200 bg-white/50 py-4 shadow-sm focus:ring-2 focus:ring-blue-500/20"
                           />
                         </div>
                       </div>
@@ -769,13 +769,13 @@
                           required
                           class="rounded-2xl flex-1 shadow-sm"
                         />
-                        <div class="w-32 shadow-sm">
+                        <div class="w-36">
                           <label class="sr-only" for="event-end-time">End time</label>
                           <Timepicker
                             id="event-end-time"
                             bind:value={endTime}
                             required
-                            inputClass="rounded-2xl"
+                            inputClass="w-full rounded-2xl border border-gray-200 bg-white/50 py-4 shadow-sm focus:ring-2 focus:ring-blue-500/20"
                           />
                         </div>
                       </div>
@@ -946,14 +946,14 @@
                           aria-label="Registration close date"
                           class="rounded-2xl flex-1 shadow-sm"
                         />
-                        <div class="w-32 shadow-sm">
+                        <div class="w-36">
                           <label class="sr-only" for="event-registration-time">
                             Registration close time
                           </label>
                           <Timepicker
                             id="event-registration-time"
                             bind:value={regTime}
-                            inputClass="rounded-2xl"
+                            inputClass="w-full rounded-2xl border border-gray-200 bg-white/50 py-4 shadow-sm focus:ring-2 focus:ring-blue-500/20"
                           />
                         </div>
                       </div>
@@ -1178,5 +1178,140 @@
   :global(.datepicker) {
     --tw-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
       0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
+  }
+
+  :global(.create-event-compact) {
+    font-size: 0.92rem;
+  }
+
+  :global(.create-event-compact .text-4xl) {
+    font-size: 1.95rem !important;
+    line-height: 1.15 !important;
+  }
+
+  :global(.create-event-compact .text-3xl) {
+    font-size: 1.55rem !important;
+    line-height: 1.15 !important;
+  }
+
+  :global(.create-event-compact .text-xl) {
+    font-size: 1.02rem !important;
+    line-height: 1.25 !important;
+  }
+
+  :global(.create-event-compact .text-lg) {
+    font-size: 0.92rem !important;
+    line-height: 1.3 !important;
+  }
+
+  :global(.create-event-compact .text-base) {
+    font-size: 0.84rem !important;
+    line-height: 1.35 !important;
+  }
+
+  :global(.create-event-compact .text-sm) {
+    font-size: 0.76rem !important;
+    line-height: 1.35 !important;
+  }
+
+  :global(.create-event-compact .text-xs) {
+    font-size: 0.68rem !important;
+    line-height: 1.25 !important;
+  }
+
+  :global(.create-event-compact .p-12) {
+    padding: 2rem !important;
+  }
+
+  :global(.create-event-compact .p-10) {
+    padding: 1.6rem !important;
+  }
+
+  :global(.create-event-compact .p-8) {
+    padding: 1.2rem !important;
+  }
+
+  :global(.create-event-compact .p-6) {
+    padding: 0.95rem !important;
+  }
+
+  :global(.create-event-compact .p-4) {
+    padding: 0.72rem !important;
+  }
+
+  :global(.create-event-compact .px-10) {
+    padding-left: 1.45rem !important;
+    padding-right: 1.45rem !important;
+  }
+
+  :global(.create-event-compact .px-8) {
+    padding-left: 1.1rem !important;
+    padding-right: 1.1rem !important;
+  }
+
+  :global(.create-event-compact .py-4) {
+    padding-top: 0.68rem !important;
+    padding-bottom: 0.68rem !important;
+  }
+
+  :global(.create-event-compact .gap-8) {
+    gap: 1.15rem !important;
+  }
+
+  :global(.create-event-compact .gap-6) {
+    gap: 0.9rem !important;
+  }
+
+  :global(.create-event-compact .gap-4) {
+    gap: 0.66rem !important;
+  }
+
+  :global(.create-event-compact .mb-10) {
+    margin-bottom: 1.45rem !important;
+  }
+
+  :global(.create-event-compact .mb-8) {
+    margin-bottom: 1rem !important;
+  }
+
+  :global(.create-event-compact .mt-12) {
+    margin-top: 1.5rem !important;
+  }
+
+  :global(.create-event-compact button),
+  :global(.create-event-compact input),
+  :global(.create-event-compact textarea),
+  :global(.create-event-compact select) {
+    font-size: 0.82rem;
+  }
+
+  :global(.create-event-compact .rounded-\[2\.5rem\]) {
+    border-radius: 1.3rem !important;
+  }
+
+  :global(.create-event-compact .rounded-\[2rem\]) {
+    border-radius: 1rem !important;
+  }
+
+  :global(.create-event-compact .rounded-2xl) {
+    border-radius: 0.8rem !important;
+  }
+
+  :global(.create-event-compact .w-24.h-24) {
+    width: 4.2rem !important;
+    height: 4.2rem !important;
+  }
+
+  :global(.create-event-compact .w-20.h-20) {
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+  }
+
+  :global(.create-event-compact .h-48) {
+    height: 10.5rem !important;
+  }
+
+  :global(.create-event-compact .min-h-\[400px\]) {
+    min-height: 340px !important;
   }
 </style>

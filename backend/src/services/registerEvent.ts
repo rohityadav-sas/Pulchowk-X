@@ -2,6 +2,7 @@ import { db } from "../lib/db.js";
 import { eq, sql, desc, and, asc } from "drizzle-orm";
 import { eventRegistrations, events } from "../models/event-schema.js";
 import { unwrapOne } from "../lib/type-utils.js";
+import { createInAppNotificationForUser } from "./inAppNotification.service.js";
 
 export async function registerStudentForEvent(userId: string, eventId: number) {
     try {
@@ -12,7 +13,9 @@ export async function registerStudentForEvent(userId: string, eventId: number) {
                 isRegistrationOpen: true,
                 maxParticipants: true,
                 currentParticipants: true,
-                registrationDeadline: true
+                registrationDeadline: true,
+                clubId: true,
+                bannerUrl: true,
             }
         })
 
@@ -71,6 +74,21 @@ export async function registerStudentForEvent(userId: string, eventId: number) {
             })
             .where(eq(events.id, eventId));
 
+        createInAppNotificationForUser({
+            userId,
+            type: "event_registration",
+            title: "Event Registration Confirmed",
+            body: "You are registered for the selected event.",
+            data: {
+                eventId,
+                clubId: event.clubId,
+                iconKey: "event",
+                ...(event.bannerUrl ? { thumbnailUrl: event.bannerUrl } : {}),
+            },
+        }).catch((error) =>
+            console.error("Failed to create event registration notification:", error),
+        );
+
         return {
             success: true,
             registration,
@@ -124,6 +142,11 @@ export async function getEventRegistrations(eventId: number) {
 
 export async function cancelEventRegistration(userId: string, eventId: number) {
     try {
+        const event = await db.query.events.findFirst({
+            where: eq(events.id, eventId),
+            columns: { id: true, clubId: true, bannerUrl: true },
+        });
+
         await db.update(eventRegistrations)
             .set({
                 status: 'cancelled',
@@ -144,6 +167,21 @@ export async function cancelEventRegistration(userId: string, eventId: number) {
                 updatedAt: new Date(),
             })
             .where(eq(events.id, eventId));
+
+        createInAppNotificationForUser({
+            userId,
+            type: "event_registration_cancelled",
+            title: "Event Registration Cancelled",
+            body: "Your event registration has been cancelled.",
+            data: {
+                eventId,
+                ...(event?.clubId ? { clubId: event.clubId } : {}),
+                iconKey: "event",
+                ...(event?.bannerUrl ? { thumbnailUrl: event.bannerUrl } : {}),
+            },
+        }).catch((error) =>
+            console.error("Failed to create event cancellation notification:", error),
+        );
 
         return {
             success: true,

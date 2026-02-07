@@ -218,6 +218,13 @@
       "when": 1770600000000,
       "tag": "0030_perf_indexes_and_trgm",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1770700000000,
+      "tag": "0031_in_app_notifications",
+      "breakpoints": true
     }
   ]
 }

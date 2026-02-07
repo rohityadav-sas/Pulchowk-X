@@ -15,6 +15,7 @@ import chatRoutes from './routes/chat.route.js'
 import noticeRoutes from './routes/notice.route.js'
 import adminRoutes from './routes/admin.route.js'
 import searchRoutes from './routes/search.route.js'
+import notificationsRoutes from './routes/notifications.route.js'
 
 const app = express()
 const httpServer = createServer(app)
@@ -34,6 +35,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/search", searchRoutes);
+app.use("/api/notifications", notificationsRoutes);
 
 app.use(
   express.static(path.join(__dirname, '../../frontend/dist'), {

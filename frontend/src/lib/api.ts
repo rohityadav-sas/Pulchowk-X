@@ -2172,13 +2172,114 @@ export interface GlobalSearchResponse {
 export async function searchEverything(
   query: string,
   limit = 6,
+  types?: Array<'clubs' | 'events' | 'books' | 'notices' | 'places'>,
 ): Promise<{ success: boolean; data?: GlobalSearchResponse; message?: string }> {
   try {
     const params = new URLSearchParams()
     params.set('q', query)
     params.set('limit', String(limit))
+    if (types && types.length > 0) {
+      params.set('types', types.join(','))
+    }
 
     const res = await fetch(`${API_SEARCH}?${params.toString()}`, {
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+// ============ IN-APP NOTIFICATIONS ============
+const API_NOTIFICATIONS = '/api/notifications'
+
+export interface InAppNotification {
+  id: number
+  type: string
+  title: string
+  body: string
+  data?: Record<string, string | number | boolean | null> | null
+  recipientId?: string | null
+  audience: 'direct' | 'all' | 'students' | 'teachers' | 'admins'
+  createdAt: string
+  isRead: boolean
+  readAt?: string | null
+}
+
+export interface InAppNotificationListResponse {
+  success: boolean
+  data?: InAppNotification[]
+  meta?: {
+    total: number
+    limit: number
+    offset: number
+  }
+  message?: string
+}
+
+export async function getInAppNotifications(filters?: {
+  limit?: number
+  offset?: number
+  type?: string
+  unreadOnly?: boolean
+}): Promise<InAppNotificationListResponse> {
+  try {
+    const params = new URLSearchParams()
+    if (filters?.limit) params.set('limit', String(filters.limit))
+    if (filters?.offset) params.set('offset', String(filters.offset))
+    if (filters?.type) params.set('type', filters.type)
+    if (filters?.unreadOnly) params.set('unreadOnly', 'true')
+    const qs = params.toString()
+    const url = qs ? `${API_NOTIFICATIONS}?${qs}` : API_NOTIFICATIONS
+
+    const res = await fetch(url, {
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function getUnreadNotificationsCount(): Promise<{
+  success: boolean
+  count?: number
+  message?: string
+}> {
+  try {
+    const res = await fetch(`${API_NOTIFICATIONS}/unread-count`, {
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function markInAppNotificationRead(id: number): Promise<{
+  success: boolean
+  message?: string
+}> {
+  try {
+    const res = await fetch(`${API_NOTIFICATIONS}/${id}/read`, {
+      method: 'PATCH',
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function markAllInAppNotificationsRead(): Promise<{
+  success: boolean
+  updated?: number
+  message?: string
+}> {
+  try {
+    const res = await fetch(`${API_NOTIFICATIONS}/mark-all-read`, {
+      method: 'POST',
       credentials: 'include',
     })
     return await res.json()

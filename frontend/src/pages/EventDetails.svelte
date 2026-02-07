@@ -609,7 +609,7 @@
   }
 </script>
 
-<div class="min-h-[calc(100vh-4rem)] bg-gray-50/30 px-4 py-8 sm:px-6 lg:px-8">
+<div class="event-details-compact min-h-[calc(100vh-4rem)] bg-gray-50/30 px-4 py-8 sm:px-6 lg:px-8">
   <div class="max-w-5xl mx-auto">
     <!-- Breadcrumb -->
     <nav class="flex items-center gap-2 text-sm text-gray-500 mb-8" in:fade>
@@ -743,7 +743,10 @@
         {#if isClubOwner}
           <div class="absolute top-6 left-6 z-10">
             <button
-              onclick={startEditingBanner}
+              onclick={(event) => {
+                event.stopPropagation();
+                startEditingBanner();
+              }}
               class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-black/40 backdrop-blur-md rounded-xl hover:bg-black/60 transition-all border border-white/20"
             >
               <svg
@@ -2020,5 +2023,130 @@
   /* Premium Export Menu Styling */
   .export-container {
     user-select: none;
+  }
+
+  :global(.event-details-compact) {
+    font-size: 0.9rem;
+  }
+
+  :global(.event-details-compact .text-4xl) {
+    font-size: 1.85rem !important;
+    line-height: 1.12 !important;
+  }
+
+  :global(.event-details-compact .text-3xl) {
+    font-size: 1.5rem !important;
+    line-height: 1.14 !important;
+  }
+
+  :global(.event-details-compact .text-2xl) {
+    font-size: 1.18rem !important;
+    line-height: 1.2 !important;
+  }
+
+  :global(.event-details-compact .text-xl) {
+    font-size: 1rem !important;
+    line-height: 1.25 !important;
+  }
+
+  :global(.event-details-compact .text-lg) {
+    font-size: 0.9rem !important;
+    line-height: 1.28 !important;
+  }
+
+  :global(.event-details-compact .text-base) {
+    font-size: 0.82rem !important;
+    line-height: 1.35 !important;
+  }
+
+  :global(.event-details-compact .text-sm) {
+    font-size: 0.74rem !important;
+    line-height: 1.35 !important;
+  }
+
+  :global(.event-details-compact .text-xs) {
+    font-size: 0.67rem !important;
+    line-height: 1.25 !important;
+  }
+
+  :global(.event-details-compact .p-8) {
+    padding: 1rem !important;
+  }
+
+  :global(.event-details-compact .p-6) {
+    padding: 0.82rem !important;
+  }
+
+  :global(.event-details-compact .p-4) {
+    padding: 0.62rem !important;
+  }
+
+  :global(.event-details-compact .px-8) {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  :global(.event-details-compact .py-4) {
+    padding-top: 0.62rem !important;
+    padding-bottom: 0.62rem !important;
+  }
+
+  :global(.event-details-compact .gap-8) {
+    gap: 1rem !important;
+  }
+
+  :global(.event-details-compact .gap-6) {
+    gap: 0.82rem !important;
+  }
+
+  :global(.event-details-compact .gap-4) {
+    gap: 0.62rem !important;
+  }
+
+  :global(.event-details-compact .space-y-8 > :not([hidden]) ~ :not([hidden])) {
+    margin-top: 1rem !important;
+  }
+
+  :global(.event-details-compact .space-y-6 > :not([hidden]) ~ :not([hidden])) {
+    margin-top: 0.82rem !important;
+  }
+
+  :global(.event-details-compact .mb-8) {
+    margin-bottom: 1rem !important;
+  }
+
+  :global(.event-details-compact .mt-8) {
+    margin-top: 1rem !important;
+  }
+
+  :global(.event-details-compact .h-80) {
+    height: 17rem !important;
+  }
+
+  :global(.event-details-compact .h-72) {
+    height: 15rem !important;
+  }
+
+  :global(.event-details-compact .h-56) {
+    height: 12rem !important;
+  }
+
+  :global(.event-details-compact button),
+  :global(.event-details-compact input),
+  :global(.event-details-compact textarea),
+  :global(.event-details-compact select) {
+    font-size: 0.8rem;
+  }
+
+  :global(.event-details-compact .rounded-\[2\.5rem\]) {
+    border-radius: 1.3rem !important;
+  }
+
+  :global(.event-details-compact .rounded-3xl) {
+    border-radius: 1rem !important;
+  }
+
+  :global(.event-details-compact .rounded-2xl) {
+    border-radius: 0.78rem !important;
   }
 </style>

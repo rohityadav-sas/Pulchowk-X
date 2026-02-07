@@ -10,6 +10,7 @@ interface SearchInput {
   query: string;
   limit?: number;
   userId?: string;
+  types?: Array<"clubs" | "events" | "books" | "notices" | "places">;
 }
 
 type CampusService = { name?: string; purpose?: string; location?: string };
@@ -111,9 +112,15 @@ export async function globalSearch(input: SearchInput) {
 
   const term = `%${query}%`;
   const blockedUserIds = input.userId ? await getBlockedUserIds(input.userId) : [];
+  const requestedTypes = new Set(input.types ?? ["clubs", "events", "books", "notices", "places"]);
+  const includeClubs = requestedTypes.has("clubs");
+  const includeEvents = requestedTypes.has("events");
+  const includeBooks = requestedTypes.has("books");
+  const includeNotices = requestedTypes.has("notices");
+  const includePlaces = requestedTypes.has("places");
 
   const [clubResults, eventResults, noticeResults, bookResults] = await Promise.all([
-    db.query.clubs.findMany({
+    includeClubs ? db.query.clubs.findMany({
       where: or(ilike(clubs.name, term), ilike(clubs.description, term)),
       orderBy: (table, { desc }) => [desc(table.createdAt)],
       limit,
@@ -123,9 +130,9 @@ export async function globalSearch(input: SearchInput) {
         description: true,
         logoUrl: true,
       },
-    }),
+    }) : Promise.resolve([]),
 
-    db.query.events.findMany({
+    includeEvents ? db.query.events.findMany({
       where: or(
         ilike(events.title, term),
         ilike(events.description, term),
@@ -153,9 +160,9 @@ export async function globalSearch(input: SearchInput) {
           },
         },
       },
-    }),
+    }) : Promise.resolve([]),
 
-    db.query.notice.findMany({
+    includeNotices ? db.query.notice.findMany({
       where: or(ilike(notice.title, term), ilike(notice.content, term)),
       orderBy: (table, { desc }) => [desc(table.createdAt)],
       limit,
@@ -168,9 +175,9 @@ export async function globalSearch(input: SearchInput) {
         attachmentUrl: true,
         createdAt: true,
       },
-    }),
+    }) : Promise.resolve([]),
 
-    db.query.bookListings.findMany({
+    includeBooks ? db.query.bookListings.findMany({
       where:
         blockedUserIds.length > 0
           ? and(
@@ -218,11 +225,12 @@ export async function globalSearch(input: SearchInput) {
           },
         },
       },
-    }),
+    }) : Promise.resolve([]),
   ]);
 
   const normalizedTerm = query.toLowerCase();
-  const places = searchableBuildings
+  const places = includePlaces
+    ? searchableBuildings
     .filter((building) => building.searchableText.includes(normalizedTerm))
     .slice(0, limit)
     .map((building) => {
@@ -235,7 +243,8 @@ export async function globalSearch(input: SearchInput) {
         icon: getLocationIcon(building.iconText),
         services,
       };
-    });
+    })
+    : [];
 
   return {
     success: true,

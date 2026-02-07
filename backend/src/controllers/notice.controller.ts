@@ -5,6 +5,7 @@ import { notice, type NewNotice } from '../models/notice-schema.js'
 import { user } from '../models/auth-schema.js'
 import { UPLOAD_CONSTANTS, generatePublicId } from '../config/cloudinary.js'
 import { uploadAssignmentFileToCloudinary } from '../services/cloudinary.service.js'
+import { createInAppNotificationForAudience } from '../services/inAppNotification.service.js'
 
 type AuthedRequest = Request & { user?: { id: string; role?: string | null } }
 
@@ -14,6 +15,9 @@ const isNoticeManager = (req: AuthedRequest): boolean => {
 }
 
 const { NOTICE_ATTACHMENTS, FOLDERS } = UPLOAD_CONSTANTS
+
+const isImageUrl = (url?: string | null) =>
+  !!url && /\.(jpg|jpeg|png|webp|gif|avif|svg)(\?.*)?$/i.test(url)
 
 // Get all notices (with optional filtering)
 export async function getNotices(req: Request, res: Response) {
@@ -175,6 +179,25 @@ export async function createNotice(req: AuthedRequest, res: Response) {
 
     const [created] = await db.insert(notice).values(newNotice).returning()
 
+    createInAppNotificationForAudience({
+      audience: 'all',
+      type: 'notice_created',
+      title: 'New Notice Published',
+      body: title,
+      data: {
+        noticeId: created.id,
+        section,
+        subsection,
+        publisherId: req.user.id,
+        iconKey: 'notice',
+        ...(isImageUrl(created.attachmentUrl)
+          ? { thumbnailUrl: created.attachmentUrl as string }
+          : {}),
+      },
+    }).catch((error) =>
+      console.error('Failed to create notice in-app notification:', error),
+    )
+
     return res.json({
       success: true,
       message: 'Notice created successfully',
@@ -237,6 +260,25 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
         .status(404)
         .json({ success: false, message: 'Notice not found' })
     }
+
+    createInAppNotificationForAudience({
+      audience: 'all',
+      type: 'notice_updated',
+      title: 'Notice Updated',
+      body: updated.title,
+      data: {
+        noticeId: updated.id,
+        section: updated.section,
+        subsection: updated.subsection,
+        publisherId: req.user.id,
+        iconKey: 'notice',
+        ...(isImageUrl(updated.attachmentUrl)
+          ? { thumbnailUrl: updated.attachmentUrl as string }
+          : {}),
+      },
+    }).catch((error) =>
+      console.error('Failed to create notice update notification:', error),
+    )
 
     return res.json({
       success: true,
@@ -355,6 +397,25 @@ export async function deleteNotice(req: AuthedRequest, res: Response) {
         .status(404)
         .json({ success: false, message: 'Notice not found' })
     }
+
+    createInAppNotificationForAudience({
+      audience: 'all',
+      type: 'notice_deleted',
+      title: 'Notice Removed',
+      body: deleted.title,
+      data: {
+        noticeId: deleted.id,
+        section: deleted.section,
+        subsection: deleted.subsection,
+        publisherId: req.user.id,
+        iconKey: 'notice',
+        ...(isImageUrl(deleted.attachmentUrl)
+          ? { thumbnailUrl: deleted.attachmentUrl as string }
+          : {}),
+      },
+    }).catch((error) =>
+      console.error('Failed to create notice delete notification:', error),
+    )
 
     return res.json({
       success: true,

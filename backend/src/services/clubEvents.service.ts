@@ -3,7 +3,8 @@ import { db } from "../lib/db.js";
 import {
     clubs,
     events,
-    clubAdmins
+    clubAdmins,
+    eventRegistrations,
 } from "../models/event-schema.js"; // updated import
 import {
     desc,
@@ -26,6 +27,7 @@ import {
 } from "../config/cloudinary.js";
 import { unwrapOne } from "../lib/type-utils.js";
 import { deriveEventStatus } from "../lib/event-status.js";
+import { createInAppNotificationsForUsers } from "./inAppNotification.service.js";
 
 
 const { MAX_FILE_SIZE, ALLOWED_TYPES } = UPLOAD_CONSTANTS;
@@ -773,6 +775,29 @@ export async function cancelEvent(authId: string, eventId: number) {
                 updatedAt: new Date()
             })
             .where(eq(events.id, eventId));
+
+        const registrations = await db.query.eventRegistrations.findMany({
+            where: and(
+                eq(eventRegistrations.eventId, eventId),
+                eq(eventRegistrations.status, "registered"),
+            ),
+            columns: { userId: true },
+        });
+
+        createInAppNotificationsForUsers({
+            userIds: registrations.map((item) => item.userId),
+            type: "event_cancelled",
+            title: "Event Cancelled",
+            body: `"${event.title}" has been cancelled by the organizers.`,
+            data: {
+                eventId,
+                clubId: event.clubId,
+                iconKey: "event",
+                ...(event.bannerUrl ? { thumbnailUrl: event.bannerUrl } : {}),
+            },
+        }).catch((error) =>
+            console.error("Failed to create event cancelled notifications:", error),
+        );
 
         return {
             success: true,

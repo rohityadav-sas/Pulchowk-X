@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { route as routeAction, goto } from '@mateothegreat/svelte5-router'
+  import { route as routeAction, goto } from "@mateothegreat/svelte5-router";
   import {
     getClub,
     type Club,
@@ -18,156 +18,156 @@
     type EventCategory,
     uploadClubLogo,
     deleteClubLogo,
-  } from '../lib/api'
-  import LoadingSpinner from '../components/LoadingSpinner.svelte'
-  import { fade, fly, slide } from 'svelte/transition'
-  import { authClient } from '../lib/auth-client'
-  import { untrack } from 'svelte'
+  } from "../lib/api";
+  import LoadingSpinner from "../components/LoadingSpinner.svelte";
+  import { fade, fly, slide } from "svelte/transition";
+  import { authClient } from "../lib/auth-client";
+  import { untrack } from "svelte";
 
-  const { route } = $props()
-  const clubId = $derived(route.result.path.params.clubId)
+  const { route } = $props();
+  const clubId = $derived(route.result.path.params.clubId);
 
-  const session = authClient.useSession()
-  let hasRedirectedToLogin = $state(false)
+  const session = authClient.useSession();
+  let hasRedirectedToLogin = $state(false);
 
-  let club = $state<Club | null>(null)
-  let profile = $state<ClubProfile | null>(null)
-  let loading = $state(true)
-  let error = $state<string | null>(null)
+  let club = $state<Club | null>(null);
+  let profile = $state<ClubProfile | null>(null);
+  let loading = $state(true);
+  let error = $state<string | null>(null);
 
   // Admin management state
   let admins = $state<
     { id: string; email: string; name: string; image: string }[]
-  >([])
-  let newAdminEmail = $state('')
-  let adminLoading = $state(false)
-  let adminError = $state<string | null>(null)
+  >([]);
+  let newAdminEmail = $state("");
+  let adminLoading = $state(false);
+  let adminError = $state<string | null>(null);
 
   // Profile editing state
-  let isEditingProfile = $state(false)
-  let editedProfile = $state<Partial<ClubProfile>>({})
-  let saveLoading = $state(false)
+  let isEditingProfile = $state(false);
+  let editedProfile = $state<Partial<ClubProfile>>({});
+  let saveLoading = $state(false);
 
   // Event categories state (independent from actual events)
-  let eventCategoriesList = $state<EventCategory[]>([])
-  let selectedCategory = $state<EventCategory | null>(null)
-  let isEditingCategory = $state(false)
-  let editedCategory = $state<Partial<EventCategory>>({})
-  let saveCategoryLoading = $state(false)
-  let showCategoryModal = $state(false)
-  let loadingCategories = $state(true)
+  let eventCategoriesList = $state<EventCategory[]>([]);
+  let selectedCategory = $state<EventCategory | null>(null);
+  let isEditingCategory = $state(false);
+  let editedCategory = $state<Partial<EventCategory>>({});
+  let saveCategoryLoading = $state(false);
+  let showCategoryModal = $state(false);
+  let loadingCategories = $state(true);
 
   // Club info editing state
-  let isEditingClubInfo = $state(false)
-  let editedClubInfo = $state<Partial<Club>>({})
-  let saveClubLoading = $state(false)
+  let isEditingClubInfo = $state(false);
+  let editedClubInfo = $state<Partial<Club>>({});
+  let saveClubLoading = $state(false);
 
   // Logo editing state
-  let isEditingLogo = $state(false)
-  let logoUploadMode = $state<'url' | 'file'>('file')
-  let logoUrlLink = $state('')
-  let selectedLogoFile = $state<File | null>(null)
-  let logoPreviewUrl = $state<string | null>(null)
-  let logoUploadLoading = $state(false)
+  let isEditingLogo = $state(false);
+  let logoUploadMode = $state<"url" | "file">("file");
+  let logoUrlLink = $state("");
+  let selectedLogoFile = $state<File | null>(null);
+  let logoPreviewUrl = $state<string | null>(null);
+  let logoUploadLoading = $state(false);
 
   const isClubOwner = $derived(
     $session.data?.user && club && club.authClubId === $session.data.user.id,
-  )
+  );
 
   const isTempAdmin = $derived(
     $session.data?.user &&
       admins.some((admin) => admin.id === $session.data?.user?.id),
-  )
+  );
 
-  const userId = $derived($session.data?.user?.id)
+  const userId = $derived($session.data?.user?.id);
 
-  const canCreateEvent = $derived(isClubOwner || isTempAdmin)
+  const canCreateEvent = $derived(isClubOwner || isTempAdmin);
 
   $effect(() => {
     if (clubId) {
-      window.scrollTo(0, 0)
-      loadClub()
+      window.scrollTo(0, 0);
+      loadClub();
     }
-  })
+  });
 
   $effect(() => {
-    if (hasRedirectedToLogin) return
+    if (hasRedirectedToLogin) return;
 
     if (!$session.isPending && !$session.error && !$session.data?.user) {
-      hasRedirectedToLogin = true
+      hasRedirectedToLogin = true;
       untrack(() => {
-        goto('/register?message=login_required')
-      })
+        goto("/register?message=login_required");
+      });
     }
-  })
+  });
 
   $effect(() => {
     // Load admins if user is logged in, so we can determine temporary admin status
     // distinct userId check prevents refetching on window focus when session refreshes
     if (userId && clubId) {
-      loadAdmins()
+      loadAdmins();
     }
-  })
+  });
 
   async function loadClub() {
-    loading = true
-    error = null
+    loading = true;
+    error = null;
     try {
       const [clubRes, profileRes] = await Promise.all([
         getClub(parseInt(clubId)),
         getClubProfile(parseInt(clubId)),
-      ])
+      ]);
 
       if (clubRes.success && clubRes.clubData) {
-        club = clubRes.clubData
+        club = clubRes.clubData;
       } else {
-        error = clubRes.message || 'Club not found'
+        error = clubRes.message || "Club not found";
       }
 
       if (profileRes.success) {
-        profile = profileRes.profile
+        profile = profileRes.profile;
         if (profile) {
-          editedProfile = { ...profile }
+          editedProfile = { ...profile };
         }
       }
 
       // Load independent event categories
-      loadCategories()
+      loadCategories();
     } catch (err: any) {
-      error = err.message || 'An error occurred'
+      error = err.message || "An error occurred";
     } finally {
-      loading = false
+      loading = false;
     }
   }
 
   async function loadCategories() {
-    if (!clubId) return
-    loadingCategories = true
+    if (!clubId) return;
+    loadingCategories = true;
     try {
-      const result = await getEventCategories(parseInt(clubId))
+      const result = await getEventCategories(parseInt(clubId));
       if (result.success) {
-        eventCategoriesList = result.categories
+        eventCategoriesList = result.categories;
       }
     } catch (err) {
-      console.error('Failed to load event categories:', err)
+      console.error("Failed to load event categories:", err);
     } finally {
-      loadingCategories = false
+      loadingCategories = false;
     }
   }
 
   const socialIcons: Record<string, string> = {
-    facebook: 'fab fa-facebook-f',
-    instagram: 'fab fa-instagram',
-    twitter: 'fab fa-x-twitter',
-    linkedin: 'fab fa-linkedin-in',
-    github: 'fab fa-github',
-    discord: 'fab fa-discord',
-    youtube: 'fab fa-youtube',
-  }
+    facebook: "fab fa-facebook-f",
+    instagram: "fab fa-instagram",
+    twitter: "fab fa-x-twitter",
+    linkedin: "fab fa-linkedin-in",
+    github: "fab fa-github",
+    discord: "fab fa-discord",
+    youtube: "fab fa-youtube",
+  };
 
   async function handleUpdateProfile() {
-    if (!club) return
-    saveLoading = true
+    if (!club) return;
+    saveLoading = true;
     try {
       const {
         id,
@@ -177,164 +177,164 @@
         totalEventHosted,
         club: c,
         ...dataToSave
-      } = editedProfile as any
+      } = editedProfile as any;
 
       if (dataToSave.establishedYear) {
         dataToSave.establishedYear = parseInt(
           dataToSave.establishedYear.toString(),
-        )
+        );
       }
 
-      let result
+      let result;
       if (profile) {
-        result = await updateClubProfile(parseInt(clubId), dataToSave)
+        result = await updateClubProfile(parseInt(clubId), dataToSave);
       } else {
-        result = await createClubProfile(parseInt(clubId), dataToSave)
+        result = await createClubProfile(parseInt(clubId), dataToSave);
       }
 
       if (result.success && result.profile) {
-        profile = result.profile
-        editedProfile = JSON.parse(JSON.stringify(profile))
-        isEditingProfile = false
+        profile = result.profile;
+        editedProfile = JSON.parse(JSON.stringify(profile));
+        isEditingProfile = false;
       } else {
-        alert(result.message || 'Failed to save profile')
+        alert(result.message || "Failed to save profile");
       }
     } catch (err: any) {
-      alert(err.message || 'An error occurred')
+      alert(err.message || "An error occurred");
     } finally {
-      saveLoading = false
+      saveLoading = false;
     }
   }
 
   function startEditing() {
     const defaultSocials = {
-      facebook: '',
-      instagram: '',
-      twitter: '',
-      linkedin: '',
-      github: '',
-      discord: '',
-    }
+      facebook: "",
+      instagram: "",
+      twitter: "",
+      linkedin: "",
+      github: "",
+      discord: "",
+    };
 
     if (profile) {
-      editedProfile = JSON.parse(JSON.stringify(profile))
+      editedProfile = JSON.parse(JSON.stringify(profile));
       if (!editedProfile.socialLinks) {
-        editedProfile.socialLinks = defaultSocials
+        editedProfile.socialLinks = defaultSocials;
       } else {
         editedProfile.socialLinks = {
           ...defaultSocials,
           ...editedProfile.socialLinks,
-        }
+        };
       }
     } else {
       editedProfile = {
-        aboutClub: '',
-        mission: '',
-        vision: '',
-        achievements: '',
-        benefits: '',
-        contactPhone: '',
-        websiteUrl: '',
+        aboutClub: "",
+        mission: "",
+        vision: "",
+        achievements: "",
+        benefits: "",
+        contactPhone: "",
+        websiteUrl: "",
         socialLinks: defaultSocials,
         establishedYear: new Date().getFullYear(),
-      }
+      };
     }
-    isEditingProfile = true
+    isEditingProfile = true;
   }
 
   async function loadAdmins() {
-    if (!clubId) return
+    if (!clubId) return;
     try {
-      const result = await getClubAdmins(parseInt(clubId))
+      const result = await getClubAdmins(parseInt(clubId));
       if (result.success && result.admins) {
-        admins = result.admins
+        admins = result.admins;
       }
     } catch (err) {
-      console.error('Failed to load admins:', err)
+      console.error("Failed to load admins:", err);
     }
   }
 
   async function handleAddAdmin() {
-    if (!newAdminEmail || !club) return
+    if (!newAdminEmail || !club) return;
 
-    adminLoading = true
-    adminError = null
+    adminLoading = true;
+    adminError = null;
 
     try {
-      const result = await addClubAdmin(parseInt(clubId), newAdminEmail)
+      const result = await addClubAdmin(parseInt(clubId), newAdminEmail);
       if (result.success) {
-        newAdminEmail = ''
-        await loadAdmins()
+        newAdminEmail = "";
+        await loadAdmins();
       } else {
-        adminError = result.message || 'Failed to add admin'
+        adminError = result.message || "Failed to add admin";
       }
     } catch (err: any) {
-      adminError = err.message || 'An error occurred'
+      adminError = err.message || "An error occurred";
     } finally {
-      adminLoading = false
+      adminLoading = false;
     }
   }
 
   async function handleRemoveAdmin(userId: string) {
-    if (!club) return
+    if (!club) return;
 
-    if (!confirm('Are you sure you want to remove this admin?')) return
+    if (!confirm("Are you sure you want to remove this admin?")) return;
 
-    adminLoading = true
-    adminError = null
+    adminLoading = true;
+    adminError = null;
 
     try {
-      const result = await removeClubAdmin(parseInt(clubId), userId)
+      const result = await removeClubAdmin(parseInt(clubId), userId);
       if (result.success) {
-        await loadAdmins()
+        await loadAdmins();
       } else {
-        adminError = result.message || 'Failed to remove admin'
+        adminError = result.message || "Failed to remove admin";
       }
     } catch (err: any) {
-      adminError = err.message || 'An error occurred'
+      adminError = err.message || "An error occurred";
     } finally {
-      adminLoading = false
+      adminLoading = false;
     }
   }
 
   function textToPoints(text: string | null) {
-    if (!text) return []
+    if (!text) return [];
     return text
-      .split('\n')
+      .split("\n")
       .map((p) => p.trim())
-      .filter((p) => p.length > 0)
+      .filter((p) => p.length > 0);
   }
 
   function openCategoryModal(category: EventCategory | null = null) {
     if (category) {
-      selectedCategory = category
-      editedCategory = { ...category }
-      isEditingCategory = true
+      selectedCategory = category;
+      editedCategory = { ...category };
+      isEditingCategory = true;
     } else {
-      selectedCategory = null
+      selectedCategory = null;
       editedCategory = {
-        name: '',
-        description: '',
-        objectives: '',
-        targetAudience: '',
-        prerequisites: '',
-        rules: '',
-        judgingCriteria: '',
-      }
-      isEditingCategory = false
+        name: "",
+        description: "",
+        objectives: "",
+        targetAudience: "",
+        prerequisites: "",
+        rules: "",
+        judgingCriteria: "",
+      };
+      isEditingCategory = false;
     }
-    showCategoryModal = true
+    showCategoryModal = true;
   }
 
   function closeCategoryModal() {
-    showCategoryModal = false
-    selectedCategory = null
-    editedCategory = {}
+    showCategoryModal = false;
+    selectedCategory = null;
+    editedCategory = {};
   }
 
   async function handleSaveCategory() {
-    if (!clubId) return
-    saveCategoryLoading = true
+    if (!clubId) return;
+    saveCategoryLoading = true;
 
     try {
       const {
@@ -343,40 +343,40 @@
         createdAt,
         updatedAt,
         ...dataToSave
-      } = editedCategory as any
+      } = editedCategory as any;
 
-      let result
+      let result;
       if (selectedCategory) {
-        result = await updateEventCategory(selectedCategory.id, dataToSave)
+        result = await updateEventCategory(selectedCategory.id, dataToSave);
       } else {
-        result = await createEventCategory(parseInt(clubId), dataToSave)
+        result = await createEventCategory(parseInt(clubId), dataToSave);
       }
 
       if (result.success) {
-        await loadCategories()
-        closeCategoryModal()
+        await loadCategories();
+        closeCategoryModal();
       } else {
-        alert(result.message || 'Failed to save category')
+        alert(result.message || "Failed to save category");
       }
     } catch (err: any) {
-      alert(err.message || 'An error occurred')
+      alert(err.message || "An error occurred");
     } finally {
-      saveCategoryLoading = false
+      saveCategoryLoading = false;
     }
   }
 
   async function handleDeleteCategory(categoryId: number) {
-    if (!confirm('Are you sure you want to delete this category?')) return
+    if (!confirm("Are you sure you want to delete this category?")) return;
 
     try {
-      const result = await deleteEventCategory(categoryId)
+      const result = await deleteEventCategory(categoryId);
       if (result.success) {
-        await loadCategories()
+        await loadCategories();
       } else {
-        alert(result.message || 'Failed to delete category')
+        alert(result.message || "Failed to delete category");
       }
     } catch (err: any) {
-      alert(err.message || 'An error occurred')
+      alert(err.message || "An error occurred");
     }
   }
 
@@ -385,126 +385,128 @@
       editedClubInfo = {
         name: club.name,
         description: club.description,
-      }
-      isEditingClubInfo = true
+      };
+      isEditingClubInfo = true;
     }
   }
 
   async function handleUpdateClubInfo() {
-    if (!club) return
-    saveClubLoading = true
+    if (!club) return;
+    saveClubLoading = true;
     try {
-      const result = await updateClubInfo(parseInt(clubId), editedClubInfo)
+      const result = await updateClubInfo(parseInt(clubId), editedClubInfo);
 
       if (result.success) {
         if (club) {
-          club.name = editedClubInfo.name || club.name
-          club.description = editedClubInfo.description || club.description
+          club.name = editedClubInfo.name || club.name;
+          club.description = editedClubInfo.description || club.description;
         }
-        isEditingClubInfo = false
+        isEditingClubInfo = false;
       } else {
-        alert(result.message || 'Failed to update club info')
+        alert(result.message || "Failed to update club info");
       }
     } catch (err: any) {
-      alert(err.message || 'An error occurred')
+      alert(err.message || "An error occurred");
     } finally {
-      saveClubLoading = false
+      saveClubLoading = false;
     }
   }
 
   function handleFileSelection(event: Event) {
-    const target = event.target as HTMLInputElement
+    const target = event.target as HTMLInputElement;
 
     if (target.files && target.files[0]) {
-      selectedLogoFile = target.files[0]
+      selectedLogoFile = target.files[0];
 
       if (logoPreviewUrl) {
-        URL.revokeObjectURL(logoPreviewUrl)
+        URL.revokeObjectURL(logoPreviewUrl);
       }
 
-      logoPreviewUrl = URL.createObjectURL(selectedLogoFile)
+      logoPreviewUrl = URL.createObjectURL(selectedLogoFile);
     }
   }
 
   async function handleLogoUpload() {
-    if (!clubId) return
+    if (!clubId) return;
 
-    logoUploadLoading = true
+    logoUploadLoading = true;
 
     try {
-      let result
+      let result;
 
-      if (logoUploadMode === 'file') {
+      if (logoUploadMode === "file") {
         if (!selectedLogoFile) {
-          alert('Please select a file first')
-          return
+          alert("Please select a file first");
+          return;
         }
 
-        result = await uploadClubLogo(parseInt(clubId), selectedLogoFile)
+        result = await uploadClubLogo(parseInt(clubId), selectedLogoFile);
       } else {
         if (!logoUrlLink) {
-          alert('Please enter a URL first')
-          return
+          alert("Please enter a URL first");
+          return;
         }
 
-        result = await uploadClubLogo(parseInt(clubId), logoUrlLink)
+        result = await uploadClubLogo(parseInt(clubId), logoUrlLink);
       }
 
       if (result.success && result.data) {
         if (club) {
-          club.logoUrl = result.data.url
+          club.logoUrl = result.data.url;
         }
 
-        isEditingLogo = false
-        resetLogoState()
+        isEditingLogo = false;
+        resetLogoState();
       } else {
-        alert(result.message || 'Failed to upload logo')
+        alert(result.message || "Failed to upload logo");
       }
     } catch (err: any) {
-      alert(err.message || 'An error occurred')
+      alert(err.message || "An error occurred");
     } finally {
-      logoUploadLoading = false
+      logoUploadLoading = false;
     }
   }
 
   async function handleDeleteLogo() {
-    if (!clubId) return
-    if (!confirm('Are you sure you want to delete the club logo?')) return
+    if (!clubId) return;
+    if (!confirm("Are you sure you want to delete the club logo?")) return;
 
-    logoUploadLoading = true
+    logoUploadLoading = true;
 
     try {
-      const result = await deleteClubLogo(parseInt(clubId))
+      const result = await deleteClubLogo(parseInt(clubId));
 
       if (result.success) {
         if (club) {
-          club.logoUrl = null
+          club.logoUrl = null;
         }
 
-        isEditingLogo = false
-        resetLogoState()
+        isEditingLogo = false;
+        resetLogoState();
       } else {
-        alert(result.message || 'Failed to delete logo')
+        alert(result.message || "Failed to delete logo");
       }
     } catch (err: any) {
-      alert(err.message || 'An error occurred')
+      alert(err.message || "An error occurred");
     } finally {
-      logoUploadLoading = false
+      logoUploadLoading = false;
     }
   }
 
   function resetLogoState() {
-    selectedLogoFile = null
-    logoUrlLink = ''
+    selectedLogoFile = null;
+    logoUrlLink = "";
 
     if (logoPreviewUrl) {
-      URL.revokeObjectURL(logoPreviewUrl)
-      logoPreviewUrl = null
+      URL.revokeObjectURL(logoPreviewUrl);
+      logoPreviewUrl = null;
     }
   }
 </script>
 
-<div class="min-h-[calc(100vh-4rem)] bg-gray-50/30 px-4 py-8 sm:px-6 lg:px-8">
+<div
+  class="club-details-compact min-h-[calc(100vh-4rem)] bg-gray-50/30 px-4 py-8 sm:px-6 lg:px-8"
+>
   <div class="max-w-7xl mx-auto">
     <!-- Breadcrumb -->
     <nav class="flex items-center gap-2 text-sm text-gray-500 mb-8" in:fade>
@@ -527,7 +529,7 @@
         />
       </svg>
       <span class="text-gray-900 font-medium"
-        >{club?.name || 'Club Details'}</span
+        >{club?.name || "Club Details"}</span
       >
     </nav>
 
@@ -569,7 +571,7 @@
         <!-- Left Column: Club Info -->
         <div class="lg:col-span-2 space-y-8">
           <div
-            class="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-8 relative overflow-hidden"
+            class="club-hero-card bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-8 relative overflow-hidden"
             in:fly={{ y: 20, duration: 600 }}
           >
             <div
@@ -688,8 +690,8 @@
                             <button
                               type="button"
                               onclick={() => {
-                                logoUploadMode = 'file'
-                                resetLogoState()
+                                logoUploadMode = "file";
+                                resetLogoState();
                               }}
                               class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all {logoUploadMode ===
                               'file'
@@ -701,8 +703,8 @@
                             <button
                               type="button"
                               onclick={() => {
-                                logoUploadMode = 'url'
-                                resetLogoState()
+                                logoUploadMode = "url";
+                                resetLogoState();
                               }}
                               class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all {logoUploadMode ===
                               'url'
@@ -713,7 +715,7 @@
                             </button>
                           </div>
 
-                          {#if logoUploadMode === 'file'}
+                          {#if logoUploadMode === "file"}
                             <div class="flex items-center gap-4">
                               <label class="cursor-pointer">
                                 <span
@@ -731,7 +733,7 @@
                               <span class="text-xs text-gray-400">
                                 {selectedLogoFile
                                   ? selectedLogoFile.name
-                                  : 'No file chosen (Max 5MB)'}
+                                  : "No file chosen (Max 5MB)"}
                               </span>
                             </div>
                           {:else}
@@ -836,7 +838,7 @@
               <div class="relative flex flex-col md:flex-row gap-8 items-start">
                 <div class="shrink-0">
                   <div
-                    class="w-32 h-32 md:w-48 md:h-48 bg-linear-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-xl flex items-center justify-center overflow-hidden transform rotate-3"
+                    class="club-hero-logo w-32 h-32 md:w-48 md:h-48 bg-linear-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-xl flex items-center justify-center overflow-hidden transform rotate-3"
                   >
                     {#if club.logoUrl}
                       <img
@@ -897,7 +899,7 @@
                   </div>
                   <p class="text-lg text-gray-600 leading-relaxed mb-8">
                     {club.description ||
-                      'No description available for this club yet.'}
+                      "No description available for this club yet."}
                   </p>
 
                   <div class="flex gap-4">
@@ -951,7 +953,7 @@
 
           <!-- Club Profile Section -->
           <div
-            class="bg-white rounded-3xl shadow-xs border border-gray-100 p-8 md:p-10"
+            class="club-profile-card bg-white rounded-3xl shadow-xs border border-gray-100 p-8 md:p-10"
             in:fly={{ y: 20, duration: 600, delay: 200 }}
           >
             <div class="flex items-center justify-between mb-8">
@@ -1186,7 +1188,7 @@
                   <div
                     class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-4"
                   >
-                    {#each ['facebook', 'instagram', 'twitter', 'linkedin', 'github', 'discord'] as platform}
+                    {#each ["facebook", "instagram", "twitter", "linkedin", "github", "discord"] as platform}
                       <div class="flex items-center gap-4">
                         <div
                           class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0"
@@ -1224,7 +1226,7 @@
                     disabled={saveLoading}
                     class="flex-1 md:flex-none px-10 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50 active:scale-95"
                   >
-                    {saveLoading ? 'Saving Changes...' : 'Save Club Profile'}
+                    {saveLoading ? "Saving Changes..." : "Save Club Profile"}
                   </button>
                   <button
                     onclick={() => (isEditingProfile = false)}
@@ -1952,7 +1954,7 @@
                 aria-modal="true"
                 aria-labelledby="category-modal-title"
                 tabindex="-1"
-                onkeydown={(e) => e.key === 'Escape' && closeCategoryModal()}
+                onkeydown={(e) => e.key === "Escape" && closeCategoryModal()}
               >
                 <div class="flex items-center justify-between mb-8">
                   <div>
@@ -1960,7 +1962,7 @@
                       id="category-modal-title"
                       class="text-2xl font-black text-gray-900 tracking-tight"
                     >
-                      {isEditingCategory ? 'Edit Category' : 'Add New Category'}
+                      {isEditingCategory ? "Edit Category" : "Add New Category"}
                     </h2>
                     <p class="text-sm text-gray-500 mt-1">
                       Describe a general type of event your club organizes
@@ -2121,7 +2123,7 @@
                         Saving...
                       </div>
                     {:else}
-                      {isEditingCategory ? 'Save Changes' : 'Create Category'}
+                      {isEditingCategory ? "Save Changes" : "Create Category"}
                     {/if}
                   </button>
                 </div>
@@ -2161,7 +2163,7 @@
                     disabled={adminLoading || !newAdminEmail}
                     class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {adminLoading ? 'Adding...' : 'Add Admin'}
+                    {adminLoading ? "Adding..." : "Add Admin"}
                   </button>
                 </div>
                 {#if adminError}
@@ -2364,7 +2366,7 @@
                   />
                 </svg>
                 <span class="text-sm font-medium"
-                  >{club.email || 'No email provided'}</span
+                  >{club.email || "No email provided"}</span
                 >
               </div>
               <div class="flex items-center gap-3 text-gray-600">
@@ -2382,7 +2384,7 @@
                   />
                 </svg>
                 <span class="text-sm font-medium"
-                  >{profile?.contactPhone || 'No Contact number provided'}</span
+                  >{profile?.contactPhone || "No Contact number provided"}</span
                 >
               </div>
               <div class="flex items-center gap-3 text-gray-600">
@@ -2414,3 +2416,239 @@
     {/if}
   </div>
 </div>
+
+<style>
+  :global(.club-details-compact) {
+    font-size: 0.86rem;
+  }
+
+  :global(.club-details-compact .text-5xl) {
+    font-size: 2.1rem !important;
+    line-height: 1.08 !important;
+  }
+
+  :global(.club-details-compact .text-4xl) {
+    font-size: 1.72rem !important;
+    line-height: 1.12 !important;
+  }
+
+  :global(.club-details-compact .text-3xl) {
+    font-size: 1.45rem !important;
+    line-height: 1.16 !important;
+  }
+
+  :global(.club-details-compact .text-2xl) {
+    font-size: 1.15rem !important;
+    line-height: 1.2 !important;
+  }
+
+  :global(.club-details-compact .text-xl) {
+    font-size: 0.98rem !important;
+    line-height: 1.25 !important;
+  }
+
+  :global(.club-details-compact .text-lg) {
+    font-size: 0.9rem !important;
+    line-height: 1.25 !important;
+  }
+
+  :global(.club-details-compact .text-base) {
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+  }
+
+  :global(.club-details-compact .text-sm) {
+    font-size: 0.74rem !important;
+    line-height: 1.35 !important;
+  }
+
+  :global(.club-details-compact .text-xs) {
+    font-size: 0.67rem !important;
+    line-height: 1.25 !important;
+  }
+
+  :global(.club-details-compact .p-8) {
+    padding: 1rem !important;
+  }
+
+  :global(.club-details-compact .p-6) {
+    padding: 0.8rem !important;
+  }
+
+  :global(.club-details-compact .p-5) {
+    padding: 0.72rem !important;
+  }
+
+  :global(.club-details-compact .py-8) {
+    padding-top: 1.1rem !important;
+    padding-bottom: 1.1rem !important;
+  }
+
+  :global(.club-details-compact .py-4) {
+    padding-top: 0.58rem !important;
+    padding-bottom: 0.58rem !important;
+  }
+
+  :global(.club-details-compact .py-3) {
+    padding-top: 0.45rem !important;
+    padding-bottom: 0.45rem !important;
+  }
+
+  :global(.club-details-compact .px-6) {
+    padding-left: 0.78rem !important;
+    padding-right: 0.78rem !important;
+  }
+
+  :global(.club-details-compact .px-4) {
+    padding-left: 0.62rem !important;
+    padding-right: 0.62rem !important;
+  }
+
+  :global(.club-details-compact .gap-8) {
+    gap: 0.95rem !important;
+  }
+
+  :global(.club-details-compact .gap-6) {
+    gap: 0.78rem !important;
+  }
+
+  :global(.club-details-compact .gap-4) {
+    gap: 0.58rem !important;
+  }
+
+  :global(.club-details-compact .space-y-8 > :not([hidden]) ~ :not([hidden])) {
+    margin-top: 0.95rem !important;
+  }
+
+  :global(.club-details-compact .space-y-6 > :not([hidden]) ~ :not([hidden])) {
+    margin-top: 0.78rem !important;
+  }
+
+  :global(.club-details-compact .space-y-4 > :not([hidden]) ~ :not([hidden])) {
+    margin-top: 0.55rem !important;
+  }
+
+  :global(.club-details-compact button),
+  :global(.club-details-compact input),
+  :global(.club-details-compact textarea),
+  :global(.club-details-compact select) {
+    font-size: 0.78rem;
+  }
+
+  :global(.club-details-compact .w-16.h-16) {
+    width: 2.7rem !important;
+    height: 2.7rem !important;
+  }
+
+  :global(.club-details-compact .w-12.h-12) {
+    width: 2.2rem !important;
+    height: 2.2rem !important;
+  }
+
+  :global(.club-details-compact .rounded-3xl) {
+    border-radius: 1rem !important;
+  }
+
+  :global(.club-details-compact .rounded-2xl) {
+    border-radius: 0.8rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card) {
+    font-size: 0.9em;
+  }
+
+  :global(.club-details-compact .club-profile-card .text-2xl) {
+    font-size: 1.02rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .text-xl) {
+    font-size: 0.9rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .text-lg) {
+    font-size: 0.82rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .text-base) {
+    font-size: 0.75rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .text-sm) {
+    font-size: 0.68rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .p-8) {
+    padding: 0.8rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .p-7) {
+    padding: 0.65rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .mb-8) {
+    margin-bottom: 0.8rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .mb-6) {
+    margin-bottom: 0.65rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .mb-5) {
+    margin-bottom: 0.5rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .gap-6) {
+    gap: 0.6rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .gap-4) {
+    gap: 0.45rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .space-y-8 > :not([hidden]) ~ :not([hidden])) {
+    margin-top: 0.8rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .space-y-6 > :not([hidden]) ~ :not([hidden])) {
+    margin-top: 0.6rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .space-y-3 > :not([hidden]) ~ :not([hidden])) {
+    margin-top: 0.35rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .w-11.h-11) {
+    width: 1.9rem !important;
+    height: 1.9rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .w-10.h-10) {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+  }
+
+  :global(.club-details-compact .club-profile-card .w-5.h-5) {
+    width: 0.82rem !important;
+    height: 0.82rem !important;
+  }
+
+  :global(.club-details-compact .club-hero-card) {
+    padding: 1.35rem !important;
+  }
+
+  :global(.club-details-compact .club-hero-logo) {
+    width: 6.5rem !important;
+    height: 6.5rem !important;
+  }
+
+  @media (min-width: 768px) {
+    :global(.club-details-compact .club-hero-card) {
+      padding: 1.85rem !important;
+    }
+
+    :global(.club-details-compact .club-hero-logo) {
+      width: 9.25rem !important;
+      height: 9.25rem !important;
+    }
+  }
+</style>

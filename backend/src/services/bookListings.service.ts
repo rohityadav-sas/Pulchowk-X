@@ -87,7 +87,9 @@ export const createBookListing = async (
             data: {
                 type: 'new_book',
                 bookId: listing.id.toString(),
+                listingId: listing.id.toString(),
                 sellerId: sellerId,
+                iconKey: 'book',
                 title: 'New Book Listed!',
                 body: `${data.title} is now available for ${data.price} NPR.`
             }

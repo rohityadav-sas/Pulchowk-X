@@ -11,6 +11,9 @@
   let loading = $state(false);
   let error = $state<string | null>(null);
   let results = $state<GlobalSearchResponse | null>(null);
+  let scope = $state<
+    "all" | "clubs" | "events" | "books" | "notices" | "places"
+  >("all");
   const quickResultsCache = new Map<string, GlobalSearchResponse>();
 
   const trimmedQuery = $derived(query.trim());
@@ -31,7 +34,7 @@
   }
 
   async function runSearch(term: string) {
-    const cacheKey = normalizeSearchTerm(term);
+    const cacheKey = `${scope}:${normalizeSearchTerm(term)}`;
     const cached = quickResultsCache.get(cacheKey);
     if (cached) {
       error = null;
@@ -42,7 +45,11 @@
 
     loading = true;
     error = null;
-    const response = await searchEverything(term, 4);
+    const response = await searchEverything(
+      term,
+      4,
+      scope === "all" ? undefined : [scope],
+    );
     if (response.success && response.data) {
       quickResultsCache.set(cacheKey, response.data);
       results = response.data;
@@ -58,7 +65,9 @@
     if (!term) return;
 
     open = false;
-    goto(`/search?q=${encodeURIComponent(term)}`);
+    const params = new URLSearchParams({ q: term });
+    if (scope !== "all") params.set("types", scope);
+    goto(`/search?${params.toString()}`);
   }
 
   function handleClickOutside(event: MouseEvent) {
@@ -82,7 +91,9 @@
       return;
     }
 
-    const cached = quickResultsCache.get(normalizeSearchTerm(term));
+    const cached = quickResultsCache.get(
+      `${scope}:${normalizeSearchTerm(term)}`,
+    );
     if (cached) {
       error = null;
       loading = false;
@@ -132,6 +143,33 @@
         placeholder="Search clubs, events, books, notices, locations..."
         class="h-9 w-full bg-transparent text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-hidden"
       />
+    </div>
+    <div class="relative">
+      <select
+        bind:value={scope}
+        aria-label="Search scope"
+        class="h-9 min-w-24 appearance-none rounded-xl border border-slate-200 bg-white pl-3 pr-8 text-sm font-medium text-slate-600 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 focus:outline-none"
+      >
+        <option value="all">All</option>
+        <option value="clubs">Clubs</option>
+        <option value="events">Events</option>
+        <option value="books">Books</option>
+        <option value="notices">Notices</option>
+        <option value="places">Places</option>
+      </select>
+      <svg
+        class="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"
+        />
+      </svg>
     </div>
     <button
       type="submit"

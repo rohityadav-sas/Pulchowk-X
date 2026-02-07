@@ -86,10 +86,12 @@ export async function createEvent(userId: string, clubId: number, eventInput: Cr
 
         const [event] = await db.insert(events).values(insertData).returning();
 
-        // Trigger push notification (don't await to avoid blocking response)
-        sendEventNotification(event).catch(err =>
-            console.error('Failed to send automated notification:', err)
-        );
+        // Await so in-app notification creation is not dropped in short-lived runtimes.
+        try {
+            await sendEventNotification({ ...event, creatorId: userId });
+        } catch (err) {
+            console.error('Failed to send automated notification:', err);
+        }
 
         return {
             success: true,

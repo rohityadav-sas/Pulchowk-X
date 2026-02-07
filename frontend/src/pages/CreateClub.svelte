@@ -212,7 +212,7 @@
 </script>
 
 <div
-  class="min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6 lg:p-8"
+  class="create-club-compact min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6 lg:p-8"
 >
   <div
     class="max-w-6xl w-full bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] border border-white overflow-hidden flex flex-col lg:flex-row min-h-[750px]"
@@ -836,5 +836,158 @@
 <style>
   :global(body) {
     background-color: #f8fafc;
+  }
+
+  :global(.create-club-compact) {
+    font-size: 0.9rem;
+  }
+
+  :global(.create-club-compact .text-5xl) {
+    font-size: 2.4rem !important;
+    line-height: 1.1 !important;
+  }
+
+  :global(.create-club-compact .text-4xl) {
+    font-size: 2rem !important;
+    line-height: 1.1 !important;
+  }
+
+  :global(.create-club-compact .text-3xl) {
+    font-size: 1.55rem !important;
+    line-height: 1.15 !important;
+  }
+
+  :global(.create-club-compact .text-2xl) {
+    font-size: 1.2rem !important;
+    line-height: 1.2 !important;
+  }
+
+  :global(.create-club-compact .text-xl) {
+    font-size: 1rem !important;
+    line-height: 1.25 !important;
+  }
+
+  :global(.create-club-compact .text-lg) {
+    font-size: 0.9rem !important;
+    line-height: 1.3 !important;
+  }
+
+  :global(.create-club-compact .text-base) {
+    font-size: 0.82rem !important;
+    line-height: 1.35 !important;
+  }
+
+  :global(.create-club-compact .text-sm) {
+    font-size: 0.74rem !important;
+    line-height: 1.35 !important;
+  }
+
+  :global(.create-club-compact .text-xs) {
+    font-size: 0.67rem !important;
+    line-height: 1.25 !important;
+  }
+
+  :global(.create-club-compact .p-16) {
+    padding: 2.25rem !important;
+  }
+
+  :global(.create-club-compact .p-12) {
+    padding: 1.65rem !important;
+  }
+
+  :global(.create-club-compact .p-10) {
+    padding: 1.35rem !important;
+  }
+
+  :global(.create-club-compact .p-8) {
+    padding: 1rem !important;
+  }
+
+  :global(.create-club-compact .p-6) {
+    padding: 0.82rem !important;
+  }
+
+  :global(.create-club-compact .py-5) {
+    padding-top: 0.68rem !important;
+    padding-bottom: 0.68rem !important;
+  }
+
+  :global(.create-club-compact .py-4) {
+    padding-top: 0.58rem !important;
+    padding-bottom: 0.58rem !important;
+  }
+
+  :global(.create-club-compact .px-12) {
+    padding-left: 1.4rem !important;
+    padding-right: 1.4rem !important;
+  }
+
+  :global(.create-club-compact .px-10) {
+    padding-left: 1.2rem !important;
+    padding-right: 1.2rem !important;
+  }
+
+  :global(.create-club-compact .px-6) {
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
+  }
+
+  :global(.create-club-compact .gap-10) {
+    gap: 1.4rem !important;
+  }
+
+  :global(.create-club-compact .gap-8) {
+    gap: 1rem !important;
+  }
+
+  :global(.create-club-compact .gap-6) {
+    gap: 0.82rem !important;
+  }
+
+  :global(.create-club-compact .gap-4) {
+    gap: 0.62rem !important;
+  }
+
+  :global(.create-club-compact .mt-12) {
+    margin-top: 1.4rem !important;
+  }
+
+  :global(.create-club-compact .mt-8) {
+    margin-top: 0.95rem !important;
+  }
+
+  :global(.create-club-compact .mb-8) {
+    margin-bottom: 0.95rem !important;
+  }
+
+  :global(.create-club-compact .min-h-\[750px\]) {
+    min-height: 650px !important;
+  }
+
+  :global(.create-club-compact button),
+  :global(.create-club-compact input),
+  :global(.create-club-compact textarea),
+  :global(.create-club-compact select) {
+    font-size: 0.8rem;
+  }
+
+  :global(.create-club-compact .rounded-\[2\.5rem\]) {
+    border-radius: 1.3rem !important;
+  }
+
+  :global(.create-club-compact .rounded-\[1\.5rem\]) {
+    border-radius: 0.9rem !important;
+  }
+
+  :global(.create-club-compact .rounded-\[1\.2rem\]) {
+    border-radius: 0.75rem !important;
+  }
+
+  :global(.create-club-compact .rounded-3xl) {
+    border-radius: 0.95rem !important;
+  }
+
+  :global(.create-club-compact .rounded-2xl) {
+    border-radius: 0.75rem !important;
   }
 </style>

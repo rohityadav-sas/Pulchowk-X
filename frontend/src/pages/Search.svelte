@@ -9,9 +9,35 @@
 
   let queryTerm = $state(routeQuery('q') || '')
   const searchTerm = $derived((queryTerm || '').trim())
+  let selectedTypes = $state<Array<'clubs' | 'events' | 'books' | 'notices' | 'places'>>([
+    'clubs',
+    'events',
+    'books',
+    'notices',
+    'places',
+  ])
+
+  function parseTypesFromUrl(value: string | null | undefined) {
+    const valid = new Set(['clubs', 'events', 'books', 'notices', 'places'])
+    if (!value) return ['clubs', 'events', 'books', 'notices', 'places'] as Array<
+      'clubs' | 'events' | 'books' | 'notices' | 'places'
+    >
+    const parsed = value
+      .split(',')
+      .map((item) => item.trim().toLowerCase())
+      .filter((item) => valid.has(item)) as Array<
+      'clubs' | 'events' | 'books' | 'notices' | 'places'
+    >
+    return parsed.length > 0
+      ? parsed
+      : (['clubs', 'events', 'books', 'notices', 'places'] as Array<
+          'clubs' | 'events' | 'books' | 'notices' | 'places'
+        >)
+  }
 
   function syncQueryFromUrl() {
     queryTerm = routeQuery('q') || ''
+    selectedTypes = parseTypesFromUrl(routeQuery('types'))
   }
 
   onMount(() => {
@@ -28,14 +54,25 @@
   })
 
   const searchQuery = createQuery(() => ({
-    queryKey: ['global-search', searchTerm],
+    queryKey: ['global-search', searchTerm, selectedTypes.join(',')],
     enabled: searchTerm.length >= 2,
     queryFn: async () => {
-      const result = await searchEverything(searchTerm, 20)
+      const result = await searchEverything(searchTerm, 20, selectedTypes)
       if (result.success && result.data) return result.data
       throw new Error(result.message || 'Search failed')
     },
+    staleTime: 15 * 1000,
   }))
+
+  function toggleType(type: 'clubs' | 'events' | 'books' | 'notices' | 'places') {
+    const hasType = selectedTypes.includes(type)
+    if (hasType) {
+      if (selectedTypes.length === 1) return
+      selectedTypes = selectedTypes.filter((item) => item !== type)
+      return
+    }
+    selectedTypes = [...selectedTypes, type]
+  }
 
   function getMapLocationHref(place: {
     name: string
@@ -71,6 +108,20 @@
       <p class="mt-2 text-sm text-slate-500 max-w-3xl">
         Unified search across clubs, events, books, notices, and campus places.
       </p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        {#each ['clubs', 'events', 'books', 'notices', 'places'] as type}
+          <button
+            class="px-3 py-1.5 rounded-full text-xs font-semibold border transition {selectedTypes.includes(
+              type as any,
+            )
+              ? 'bg-cyan-600 text-white border-cyan-600'
+              : 'bg-white text-slate-600 border-slate-200 hover:border-cyan-300'}"
+            onclick={() => toggleType(type as any)}
+          >
+            {type}
+          </button>
+        {/each}
+      </div>
     </section>
 
     {#if searchTerm.length < 2}
@@ -100,6 +151,7 @@
     {:else if searchQuery.data}
       {@const data = searchQuery.data}
       <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" transition:fade>
+        {#if selectedTypes.includes('clubs')}
         <article class="rounded-2xl border border-cyan-100 bg-white p-4 shadow-sm">
           <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
             <span class="w-7 h-7 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center">
@@ -136,7 +188,9 @@
             {/if}
           </div>
         </article>
+        {/if}
 
+        {#if selectedTypes.includes('events')}
         <article class="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
           <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
             <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
@@ -191,7 +245,9 @@
             {/if}
           </div>
         </article>
+        {/if}
 
+        {#if selectedTypes.includes('books')}
         <article class="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm">
           <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
             <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
@@ -236,7 +292,9 @@
             {/if}
           </div>
         </article>
+        {/if}
 
+        {#if selectedTypes.includes('notices')}
         <article class="rounded-2xl border border-amber-100 bg-white p-4 shadow-sm">
           <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
             <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
@@ -282,7 +340,9 @@
             {/if}
           </div>
         </article>
+        {/if}
 
+        {#if selectedTypes.includes('places')}
         <article class="rounded-2xl border border-indigo-100 bg-white p-4 shadow-sm md:col-span-2 xl:col-span-2">
           <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
             <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center">
@@ -326,6 +386,7 @@
             {/if}
           </div>
         </article>
+        {/if}
       </section>
     {/if}
   </div>

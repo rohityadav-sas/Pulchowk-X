@@ -11,11 +11,22 @@ export const SearchAll = async (req: Request, res: Response) => {
     const query = (req.query.q as string | undefined) ?? "";
     const limit = req.query.limit ? Number(req.query.limit) : undefined;
     const userId = getUserId(req);
+    const typesParam = (req.query.types as string | undefined)?.trim();
+    const validTypes = new Set(["clubs", "events", "books", "notices", "places"]);
+    const parsedTypes = typesParam
+      ? typesParam
+          .split(",")
+          .map((type) => type.trim().toLowerCase())
+          .filter((type) => validTypes.has(type)) as Array<
+            "clubs" | "events" | "books" | "notices" | "places"
+          >
+      : undefined;
 
     const result = await globalSearch({
       query,
       limit,
       userId,
+      types: parsedTypes,
     });
 
     res.setHeader("Vary", "Cookie, Authorization");

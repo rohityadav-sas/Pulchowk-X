@@ -39,4 +39,10 @@
   select {
     font-family: var(--font-body);
   }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #94a3b8;
+    opacity: 1;
+  }
 }

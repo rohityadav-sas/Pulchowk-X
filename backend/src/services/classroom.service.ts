@@ -18,6 +18,7 @@ import {
   uploadAssignmentFileToCloudinary,
 } from "./cloudinary.service.js";
 import { sendToTopic, sendToUser } from "./notification.service.js";
+import { createInAppNotificationsForUsers } from "./inAppNotification.service.js";
 import { unwrapOne } from "../lib/type-utils.js";
 import { calculateCurrentSemester, getSemesterEndDate } from "../lib/bikram-sambat.js";
 import type { ParsedStudentEmail } from "../lib/student-email-parser.js";
@@ -436,6 +437,26 @@ export async function createAssignmentForSubject(
     }
   }).catch(err => console.error('Failed to send assignment notification:', err));
 
+  const studentsInFaculty = await db.query.studentProfiles.findMany({
+    where: eq(studentProfiles.facultyId, subject.facultyId),
+    columns: { userId: true },
+  });
+
+  createInAppNotificationsForUsers({
+    userIds: studentsInFaculty.map((row) => row.userId),
+    type: "new_assignment",
+    title: "New Assignment Posted",
+    body: `${subject.title}: ${created.title}`,
+    data: {
+      assignmentId: created.id,
+      subjectId,
+      facultyId: subject.facultyId,
+      iconKey: "classroom",
+    },
+  }).catch((err) =>
+    console.error("Failed to create in-app assignment notifications:", err),
+  );
+
   return { success: true, assignment: created };
 }
 
@@ -664,6 +685,7 @@ export async function gradeSubmission(
       type: 'grading_update',
       assignmentId: submission.assignmentId.toString(),
       status: gradeData.status,
+      iconKey: 'classroom',
     }
   }).catch(err => console.error('Failed to notify student of grading update:', err));
 

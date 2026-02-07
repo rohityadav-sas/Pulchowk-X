@@ -8,6 +8,7 @@ import * as classroomSchema from '../models/classroom-schema.js'
 import * as chatSchema from '../models/chat-schema.js'
 import * as noticeSchema from '../models/notice-schema.js'
 import * as trustSchema from '../models/trust-schema.js'
+import * as notificationSchema from '../models/notification-schema.js'
 
 const sql = neon(ENV.DATABASE_URL)
 
@@ -21,5 +22,6 @@ export const db = drizzle({
     ...chatSchema,
     ...noticeSchema,
     ...trustSchema,
+    ...notificationSchema,
   },
 })

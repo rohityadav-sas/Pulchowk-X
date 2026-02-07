@@ -11,6 +11,11 @@ export const sendMessage = async (senderId: string, listingId: number, content: 
         // 1. Get the listing to find the seller
         const listing = await db.query.bookListings.findFirst({
             where: eq(bookListings.id, listingId),
+            with: {
+                images: {
+                    limit: 1,
+                },
+            },
         });
 
         if (!listing) {
@@ -97,9 +102,12 @@ export const sendMessage = async (senderId: string, listingId: number, content: 
             data: {
                 type: 'chat_message',
                 conversationId: conversation.id.toString(),
+                listingId: listing.id.toString(),
                 senderId,
                 senderName: sender?.name || "Someone",
                 content: content,
+                iconKey: 'book',
+                ...(listing.images?.[0]?.imageUrl ? { thumbnailUrl: listing.images[0].imageUrl } : {}),
             }
         });
 
@@ -223,6 +231,15 @@ export const sendMessageToConversation = async (conversationId: number, senderId
             return { success: false, message: "Conversation not found or access denied." };
         }
 
+        const listing = await db.query.bookListings.findFirst({
+            where: eq(bookListings.id, conversation.listingId),
+            with: {
+                images: {
+                    limit: 1,
+                },
+            },
+        });
+
         const participantRecipientId = senderId === conversation.buyerId
             ? conversation.sellerId
             : conversation.buyerId;
@@ -282,9 +299,12 @@ export const sendMessageToConversation = async (conversationId: number, senderId
             data: {
                 type: 'chat_message',
                 conversationId: conversationId.toString(),
+                listingId: conversation.listingId.toString(),
                 senderId,
                 senderName: sender?.name || "Someone",
                 content: content,
+                iconKey: 'book',
+                ...(listing?.images?.[0]?.imageUrl ? { thumbnailUrl: listing.images[0].imageUrl } : {}),
             }
         });
 

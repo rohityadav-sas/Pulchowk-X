@@ -14,6 +14,11 @@ export const createPurchaseRequest = async (
 
         const listing = await db.query.bookListings.findFirst({
             where: eq(bookListings.id, listingId),
+            with: {
+                images: {
+                    limit: 1,
+                },
+            },
         });
 
         if (!listing) {
@@ -72,6 +77,8 @@ export const createPurchaseRequest = async (
                 type: 'purchase_request',
                 listingId: listingId.toString(),
                 requestId: request.id.toString(),
+                iconKey: 'book',
+                ...(listing.images?.[0]?.imageUrl ? { thumbnailUrl: listing.images[0].imageUrl } : {}),
             }
         }).catch(err => console.error('Failed to notify seller of purchase request:', err));
 
@@ -172,7 +179,13 @@ export const respondToPurchaseRequest = async (
         const request = await db.query.bookPurchaseRequests.findFirst({
             where: eq(bookPurchaseRequests.id, requestId),
             with: {
-                listing: true,
+                listing: {
+                    with: {
+                        images: {
+                            limit: 1,
+                        },
+                    },
+                },
             },
         });
 
@@ -215,6 +228,8 @@ export const respondToPurchaseRequest = async (
                 type: 'request_response',
                 listingId: request.listingId.toString(),
                 status: newStatus,
+                iconKey: 'book',
+                ...(requestListing.images?.[0]?.imageUrl ? { thumbnailUrl: requestListing.images[0].imageUrl } : {}),
             }
         }).catch(err => console.error('Failed to notify buyer of request response:', err));
 

@@ -5,6 +5,10 @@ import { user } from "../models/auth-schema.js";
 import { eq } from "drizzle-orm";
 import fs from "fs";
 import path from "path";
+import {
+  createInAppNotificationForAudience,
+  createInAppNotificationForUser,
+} from "./inAppNotification.service.js";
 
 let isFirebaseInitialized = false;
 
@@ -63,6 +67,37 @@ export const sendToTopic = async (
   topic: string,
   payload: NotificationPayload,
 ) => {
+  const derivedTitle =
+    payload.title || (typeof payload.data?.title === "string" ? payload.data.title : undefined);
+  const derivedBody =
+    payload.body || (typeof payload.data?.body === "string" ? payload.data.body : undefined);
+
+  if (derivedTitle && derivedBody) {
+    if (topic === "events") {
+      createInAppNotificationForAudience({
+        audience: "all",
+        type: "event_published",
+        title: derivedTitle,
+        body: derivedBody,
+        data: { iconKey: "event", ...payload.data },
+      }).catch((error) =>
+        console.error("Failed to create in-app audience notification:", error),
+      );
+    }
+
+    if (topic === "books") {
+      createInAppNotificationForAudience({
+        audience: "all",
+        type: "book_listed",
+        title: derivedTitle,
+        body: derivedBody,
+        data: { iconKey: "book", ...payload.data },
+      }).catch((error) =>
+        console.error("Failed to create in-app audience notification:", error),
+      );
+    }
+  }
+
   if (!isFirebaseInitialized) {
     console.warn("Cannot send notification: Firebase not initialized.");
     return;
@@ -101,6 +136,18 @@ export const sendToUser = async (
   userId: string,
   payload: NotificationPayload,
 ) => {
+  if (payload.title && payload.body) {
+    createInAppNotificationForUser({
+      userId,
+      type: payload.data?.type || "user_notification",
+      title: payload.title,
+      body: payload.body,
+      data: payload.data,
+    }).catch((error) =>
+      console.error("Failed to create in-app user notification:", error),
+    );
+  }
+
   if (!isFirebaseInitialized) {
     console.warn("Cannot send notification: Firebase not initialized.");
     return;
@@ -144,12 +191,19 @@ export const sendToUser = async (
  * @deprecated Use sendToTopic or sendToUser instead
  */
 export const sendEventNotification = async (event: any) => {
+  const creatorId =
+    typeof event?.creatorId === "string" && event.creatorId.trim().length > 0
+      ? event.creatorId
+      : undefined;
   return sendToTopic("events", {
     title: "New Event Published!",
     body: `${event.title} is now open for registration.`,
     data: {
       eventId: event.id.toString(),
       type: "new_event",
+      iconKey: "event",
+      ...(creatorId ? { publisherId: creatorId } : {}),
+      ...(event.bannerUrl ? { bannerUrl: String(event.bannerUrl), thumbnailUrl: String(event.bannerUrl) } : {}),
     },
   });
 };

@@ -32,8 +32,10 @@
   import Notices from './pages/Notices.svelte'
   import Search from './pages/Search.svelte'
   import Admin from './pages/Admin.svelte'
+  import Notifications from './pages/Notifications.svelte'
   import GlobalSearch from './components/GlobalSearch.svelte'
   import { onMount, type Component } from 'svelte'
+  import { getUnreadNotificationsCount } from './lib/api'
 
   let MapComponent: Component | any = $state(null)
 
@@ -84,6 +86,20 @@
     }
   })
 
+  onMount(() => {
+    const handleUnreadCountUpdate = (event: Event) => {
+      const custom = event as CustomEvent<{ count?: number }>
+      unreadNotificationsCount = Math.max(0, custom.detail?.count ?? 0)
+    }
+
+    window.addEventListener('notifications:unread-count', handleUnreadCountUpdate)
+    return () =>
+      window.removeEventListener(
+        'notifications:unread-count',
+        handleUnreadCountUpdate,
+      )
+  })
+
   $effect(() => {
     const routerPath = tryNormalizePath(
       instance?.current?.result?.path?.original,
@@ -122,6 +138,42 @@
   const navUser = $derived(($session.data?.user as any) ?? navUserCache)
   const showNavSessionLoader = $derived(!navAuthResolved && $session.isPending)
   const currentRole = $derived((navUser as any)?.role as string | undefined)
+
+  let unreadNotificationsCount = $state(0)
+  let unreadNotificationsPoller: ReturnType<typeof setInterval> | null = null
+
+  async function refreshUnreadNotificationsCount() {
+    if (!navUser) {
+      unreadNotificationsCount = 0
+      return
+    }
+
+    const result = await getUnreadNotificationsCount()
+    unreadNotificationsCount = result.success ? result.count || 0 : 0
+  }
+
+  $effect(() => {
+    if (!navUser) {
+      unreadNotificationsCount = 0
+      if (unreadNotificationsPoller) {
+        clearInterval(unreadNotificationsPoller)
+        unreadNotificationsPoller = null
+      }
+      return
+    }
+
+    refreshUnreadNotificationsCount()
+
+    if (unreadNotificationsPoller) clearInterval(unreadNotificationsPoller)
+    unreadNotificationsPoller = setInterval(refreshUnreadNotificationsCount, 20000)
+
+    return () => {
+      if (unreadNotificationsPoller) {
+        clearInterval(unreadNotificationsPoller)
+        unreadNotificationsPoller = null
+      }
+    }
+  })
 
   const error = query('message')
   let showError = $state(error === 'unauthorized_domain')
@@ -240,6 +292,10 @@
       path: /^\/admin\/?$/,
       component: Admin,
     },
+    {
+      path: /^\/notifications\/?$/,
+      component: Notifications,
+    },
   ]
 </script>
 
@@ -287,9 +343,47 @@
                     href="/dashboard"
                     class={`${utilityPillClass('/dashboard')} hover:bg-emerald-50 hover:text-emerald-700`}
                   >
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"
-                    ></span>
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3 12l9-9 9 9M5 10v10h14V10"
+                      />
+                    </svg>
                     Dashboard
+                  </a>
+                  <a
+                    use:route
+                    href="/notifications"
+                    class={`${utilityPillClass('/notifications')} hover:bg-cyan-50 hover:text-cyan-700 relative`}
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .53-.2 1.04-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                      />
+                    </svg>
+                    Notifications
+                    {#if unreadNotificationsCount > 0}
+                      <span
+                        class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-bold"
+                      >
+                        {Math.min(unreadNotificationsCount, 99)}
+                      </span>
+                    {/if}
                   </a>
                   {#if currentRole !== 'admin'}
                     <a
@@ -297,6 +391,19 @@
                       href="/classroom"
                       class={`${utilityPillClass('/classroom')} hover:bg-emerald-50 hover:text-emerald-700`}
                     >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 6h16v10H4zM8 20h8"
+                        />
+                      </svg>
                       Classroom
                     </a>
                   {/if}
@@ -310,6 +417,19 @@
                         ? 'text-white bg-linear-to-r from-slate-900 to-slate-700'
                         : 'text-slate-700 bg-white border border-slate-200 hover:bg-slate-50'}"
                     >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 3l7 4v5c0 5-3 8-7 9-4-1-7-4-7-9V7l7-4z"
+                        />
+                      </svg>
                       Admin
                     </a>
                   {/if}
