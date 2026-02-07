@@ -186,6 +186,7 @@ export async function createNotice(req: AuthedRequest, res: Response) {
       body: title,
       data: {
         noticeId: created.id,
+        noticeTitle: created.title,
         section,
         subsection,
         publisherId: req.user.id,
@@ -268,6 +269,7 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
       body: updated.title,
       data: {
         noticeId: updated.id,
+        noticeTitle: updated.title,
         section: updated.section,
         subsection: updated.subsection,
         publisherId: req.user.id,
@@ -405,6 +407,7 @@ export async function deleteNotice(req: AuthedRequest, res: Response) {
       body: deleted.title,
       data: {
         noticeId: deleted.id,
+        noticeTitle: deleted.title,
         section: deleted.section,
         subsection: deleted.subsection,
         publisherId: req.user.id,

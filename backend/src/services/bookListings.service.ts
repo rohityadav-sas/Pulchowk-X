@@ -88,6 +88,7 @@ export const createBookListing = async (
                 type: 'new_book',
                 bookId: listing.id.toString(),
                 listingId: listing.id.toString(),
+                listingTitle: data.title,
                 sellerId: sellerId,
                 iconKey: 'book',
                 title: 'New Book Listed!',

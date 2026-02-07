@@ -200,6 +200,7 @@ export const sendEventNotification = async (event: any) => {
     body: `${event.title} is now open for registration.`,
     data: {
       eventId: event.id.toString(),
+      eventTitle: String(event.title),
       type: "new_event",
       iconKey: "event",
       ...(creatorId ? { publisherId: creatorId } : {}),

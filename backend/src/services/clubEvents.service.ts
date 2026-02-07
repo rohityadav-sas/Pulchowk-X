@@ -792,6 +792,8 @@ export async function cancelEvent(authId: string, eventId: number) {
             data: {
                 eventId,
                 clubId: event.clubId,
+                publisherId: userId,
+                eventTitle: event.title,
                 iconKey: "event",
                 ...(event.bannerUrl ? { thumbnailUrl: event.bannerUrl } : {}),
             },

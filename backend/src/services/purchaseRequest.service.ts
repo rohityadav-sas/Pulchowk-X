@@ -1,6 +1,7 @@
 import { db } from "../lib/db.js";
 import { eq, and, desc } from "drizzle-orm";
 import { bookPurchaseRequests, bookListings } from "../models/book_buy_sell-schema.js";
+import { user } from "../models/auth-schema.js";
 import { sendToUser } from "./notification.service.js";
 import { unwrapOne } from "../lib/type-utils.js";
 import { isUserBlockedBetween } from "./trust.service.js";
@@ -69,14 +70,30 @@ export const createPurchaseRequest = async (
             })
             .returning();
 
+        const buyer = await db.query.user.findFirst({
+            where: eq(user.id, buyerId),
+            columns: {
+                id: true,
+                name: true,
+                image: true,
+            },
+        });
+
+        const buyerName = buyer?.name?.trim() || "Someone";
+
         // Notify seller (non-blocking)
         sendToUser(listing.sellerId, {
             title: 'New Purchase Request!',
-            body: `Someone is interested in your book: ${listing.title}.`,
+            body: `${buyerName} is interested in your book: ${listing.title}.`,
             data: {
                 type: 'purchase_request',
                 listingId: listingId.toString(),
                 requestId: request.id.toString(),
+                buyerId: buyerId.toString(),
+                buyerName,
+                actorName: buyerName,
+                ...(buyer?.image ? { actorAvatarUrl: buyer.image } : {}),
+                listingTitle: listing.title,
                 iconKey: 'book',
                 ...(listing.images?.[0]?.imageUrl ? { thumbnailUrl: listing.images[0].imageUrl } : {}),
             }
@@ -218,6 +235,17 @@ export const respondToPurchaseRequest = async (
             .where(eq(bookPurchaseRequests.id, requestId))
             .returning();
 
+        const seller = await db.query.user.findFirst({
+            where: eq(user.id, sellerId),
+            columns: {
+                id: true,
+                name: true,
+                image: true,
+            },
+        });
+
+        const sellerName = seller?.name?.trim() || "Seller";
+
         // Notify buyer (non-blocking)
         sendToUser(request.buyerId, {
             title: accept ? 'Request Accepted!' : 'Request Rejected',
@@ -227,6 +255,11 @@ export const respondToPurchaseRequest = async (
             data: {
                 type: 'request_response',
                 listingId: request.listingId.toString(),
+                requestId: request.id.toString(),
+                sellerId: sellerId.toString(),
+                actorName: sellerName,
+                ...(seller?.image ? { actorAvatarUrl: seller.image } : {}),
+                listingTitle: requestListing.title,
                 status: newStatus,
                 iconKey: 'book',
                 ...(requestListing.images?.[0]?.imageUrl ? { thumbnailUrl: requestListing.images[0].imageUrl } : {}),

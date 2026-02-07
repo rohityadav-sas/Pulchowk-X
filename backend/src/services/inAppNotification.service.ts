@@ -16,7 +16,12 @@ import {
 } from "../models/notification-schema.js";
 import { clubs, events } from "../models/event-schema.js";
 import { notice } from "../models/notice-schema.js";
-import { bookImages, bookListings } from "../models/book_buy_sell-schema.js";
+import {
+  bookImages,
+  bookListings,
+  bookPurchaseRequests,
+} from "../models/book_buy_sell-schema.js";
+import { user } from "../models/auth-schema.js";
 
 type Audience = (typeof notificationAudienceEnum.enumValues)[number];
 type UserRole = "student" | "teacher" | "admin" | "notice_manager" | string;
@@ -55,22 +60,38 @@ async function enrichNotificationData(rows: Array<{ type: string; data: unknown 
   const eventIds = new Set<number>();
   const noticeIds = new Set<number>();
   const listingIds = new Set<number>();
+  const requestIds = new Set<number>();
+  const actorUserIds = new Set<string>();
 
   for (const row of rows) {
     const data = (row.data || {}) as NotificationData;
     const eventId = parseNumericId(data.eventId);
     const noticeId = parseNumericId(data.noticeId);
     const listingId = parseNumericId(data.listingId) ?? parseNumericId(data.bookId);
+    const requestId = parseNumericId(data.requestId);
+    const actorIdCandidate = [
+      parseString(data.actorId),
+      parseString(data.senderId),
+      parseString(data.buyerId),
+      parseString(data.publisherId),
+      parseString(data.sellerId),
+      parseString(data.teacherId),
+      parseString(data.creatorId),
+      parseString(data.authorId),
+      parseString(data.userId),
+    ].find((value) => !!value);
 
     if (eventId) eventIds.add(eventId);
     if (noticeId) noticeIds.add(noticeId);
     if (listingId) listingIds.add(listingId);
+    if (requestId) requestIds.add(requestId);
+    if (actorIdCandidate) actorUserIds.add(actorIdCandidate);
   }
 
-  const [eventRows, noticeRows, listingImageRows] = await Promise.all([
+  const [eventRows, noticeRows, listingImageRows, requestRows, actorRows] = await Promise.all([
     eventIds.size > 0
       ? db
-          .select({ id: events.id, bannerUrl: events.bannerUrl })
+          .select({ id: events.id, bannerUrl: events.bannerUrl, title: events.title })
           .from(events)
           .where(inArray(events.id, [...eventIds]))
       : Promise.resolve([]),
@@ -79,6 +100,7 @@ async function enrichNotificationData(rows: Array<{ type: string; data: unknown 
           .select({
             id: notice.id,
             attachmentUrl: notice.attachmentUrl,
+            title: notice.title,
           })
           .from(notice)
           .where(inArray(notice.id, [...noticeIds]))
@@ -88,25 +110,93 @@ async function enrichNotificationData(rows: Array<{ type: string; data: unknown 
           .select({
             id: bookListings.id,
             imageUrl: bookImages.imageUrl,
+            title: bookListings.title,
           })
           .from(bookListings)
           .leftJoin(bookImages, eq(bookImages.listingId, bookListings.id))
           .where(inArray(bookListings.id, [...listingIds]))
       : Promise.resolve([]),
+    requestIds.size > 0
+      ? db
+          .select({
+            id: bookPurchaseRequests.id,
+            listingId: bookPurchaseRequests.listingId,
+            buyerId: bookPurchaseRequests.buyerId,
+            buyerName: user.name,
+            buyerImage: user.image,
+            listingTitle: bookListings.title,
+          })
+          .from(bookPurchaseRequests)
+          .innerJoin(user, eq(user.id, bookPurchaseRequests.buyerId))
+          .innerJoin(bookListings, eq(bookListings.id, bookPurchaseRequests.listingId))
+          .where(inArray(bookPurchaseRequests.id, [...requestIds]))
+      : Promise.resolve([]),
+    actorUserIds.size > 0
+      ? db
+          .select({
+            id: user.id,
+            name: user.name,
+            image: user.image,
+          })
+          .from(user)
+          .where(inArray(user.id, [...actorUserIds]))
+      : Promise.resolve([]),
   ]);
 
-  const eventMap = new Map<number, string | null>(
-    eventRows.map((row) => [row.id, row.bannerUrl ?? null]),
+  const eventMap = new Map<number, { bannerUrl: string | null; title: string | null }>(
+    eventRows.map((row) => [
+      row.id,
+      {
+        bannerUrl: row.bannerUrl ?? null,
+        title: row.title ?? null,
+      },
+    ]),
   );
-  const noticeMap = new Map<number, string | null>(
-    noticeRows.map((row) => [row.id, row.attachmentUrl ?? null]),
+  const noticeMap = new Map<number, { attachmentUrl: string | null; title: string | null }>(
+    noticeRows.map((row) => [
+      row.id,
+      {
+        attachmentUrl: row.attachmentUrl ?? null,
+        title: row.title ?? null,
+      },
+    ]),
   );
-  const listingMap = new Map<number, string | null>();
+  const listingMap = new Map<number, { imageUrl: string | null; title: string | null }>();
   for (const row of listingImageRows) {
     if (!listingMap.has(row.id)) {
-      listingMap.set(row.id, row.imageUrl ?? null);
+      listingMap.set(row.id, { imageUrl: row.imageUrl ?? null, title: row.title ?? null });
     }
   }
+  const requestMap = new Map<
+    number,
+    {
+      listingId: number;
+      buyerId: string;
+      buyerName: string | null;
+      buyerImage: string | null;
+      listingTitle: string | null;
+    }
+  >(
+    requestRows.map((row) => [
+      row.id,
+      {
+        listingId: row.listingId,
+        buyerId: row.buyerId,
+        buyerName: row.buyerName ?? null,
+        buyerImage: row.buyerImage ?? null,
+        listingTitle: row.listingTitle ?? null,
+      },
+    ]),
+  );
+  const actorMap = new Map<string, { name: string | null; image: string | null }>(
+    actorRows.map((row) => [
+      row.id,
+      {
+        name: row.name ?? null,
+        image: row.image ?? null,
+      },
+    ]),
+  );
 
   return rows.map((row) => {
     const sourceData = (row.data || {}) as NotificationData;
@@ -122,13 +212,76 @@ async function enrichNotificationData(rows: Array<{ type: string; data: unknown 
       const noticeId = parseNumericId(data.noticeId);
       const listingId = parseNumericId(data.listingId) ?? parseNumericId(data.bookId);
 
-      const eventBanner = eventId ? eventMap.get(eventId) : null;
-      const noticeAttachment = noticeId ? noticeMap.get(noticeId) : null;
-      const listingImage = listingId ? listingMap.get(listingId) : null;
+      const eventMeta = eventId ? eventMap.get(eventId) : null;
+      const noticeMeta = noticeId ? noticeMap.get(noticeId) : null;
+      const listingMeta = listingId ? listingMap.get(listingId) : null;
 
-      if (eventBanner) data.thumbnailUrl = eventBanner;
-      else if (noticeAttachment && isImageUrl(noticeAttachment)) data.thumbnailUrl = noticeAttachment;
-      else if (listingImage) data.thumbnailUrl = listingImage;
+      if (eventMeta?.bannerUrl) data.thumbnailUrl = eventMeta.bannerUrl;
+      else if (noticeMeta?.attachmentUrl && isImageUrl(noticeMeta.attachmentUrl))
+        data.thumbnailUrl = noticeMeta.attachmentUrl;
+      else if (listingMeta?.imageUrl) data.thumbnailUrl = listingMeta.imageUrl;
+    }
+
+    const eventId = parseNumericId(data.eventId);
+    const noticeId = parseNumericId(data.noticeId);
+    const listingId = parseNumericId(data.listingId) ?? parseNumericId(data.bookId);
+    const eventMeta = eventId ? eventMap.get(eventId) : null;
+    const noticeMeta = noticeId ? noticeMap.get(noticeId) : null;
+    const listingMeta = listingId ? listingMap.get(listingId) : null;
+    if (!parseString(data.eventTitle) && eventMeta?.title) {
+      data.eventTitle = eventMeta.title;
+    }
+    if (!parseString(data.noticeTitle) && noticeMeta?.title) {
+      data.noticeTitle = noticeMeta.title;
+    }
+    if (!parseString(data.listingTitle) && listingMeta?.title) {
+      data.listingTitle = listingMeta.title;
+    }
+
+    const requestId = parseNumericId(data.requestId);
+    const requestMeta = requestId ? requestMap.get(requestId) : null;
+    if (requestMeta) {
+      if (!parseNumericId(data.listingId) && !parseNumericId(data.bookId)) {
+        data.listingId = requestMeta.listingId;
+      }
+      if (!parseString(data.buyerId)) {
+        data.buyerId = requestMeta.buyerId;
+      }
+      if (!parseString(data.buyerName) && requestMeta.buyerName) {
+        data.buyerName = requestMeta.buyerName;
+      }
+      if (!parseString(data.actorName) && requestMeta.buyerName) {
+        data.actorName = requestMeta.buyerName;
+      }
+      if (!parseString(data.actorAvatarUrl) && requestMeta.buyerImage) {
+        data.actorAvatarUrl = requestMeta.buyerImage;
+      }
+      if (!parseString(data.listingTitle) && requestMeta.listingTitle) {
+        data.listingTitle = requestMeta.listingTitle;
+      }
+    }
+
+    const actorIdCandidate = [
+      parseString(data.actorId),
+      parseString(data.senderId),
+      parseString(data.buyerId),
+      parseString(data.publisherId),
+      parseString(data.sellerId),
+      parseString(data.teacherId),
+      parseString(data.creatorId),
+      parseString(data.authorId),
+      parseString(data.userId),
+    ].find((value) => !!value);
+    if (actorIdCandidate) {
+      const actorMeta = actorMap.get(actorIdCandidate);
+      if (actorMeta) {
+        if (!parseString(data.actorName) && actorMeta.name) {
+          data.actorName = actorMeta.name;
+        }
+        if (!parseString(data.actorAvatarUrl) && actorMeta.image) {
+          data.actorAvatarUrl = actorMeta.image;
+        }
+      }
     }
 
     if (!parseString(data.iconKey)) {

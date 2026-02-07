@@ -358,7 +358,8 @@
           return (
             (typeof description === "string" &&
               description.toLowerCase() === normalizedName) ||
-            (typeof title === "string" && title.toLowerCase() === normalizedName)
+            (typeof title === "string" &&
+              title.toLowerCase() === normalizedName)
           );
         }) ||
         labels.find((label) => {
@@ -367,7 +368,8 @@
           return (
             (typeof description === "string" &&
               description.toLowerCase().includes(normalizedName)) ||
-            (typeof title === "string" && title.toLowerCase().includes(normalizedName))
+            (typeof title === "string" &&
+              title.toLowerCase().includes(normalizedName))
           );
         });
     }
@@ -423,9 +425,13 @@
     const lngRaw = params.get("lng");
 
     const lat =
-      latRaw !== null && Number.isFinite(Number(latRaw)) ? Number(latRaw) : null;
+      latRaw !== null && Number.isFinite(Number(latRaw))
+        ? Number(latRaw)
+        : null;
     const lng =
-      lngRaw !== null && Number.isFinite(Number(lngRaw)) ? Number(lngRaw) : null;
+      lngRaw !== null && Number.isFinite(Number(lngRaw))
+        ? Number(lngRaw)
+        : null;
 
     if (!focusName && (lat === null || lng === null)) {
       pendingFocusRequest = null;
@@ -467,7 +473,10 @@
 
     const a =
       Math.sin(dPhi / 2) * Math.sin(dPhi / 2) +
-      Math.cos(phi1) * Math.cos(phi2) * Math.sin(dLambda / 2) * Math.sin(dLambda / 2);
+      Math.cos(phi1) *
+        Math.cos(phi2) *
+        Math.sin(dLambda / 2) *
+        Math.sin(dLambda / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
@@ -1262,22 +1271,54 @@
 
 <!-- Chatbot UI -->
 {#if !isEmbedded}
-<div class="fixed bottom-10.5 right-6 z-100 flex flex-col items-end gap-4">
-  {#if chatOpen}
-    <div
-      class="w-95 h-137.5 bg-white/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 flex flex-col overflow-hidden origin-bottom-right"
-      transition:fly={{ y: 20, duration: 400, easing: quintOut }}
-    >
-      <!-- Chat Header -->
+  <div class="fixed bottom-6 right-5 z-100 flex flex-col items-end gap-3">
+    {#if chatOpen}
       <div
-        class="p-5 bg-linear-to-r from-blue-600 to-blue-500 text-white flex items-center justify-between shadow-lg"
+        class="w-80 h-118 bg-white/85 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 flex flex-col overflow-hidden origin-bottom-right"
+        transition:fly={{ y: 20, duration: 400, easing: quintOut }}
       >
-        <div class="flex items-center gap-3">
-          <div
-            class="w-10 h-10 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30"
+        <!-- Chat Header -->
+        <div
+          class="p-4 bg-linear-to-r from-blue-600 to-blue-500 text-white flex items-center justify-between shadow-lg"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-9 h-9 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-bold text-base leading-tight">
+                Campus Assistant
+              </h3>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"
+                ></span>
+                <span class="text-[11px] font-medium text-blue-100"
+                  >Always available</span
+                >
+              </div>
+            </div>
+          </div>
+          <button
+            onclick={() => (chatOpen = false)}
+            class="p-1.5 hover:bg-white/20 rounded-xl transition-all active:scale-90"
+            aria-label="Close Chat"
           >
             <svg
-              class="w-6 h-6"
+              class="w-4 h-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -1286,233 +1327,210 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                d="M6 18L18 6M6 6l12 12"
               />
             </svg>
-          </div>
-          <div>
-            <h3 class="font-bold text-lg leading-tight">Campus Assistant</h3>
-            <div class="flex items-center gap-1.5 mt-0.5">
-              <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"
-              ></span>
-              <span class="text-xs font-medium text-blue-100"
-                >Always available</span
-              >
-            </div>
-          </div>
-        </div>
-        <button
-          onclick={() => (chatOpen = false)}
-          class="p-2 hover:bg-white/20 rounded-xl transition-all active:scale-90"
-          aria-label="Close Chat"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Messages Area -->
-      <div
-        bind:this={messagesContainer}
-        class="flex-1 overflow-y-auto p-5 space-y-4 scroll-smooth"
-      >
-        {#if messages.length === 0}
-          <div
-            class="flex flex-col items-center justify-center h-full text-center p-6 space-y-4"
-            in:fade
-          >
-            <div
-              class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-blue-500"
-            >
-              <svg
-                class="w-8 h-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <div>
-              <p class="text-gray-900 font-semibold">Hello there!</p>
-              <p class="text-gray-500 text-sm mt-1">
-                Ask me anything about Pulchowk Campus departments, landmarks, or
-                directions.
-              </p>
-            </div>
-          </div>
-        {/if}
-
-        {#each messages as message}
-          <div
-            class="flex {message.role === 'user'
-              ? 'justify-end'
-              : 'justify-start'}"
-            in:fly={{ y: 10, duration: 300 }}
-          >
-            <div
-              class="max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm
-                {message.role === 'user'
-                ? 'bg-blue-600 text-white rounded-br-none'
-                : message.role === 'error'
-                  ? 'bg-red-50 text-red-600 border border-red-100'
-                  : 'bg-white text-gray-800 rounded-bl-none border border-gray-100'}"
-            >
-              {message.content}
-            </div>
-          </div>
-        {/each}
-
-        {#if chatQuery.isFetching}
-          <div class="flex justify-start" in:fade>
-            <div
-              class="bg-gray-100 p-4 rounded-2xl rounded-bl-none flex gap-1.5 items-center"
-            >
-              <span
-                class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"
-              ></span>
-              <span
-                class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"
-              ></span>
-              <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
-              ></span>
-            </div>
-          </div>
-        {/if}
-      </div>
-
-      <!-- Chat Input -->
-      <div class="p-4 bg-white border-t border-gray-100">
-        {#if rateLimitCooldown > 0}
-          <div
-            class="text-center text-sm text-amber-600 mb-2 flex items-center justify-center gap-2"
-          >
-            <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              ></circle>
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            <span
-              >Rate limited. Retry in <strong>{rateLimitCooldown}s</strong
-              ></span
-            >
-          </div>
-        {/if}
-        <form onsubmit={handleSubmit} class="flex items-center gap-2">
-          <input
-            type="text"
-            bind:value={currentQuery}
-            placeholder={rateLimitCooldown > 0
-              ? `Wait ${rateLimitCooldown}s...`
-              : "Type your message..."}
-            class="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            disabled={chatQuery.isFetching || rateLimitCooldown > 0}
-          />
-          <button
-            type="submit"
-            disabled={chatQuery.isFetching ||
-              !currentQuery.trim() ||
-              rateLimitCooldown > 0}
-            class="w-11 h-11 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-90 shadow-lg shadow-blue-600/20"
-          >
-            {#if chatQuery.isFetching}
-              <div
-                class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
-              ></div>
-            {:else if rateLimitCooldown > 0}
-              <span class="text-xs font-bold">{rateLimitCooldown}</span>
-            {:else}
-              <svg
-                class="w-5 h-5 rotate-90"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                />
-              </svg>
-            {/if}
           </button>
-        </form>
-      </div>
-    </div>
-  {/if}
+        </div>
 
-  <!-- Chat Toggle Button -->
-  <button
-    onclick={() => (chatOpen = !chatOpen)}
-    class="w-16 h-16 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-blue-600/40 relative group"
-    aria-label="Toggle Chat"
-  >
-    <div
-      class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-20 scale-125 pointer-events-none mb-4 group-hover:opacity-0"
-    ></div>
-    {#if chatOpen}
-      <svg
-        class="w-7 h-7"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        transition:fade
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M19 9l-7 7-7-7"
-        />
-      </svg>
-    {:else}
-      <svg
-        class="w-7 h-7"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        transition:fade
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-        />
-      </svg>
+        <!-- Messages Area -->
+        <div
+          bind:this={messagesContainer}
+          class="flex-1 overflow-y-auto p-4 space-y-3 scroll-smooth"
+        >
+          {#if messages.length === 0}
+            <div
+              class="flex flex-col items-center justify-center h-full text-center p-5 space-y-3"
+              in:fade
+            >
+              <div
+                class="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center text-blue-500"
+              >
+                <svg
+                  class="w-7 h-7"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p class="text-gray-900 font-semibold text-sm">Hello there!</p>
+                <p class="text-gray-500 text-xs mt-1">
+                  Ask me anything about Pulchowk Campus departments, landmarks,
+                  or directions.
+                </p>
+              </div>
+            </div>
+          {/if}
+
+          {#each messages as message}
+            <div
+              class="flex {message.role === 'user'
+                ? 'justify-end'
+                : 'justify-start'}"
+              in:fly={{ y: 10, duration: 300 }}
+            >
+              <div
+                class="max-w-[88%] p-3 rounded-2xl text-[13px] leading-relaxed shadow-sm
+                {message.role === 'user'
+                  ? 'bg-blue-600 text-white rounded-br-none'
+                  : message.role === 'error'
+                    ? 'bg-red-50 text-red-600 border border-red-100'
+                    : 'bg-white text-gray-800 rounded-bl-none border border-gray-100'}"
+              >
+                {message.content}
+              </div>
+            </div>
+          {/each}
+
+          {#if chatQuery.isFetching}
+            <div class="flex justify-start" in:fade>
+              <div
+                class="bg-gray-100 p-3 rounded-2xl rounded-bl-none flex gap-1.5 items-center"
+              >
+                <span
+                  class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"
+                ></span>
+                <span
+                  class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"
+                ></span>
+                <span
+                  class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                ></span>
+              </div>
+            </div>
+          {/if}
+        </div>
+
+        <!-- Chat Input -->
+        <div class="p-3 bg-white border-t border-gray-100">
+          {#if rateLimitCooldown > 0}
+            <div
+              class="text-center text-xs text-amber-600 mb-2 flex items-center justify-center gap-2"
+            >
+              <svg
+                class="w-3.5 h-3.5 animate-spin"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <span
+                >Rate limited. Retry in <strong>{rateLimitCooldown}s</strong
+                ></span
+              >
+            </div>
+          {/if}
+          <form onsubmit={handleSubmit} class="flex items-center gap-2">
+            <input
+              type="text"
+              bind:value={currentQuery}
+              placeholder={rateLimitCooldown > 0
+                ? `Wait ${rateLimitCooldown}s...`
+                : "Type your message..."}
+              class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              disabled={chatQuery.isFetching || rateLimitCooldown > 0}
+            />
+            <button
+              type="submit"
+              disabled={chatQuery.isFetching ||
+                !currentQuery.trim() ||
+                rateLimitCooldown > 0}
+              class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-90 shadow-lg shadow-blue-600/20"
+            >
+              {#if chatQuery.isFetching}
+                <div
+                  class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                ></div>
+              {:else if rateLimitCooldown > 0}
+                <span class="text-xs font-bold">{rateLimitCooldown}</span>
+              {:else}
+                <svg
+                  class="w-4.5 h-4.5 rotate-90"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  />
+                </svg>
+              {/if}
+            </button>
+          </form>
+        </div>
+      </div>
     {/if}
-  </button>
-</div>
+
+    <!-- Chat Toggle Button -->
+    <button
+      onclick={() => (chatOpen = !chatOpen)}
+      class="w-12 h-12 bg-blue-600 text-white rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-105 active:scale-90 shadow-blue-600/35 relative group"
+      aria-label="Toggle Chat"
+    >
+      <div
+        class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-20 scale-120 pointer-events-none group-hover:opacity-0"
+      ></div>
+      {#if chatOpen}
+        <svg
+          class="w-5.5 h-5.5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          transition:fade
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      {:else}
+        <svg
+          class="w-5.5 h-5.5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          transition:fade
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+          />
+        </svg>
+      {/if}
+    </button>
+  </div>
 {/if}
 
-<div class="relative w-full h-[calc(100vh-4rem)] bg-gray-50">
+<div
+  class="relative w-full h-[calc(100vh-4rem)] bg-linear-to-b from-cyan-50 via-white to-blue-50"
+>
   {#if !isNavigating}
     <!-- Search Container -->
     <div
@@ -1946,7 +1964,9 @@
               >
                 <div class="flex flex-col gap-2">
                   <div class="h-5 w-20 bg-gray-100 rounded animate-pulse"></div>
-                  <div class="h-2.5 w-28 bg-gray-50 rounded animate-pulse"></div>
+                  <div
+                    class="h-2.5 w-28 bg-gray-50 rounded animate-pulse"
+                  ></div>
                 </div>
                 <div
                   class="w-9 h-9 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center"
@@ -2052,27 +2072,6 @@
     </div>
   {/if}
 
-  <div
-    class="absolute bottom-6 left-6 z-10 bg-white/90 backdrop-blur rounded-lg shadow-lg border border-gray-100 p-1 flex gap-1"
-  >
-    <button
-      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors {isSatellite
-        ? 'text-gray-600 hover:bg-gray-100'
-        : 'bg-blue-50 text-blue-700'}"
-      onclick={() => (isSatellite = false)}
-    >
-      Map
-    </button>
-    <button
-      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors {isSatellite
-        ? 'bg-blue-50 text-blue-700'
-        : 'text-gray-600 hover:bg-gray-100'}"
-      onclick={() => (isSatellite = true)}
-    >
-      Satellite
-    </button>
-  </div>
-
   <MapLibre
     bind:map
     zoom={16}
@@ -2093,9 +2092,9 @@
     <GeoJSONSource data={pulchowkData} maxzoom={22}>
       <FillLayer
         paint={{
-          "fill-color": "#fff",
-          "fill-opacity": 1,
-          "fill-outline-color": "#333",
+          "fill-color": isSatellite ? "#cfe8ff" : "#dff4ff",
+          "fill-opacity": isSatellite ? 0.22 : 0.7,
+          "fill-outline-color": isSatellite ? "#60a5fa" : "#7dd3fc",
         }}
       />
       {#if isLoaded}
@@ -2309,7 +2308,7 @@
       closeOnClick={true}
     >
       {#key popupData.title}
-        <div class="max-w-[17rem] popup-content">
+        <div class="max-w-68 popup-content">
           {#if popupData.image}
             <div
               class="overflow-hidden rounded-t-lg mb-1.5 relative group h-28"
@@ -2558,6 +2557,27 @@
       onoutofmaxbounds={handleGeolocate}
       onerror={(e) => console.error("Geolocate error:", e)}
     />
+
+    <div
+      class="absolute top-4 right-16 z-50 bg-white/95 backdrop-blur rounded-xl shadow-xl border border-cyan-200 p-1 flex gap-1"
+    >
+      <button
+        class="px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-colors {isSatellite
+          ? 'text-slate-600 hover:bg-slate-100'
+          : 'bg-cyan-100 text-cyan-800'}"
+        onclick={() => (isSatellite = false)}
+      >
+        Map
+      </button>
+      <button
+        class="px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-colors {isSatellite
+          ? 'bg-cyan-100 text-cyan-800'
+          : 'text-slate-600 hover:bg-slate-100'}"
+        onclick={() => (isSatellite = true)}
+      >
+        Satellite
+      </button>
+    </div>
 
     <FullScreenControl position="top-right" />
   </MapLibre>

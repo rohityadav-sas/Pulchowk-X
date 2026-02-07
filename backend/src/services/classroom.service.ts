@@ -451,6 +451,9 @@ export async function createAssignmentForSubject(
       assignmentId: created.id,
       subjectId,
       facultyId: subject.facultyId,
+      teacherId,
+      assignmentTitle: created.title,
+      subjectTitle: subject.title,
       iconKey: "classroom",
     },
   }).catch((err) =>
@@ -684,6 +687,8 @@ export async function gradeSubmission(
     data: {
       type: 'grading_update',
       assignmentId: submission.assignmentId.toString(),
+      teacherId: teacherId,
+      assignmentTitle: submissionAssignment.title,
       status: gradeData.status,
       iconKey: 'classroom',
     }
