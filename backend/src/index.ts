@@ -70,6 +70,42 @@ app.get('/{*splat}', async (_, res) => {
 
 async function ensureRuntimeSchema() {
   await db.execute(sql`
+    DO $$
+    BEGIN
+      IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'notice' AND column_name = 'section'
+      ) THEN
+        ALTER TABLE "notice" RENAME COLUMN "section" TO "category";
+      END IF;
+    END $$;
+  `)
+  await db.execute(sql`
+    DO $$
+    BEGIN
+      IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'notice' AND column_name = 'subsection'
+      ) THEN
+        ALTER TABLE "notice" RENAME COLUMN "subsection" TO "level";
+      END IF;
+    END $$;
+  `)
+  await db.execute(sql`ALTER TABLE "notice" DROP COLUMN IF EXISTS "content"`)
+  await db.execute(sql`ALTER TABLE "notice" ALTER COLUMN "level" DROP NOT NULL`)
+  await db.execute(sql`ALTER TABLE "notice" ADD COLUMN IF NOT EXISTS "published_date" varchar(100)`)
+  await db.execute(sql`ALTER TABLE "notice" ADD COLUMN IF NOT EXISTS "source_url" text`)
+  await db.execute(sql`ALTER TABLE "notice" ADD COLUMN IF NOT EXISTS "external_ref" varchar(120)`)
+  await db.execute(sql`ALTER TABLE "notice" DROP COLUMN IF EXISTS "author_id"`)
+  await db.execute(sql`ALTER TABLE "notice" DROP COLUMN IF EXISTS "attachment_name"`)
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS "notice_external_ref_unique"
+    ON "notice" ("external_ref")
+  `)
+
+  await db.execute(sql`
     ALTER TABLE "user"
     ADD COLUMN IF NOT EXISTS "notification_preferences" jsonb
     DEFAULT '{"eventReminders":true,"marketplaceAlerts":true,"noticeUpdates":true,"classroomAlerts":true,"chatAlerts":true,"adminAlerts":true}'::jsonb

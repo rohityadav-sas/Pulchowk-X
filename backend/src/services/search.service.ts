@@ -163,16 +163,16 @@ export async function globalSearch(input: SearchInput) {
     }) : Promise.resolve([]),
 
     includeNotices ? db.query.notice.findMany({
-      where: or(ilike(notice.title, term), ilike(notice.content, term)),
+      where: or(ilike(notice.title, term), ilike(notice.category, term), ilike(notice.publishedDate, term)),
       orderBy: (table, { desc }) => [desc(table.createdAt)],
       limit,
       columns: {
         id: true,
         title: true,
-        content: true,
-        section: true,
-        subsection: true,
+        category: true,
+        level: true,
         attachmentUrl: true,
+        publishedDate: true,
         createdAt: true,
       },
     }) : Promise.resolve([]),
@@ -229,6 +229,12 @@ export async function globalSearch(input: SearchInput) {
   ]);
 
   const normalizedTerm = query.toLowerCase();
+  const normalizedNoticeResults = noticeResults.map((item) => ({
+    ...item,
+    content: "",
+    section: item.category,
+    subsection: item.level ?? "be",
+  }));
   const places = includePlaces
     ? searchableBuildings
     .filter((building) => building.searchableText.includes(normalizedTerm))
@@ -253,13 +259,13 @@ export async function globalSearch(input: SearchInput) {
       clubs: clubResults,
       events: eventResults,
       books: bookResults,
-      notices: noticeResults,
+      notices: normalizedNoticeResults,
       places,
       total:
         clubResults.length +
         eventResults.length +
         bookResults.length +
-        noticeResults.length +
+        normalizedNoticeResults.length +
         places.length,
     },
   };

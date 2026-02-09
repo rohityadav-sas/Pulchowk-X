@@ -2,7 +2,6 @@ import { Request, Response } from 'express'
 import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { db } from '../lib/db.js'
 import { notice, type NewNotice } from '../models/notice-schema.js'
-import { user } from '../models/auth-schema.js'
 import { UPLOAD_CONSTANTS, generatePublicId } from '../config/cloudinary.js'
 import { uploadAssignmentFileToCloudinary } from '../services/cloudinary.service.js'
 import {
@@ -10,8 +9,18 @@ import {
   deleteNoticeNotificationsByNoticeId,
 } from '../services/inAppNotification.service.js'
 import { sendToTopic } from '../services/notification.service.js'
+import { syncExamNotices } from '../services/notice-sync.service.js'
 
 type AuthedRequest = Request & { user?: { id: string; role?: string | null } }
+
+type NoticeCategory = 'results' | 'application_forms' | 'exam_centers' | 'general'
+
+const VALID_CATEGORIES: NoticeCategory[] = [
+  'results',
+  'application_forms',
+  'exam_centers',
+  'general',
+]
 
 const isNoticeManager = (req: AuthedRequest): boolean => {
   const role = req.user?.role
@@ -23,11 +32,48 @@ const { NOTICE_ATTACHMENTS, FOLDERS } = UPLOAD_CONSTANTS
 const isImageUrl = (url?: string | null) =>
   !!url && /\.(jpg|jpeg|png|webp|gif|avif|svg)(\?.*)?$/i.test(url)
 
+function mapLegacySectionToCategory(section: string): NoticeCategory | null {
+  if (section === 'results') return 'results'
+  if (section === 'routines') return 'general'
+  return null
+}
+
+function normalizeCategoryInput(rawCategory?: string | null, rawSection?: string | null): NoticeCategory | null {
+  const category = (rawCategory ?? '').trim().toLowerCase()
+  if (category && VALID_CATEGORIES.includes(category as NoticeCategory)) {
+    return category as NoticeCategory
+  }
+
+  const section = (rawSection ?? '').trim().toLowerCase()
+  if (section) {
+    return mapLegacySectionToCategory(section)
+  }
+
+  return null
+}
+
+function makeLegacySubsection(category: NoticeCategory): string {
+  if (category === 'results') return 'be'
+  if (category === 'application_forms') return 'msc'
+  if (category === 'exam_centers') return 'be'
+  return 'msc'
+}
+
+function toLegacySection(category: string): string {
+  if (category === 'results' || category === 'application_forms') return 'results'
+  return 'routines'
+}
+
 // Get all notices (with optional filtering)
 export async function getNotices(req: Request, res: Response) {
   try {
-    const section = (req.query.section as string | undefined)?.trim() // 'results' | 'routines'
-    const subsection = (req.query.subsection as string | undefined)?.trim() // 'be' | 'msc'
+    const category = normalizeCategoryInput(
+      req.query.category as string | undefined,
+      req.query.section as string | undefined,
+    )
+    const level =
+      (req.query.level as string | undefined)?.trim() ??
+      (req.query.subsection as string | undefined)?.trim()
     const search = (req.query.search as string | undefined)?.trim()
     const parsedLimit = Number(req.query.limit)
     const parsedOffset = Number(req.query.offset)
@@ -41,11 +87,17 @@ export async function getNotices(req: Request, res: Response) {
         : 0
 
     const filters: any[] = []
-    if (section) filters.push(eq(notice.section, section))
-    if (subsection) filters.push(eq(notice.subsection, subsection))
+    if (category) filters.push(eq(notice.category, category))
+    if (level) filters.push(eq(notice.level, level))
     if (search) {
       const term = `%${search}%`
-      filters.push(or(ilike(notice.title, term), ilike(notice.content, term)))
+      filters.push(
+        or(
+          ilike(notice.title, term),
+          ilike(notice.publishedDate, term),
+          ilike(notice.category, term),
+        ),
+      )
     }
 
     const whereClause =
@@ -60,22 +112,24 @@ export async function getNotices(req: Request, res: Response) {
       .select({
         id: notice.id,
         title: notice.title,
-        content: notice.content,
-        section: notice.section,
-        subsection: notice.subsection,
+        content: sql<string>`''`,
+        section: sql<string>`
+          CASE
+            WHEN ${notice.category} IN ('results', 'application_forms') THEN 'results'
+            ELSE 'routines'
+          END
+        `,
+        category: notice.category,
+        level: notice.level,
+        subsection: sql<string>`coalesce(${notice.level}, 'be')`,
         attachmentUrl: notice.attachmentUrl,
-        attachmentName: notice.attachmentName,
+        publishedDate: notice.publishedDate,
+        sourceUrl: notice.sourceUrl,
+        externalRef: notice.externalRef,
         createdAt: notice.createdAt,
         updatedAt: notice.updatedAt,
-        authorId: notice.authorId,
-        author: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        },
       })
       .from(notice)
-      .leftJoin(user, eq(notice.authorId, user.id))
       .where(whereClause)
       .orderBy(desc(notice.createdAt))
       .limit(limit)
@@ -104,21 +158,43 @@ export async function getNoticeStats(_req: Request, res: Response) {
   try {
     const [stats] = await db
       .select({
+        // Keep stats aligned with legacy UI filters:
+        // section=results => categories(results, application_forms)
+        // section=routines => categories(exam_centers, general)
         beResults:
-          sql<number>`count(*) filter (where ${notice.section} = 'results' and ${notice.subsection} = 'be')::int`,
+          sql<number>`count(*) filter (where ${notice.category} in ('results', 'application_forms') and coalesce(${notice.level}, 'be') = 'be')::int`,
         mscResults:
-          sql<number>`count(*) filter (where ${notice.section} = 'results' and ${notice.subsection} = 'msc')::int`,
+          sql<number>`count(*) filter (where ${notice.category} in ('results', 'application_forms') and coalesce(${notice.level}, 'be') = 'msc')::int`,
         beRoutines:
-          sql<number>`count(*) filter (where ${notice.section} = 'routines' and ${notice.subsection} = 'be')::int`,
+          sql<number>`count(*) filter (where ${notice.category} in ('exam_centers', 'general') and coalesce(${notice.level}, 'be') = 'be')::int`,
         mscRoutines:
-          sql<number>`count(*) filter (where ${notice.section} = 'routines' and ${notice.subsection} = 'msc')::int`,
+          sql<number>`count(*) filter (where ${notice.category} in ('exam_centers', 'general') and coalesce(${notice.level}, 'be') = 'msc')::int`,
+        results: sql<number>`count(*) filter (where ${notice.category} = 'results')::int`,
+        applicationForms:
+          sql<number>`count(*) filter (where ${notice.category} = 'application_forms')::int`,
+        examCenters:
+          sql<number>`count(*) filter (where ${notice.category} = 'exam_centers')::int`,
+        general: sql<number>`count(*) filter (where ${notice.category} = 'general')::int`,
         newCount:
           sql<number>`count(*) filter (where ${notice.createdAt} >= now() - interval '7 days')::int`,
         total: sql<number>`count(*)::int`,
       })
       .from(notice)
 
-    return res.json({ success: true, data: stats ?? {} })
+    const normalizedStats = stats ?? {
+      beResults: 0,
+      mscResults: 0,
+      beRoutines: 0,
+      mscRoutines: 0,
+      results: 0,
+      applicationForms: 0,
+      examCenters: 0,
+      general: 0,
+      newCount: 0,
+      total: 0,
+    }
+
+    return res.json({ success: true, data: normalizedStats })
   } catch (error: any) {
     console.error('Error fetching notice stats:', error)
     return res.status(500).json({
@@ -141,44 +217,38 @@ export async function createNotice(req: AuthedRequest, res: Response) {
     const body = req.body ?? {}
     const {
       title,
-      content,
-      section,
+      category: rawCategory,
+      section: rawSection,
+      level: rawLevel,
       subsection,
       attachmentUrl,
-
-      attachmentName,
+      publishedDate,
+      sourceUrl,
+      externalRef,
     } = body
 
-    if (!title || !content || !section || !subsection) {
+    const category = normalizeCategoryInput(rawCategory, rawSection)
+
+    if (!title || !category) {
       return res.status(400).json({
         success: false,
-        message: 'Title, content, section, and subsection are required',
+        message: 'Title and category are required',
       })
     }
 
-    if (!['results', 'routines'].includes(section)) {
-      return res.status(400).json({
-        success: false,
-        message: "Section must be 'results' or 'routines'",
-      })
-    }
-
-    if (!['be', 'msc'].includes(subsection)) {
-      return res.status(400).json({
-        success: false,
-        message: "Subsection must be 'be' or 'msc'",
-      })
-    }
+    const normalizedLevel =
+      (rawLevel as string | null | undefined)?.trim() ||
+      (subsection as string | null | undefined)?.trim() ||
+      makeLegacySubsection(category)
 
     const newNotice: NewNotice = {
       title,
-      content,
-      section,
-      subsection,
+      category,
+      level: normalizedLevel,
       attachmentUrl: attachmentUrl || null,
-
-      attachmentName: attachmentName || null,
-      authorId: req.user.id,
+      publishedDate: publishedDate || null,
+      sourceUrl: sourceUrl || null,
+      externalRef: externalRef || null,
     }
 
     const [created] = await db.insert(notice).values(newNotice).returning()
@@ -191,8 +261,10 @@ export async function createNotice(req: AuthedRequest, res: Response) {
       data: {
         noticeId: created.id,
         noticeTitle: created.title,
-        section,
-        subsection,
+        category,
+        section: toLegacySection(category),
+        level: normalizedLevel,
+        subsection: normalizedLevel,
         publisherId: req.user.id,
         iconKey: 'notice',
         ...(isImageUrl(created.attachmentUrl)
@@ -203,15 +275,16 @@ export async function createNotice(req: AuthedRequest, res: Response) {
       console.error('Failed to create notice in-app notification:', error),
     )
 
-    // Send FCM push notification to 'announcements' topic
     sendToTopic('announcements', {
       title: 'New Notice Published',
       body: title,
       data: {
         noticeId: created.id.toString(),
         type: 'notice_created',
-        section,
-        subsection,
+        category,
+        section: toLegacySection(category),
+        level: normalizedLevel,
+        subsection: normalizedLevel,
         publisherId: req.user.id,
         iconKey: 'notice',
       },
@@ -251,22 +324,33 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
     const body = req.body ?? {}
     const {
       title,
-      content,
-      section,
+      category: rawCategory,
+      section: rawSection,
+      level: rawLevel,
       subsection,
       attachmentUrl,
-
-      attachmentName,
+      publishedDate,
+      sourceUrl,
+      externalRef,
     } = body
 
     const updateData: Partial<NewNotice> = {}
     if (title) updateData.title = title
-    if (content) updateData.content = content
-    if (section) updateData.section = section
-    if (subsection) updateData.subsection = subsection
-    if (attachmentUrl !== undefined) updateData.attachmentUrl = attachmentUrl
 
-    if (attachmentName !== undefined) updateData.attachmentName = attachmentName
+    const category = normalizeCategoryInput(rawCategory, rawSection)
+    if (category) updateData.category = category
+
+    if (rawLevel !== undefined || subsection !== undefined) {
+      const normalizedLevel =
+        (rawLevel as string | null | undefined)?.trim() ||
+        (subsection as string | null | undefined)?.trim() ||
+        null
+      updateData.level = normalizedLevel
+    }
+    if (attachmentUrl !== undefined) updateData.attachmentUrl = attachmentUrl
+    if (publishedDate !== undefined) updateData.publishedDate = publishedDate
+    if (sourceUrl !== undefined) updateData.sourceUrl = sourceUrl
+    if (externalRef !== undefined) updateData.externalRef = externalRef
 
     const [updated] = await db
       .update(notice)
@@ -280,6 +364,9 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
         .json({ success: false, message: 'Notice not found' })
     }
 
+    const effectiveCategory = (updated.category as NoticeCategory) || 'general'
+    const effectiveLevel = updated.level || makeLegacySubsection(effectiveCategory)
+
     createInAppNotificationForAudience({
       audience: 'all',
       type: 'notice_updated',
@@ -288,8 +375,10 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
       data: {
         noticeId: updated.id,
         noticeTitle: updated.title,
-        section: updated.section,
-        subsection: updated.subsection,
+        category: effectiveCategory,
+        section: toLegacySection(effectiveCategory),
+        level: effectiveLevel,
+        subsection: effectiveLevel,
         publisherId: req.user.id,
         iconKey: 'notice',
         ...(isImageUrl(updated.attachmentUrl)
@@ -300,15 +389,16 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
       console.error('Failed to create notice update notification:', error),
     )
 
-    // Send FCM push notification to 'announcements' topic
     sendToTopic('announcements', {
       title: 'Notice Updated',
       body: updated.title,
       data: {
         noticeId: updated.id.toString(),
         type: 'notice_updated',
-        section: updated.section,
-        subsection: updated.subsection,
+        category: effectiveCategory,
+        section: toLegacySection(effectiveCategory),
+        level: effectiveLevel,
+        subsection: effectiveLevel,
         publisherId: req.user.id,
         iconKey: 'notice',
       },
@@ -366,11 +456,7 @@ export async function uploadNoticeAttachment(
     const base64 = file.buffer.toString('base64')
     const dataUri = `data:${file.mimetype};base64,${base64}`
 
-    // Generate public ID (no extension needed - Cloudinary handles format automatically)
     const publicId = generatePublicId('notice', req.user.id)
-
-    // Use 'image' for both images and PDFs - Cloudinary treats PDFs as images
-    // This ensures public access via /image/upload/ URL path
     const cloudinaryResourceType = 'image'
 
     const uploadResult = await uploadAssignmentFileToCloudinary(
@@ -391,7 +477,6 @@ export async function uploadNoticeAttachment(
       success: true,
       data: {
         url: uploadResult.data.url,
-
         name: file.originalname,
       },
     })
@@ -437,6 +522,9 @@ export async function deleteNotice(req: AuthedRequest, res: Response) {
       types: ['notice_created', 'notice_updated'],
     })
 
+    const effectiveCategory = (deleted.category as NoticeCategory) || 'general'
+    const effectiveLevel = deleted.level || makeLegacySubsection(effectiveCategory)
+
     createInAppNotificationForAudience({
       audience: 'admins',
       type: 'notice_deleted',
@@ -445,8 +533,10 @@ export async function deleteNotice(req: AuthedRequest, res: Response) {
       data: {
         noticeId: deleted.id,
         noticeTitle: deleted.title,
-        section: deleted.section,
-        subsection: deleted.subsection,
+        category: effectiveCategory,
+        section: toLegacySection(effectiveCategory),
+        level: effectiveLevel,
+        subsection: effectiveLevel,
         publisherId: req.user.id,
         iconKey: 'notice',
         ...(isImageUrl(deleted.attachmentUrl)
@@ -466,6 +556,25 @@ export async function deleteNotice(req: AuthedRequest, res: Response) {
     return res.status(500).json({
       success: false,
       message: error.message || 'Failed to delete notice',
+    })
+  }
+}
+
+// Sync notices from IOE exam notice pages (for GitHub Actions/cron)
+export async function syncIoeExamNotices(req: Request, res: Response) {
+  try {
+    const result = await syncExamNotices()
+
+    return res.json({
+      success: true,
+      message: 'Notice sync completed successfully',
+      data: result,
+    })
+  } catch (error: any) {
+    console.error('Error syncing notices:', error)
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to sync notices',
     })
   }
 }

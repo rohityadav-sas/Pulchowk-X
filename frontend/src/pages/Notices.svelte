@@ -10,6 +10,7 @@
     uploadNoticeAttachment,
     type Notice,
     type NoticeStats,
+    type NoticeWritePayload,
   } from "../lib/api";
   import { createQuery, useQueryClient } from "@tanstack/svelte-query";
 
@@ -20,12 +21,14 @@
   );
   const isNoticeManager = $derived(sessionUser?.role === "notice_manager");
 
-  type NoticeSection = "results" | "routines";
-  type NoticeSubsection = "be" | "msc";
+  type NoticeCategory =
+    | "results"
+    | "application_forms"
+    | "exam_centers"
+    | "general";
 
   // State
-  let activeSection = $state<NoticeSection>("results");
-  let activeSubsection = $state<NoticeSubsection>("be");
+  let activeCategory = $state<NoticeCategory>("results");
   let searchQuery = $state("");
   let expandedNoticeId = $state<number | null>(null);
 
@@ -46,8 +49,7 @@
   // Form state
   let formTitle = $state("");
   let formContent = $state("");
-  let formSection = $state<NoticeSection>("results");
-  let formSubsection = $state<NoticeSubsection>("be");
+  let formCategory = $state<NoticeCategory>("results");
   let formAttachmentUrl = $state("");
   let manualUrlInput = $state("");
   let formAttachmentName = $state("");
@@ -122,11 +124,10 @@
   }
 
   const noticesQuery = createQuery(() => ({
-    queryKey: ["notices", activeSection, activeSubsection],
+    queryKey: ["notices", activeCategory],
     queryFn: async () => {
       const result = await getNotices({
-        section: activeSection,
-        subsection: activeSubsection,
+        category: activeCategory,
       });
       if (!result.success || !result.data) {
         throw new Error(result.message || "Failed to load notices");
@@ -146,17 +147,9 @@
     },
   }));
 
-  // Handle section change
-  function setSection(section: NoticeSection) {
-    if (activeSection !== section) {
-      activeSection = section;
-    }
-  }
-
-  // Handle subsection change
-  function setSubsection(subsection: NoticeSubsection) {
-    if (activeSubsection !== subsection) {
-      activeSubsection = subsection;
+  function setCategory(category: NoticeCategory) {
+    if (activeCategory !== category) {
+      activeCategory = category;
     }
   }
 
@@ -173,28 +166,30 @@
     }
     return filtered.sort(
       (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        new Date(
+          b.publishedDate && !Number.isNaN(new Date(b.publishedDate).getTime())
+            ? b.publishedDate
+            : b.createdAt,
+        ).getTime() -
+        new Date(
+          a.publishedDate && !Number.isNaN(new Date(a.publishedDate).getTime())
+            ? a.publishedDate
+            : a.createdAt,
+        ).getTime(),
     );
   }
 
   const filteredNotices = $derived(getFilteredNotices());
-  const beResults = $derived(
-    statsQuery.data
-      ? activeSection === "results"
-        ? statsQuery.data.beResults
-        : statsQuery.data.beRoutines
-      : 0,
-  );
-  const mscResults = $derived(
-    statsQuery.data
-      ? activeSection === "results"
-        ? statsQuery.data.mscResults
-        : statsQuery.data.mscRoutines
-      : 0,
-  );
+  const categoryCounts = $derived({
+    results: statsQuery.data?.results ?? 0,
+    application_forms: statsQuery.data?.applicationForms ?? 0,
+    exam_centers: statsQuery.data?.examCenters ?? 0,
+    general: statsQuery.data?.general ?? 0,
+  });
   // Calculate newCount locally from notices using the same isNoticeNew logic
   const newCount = $derived(
-    filteredNotices.filter((n) => isNoticeNew(n.createdAt)).length,
+    filteredNotices.filter((n) => isNoticeNew(n.publishedDate, n.createdAt))
+      .length,
   );
 
   function openImagePreview(url: string, title: string) {
@@ -208,8 +203,7 @@
       const notice = filteredNotices.find((n) => n.id === expandedNoticeId);
       if (
         notice?.attachmentUrl &&
-        getAttachmentType(notice.attachmentUrl, notice.attachmentName) ===
-          "image"
+        getAttachmentType(notice.attachmentUrl) === "image"
       ) {
         if (
           !imagesLoaded[notice.id] &&
@@ -225,8 +219,41 @@
     previewImage = null;
     previewTitle = "";
   }
-  function formatDate(dateStr: string) {
-    const date = new Date(dateStr);
+  function formatDate(publishedDate?: string | null, createdAt?: string) {
+    if (publishedDate?.trim()) {
+      const parsedPublished = new Date(publishedDate);
+      if (!Number.isNaN(parsedPublished.getTime())) {
+        const now = new Date();
+        const hasExplicitTime = /T\d{1,2}:\d{2}|\b\d{1,2}:\d{2}\b/.test(
+          publishedDate,
+        );
+        if (!hasExplicitTime) {
+          const sameDay =
+            parsedPublished.getFullYear() === now.getFullYear() &&
+            parsedPublished.getMonth() === now.getMonth() &&
+            parsedPublished.getDate() === now.getDate();
+          if (sameDay) return "Today";
+        }
+        const diffMs = now.getTime() - parsedPublished.getTime();
+        const diffHours = diffMs / (1000 * 60 * 60);
+        const diffDays = diffMs / (1000 * 60 * 60 * 24);
+        if (diffHours < 1) return "Just now";
+        if (diffHours < 24) return "Today";
+        if (diffDays < 7) return `${Math.floor(diffDays)}d ago`;
+        return parsedPublished.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year:
+            parsedPublished.getFullYear() !== now.getFullYear()
+              ? "numeric"
+              : undefined,
+        });
+      }
+      // If backend gives a non-ISO publish date string, show it directly.
+      return publishedDate;
+    }
+
+    const date = new Date(createdAt || "");
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffHours = diffMs / (1000 * 60 * 60);
@@ -240,8 +267,14 @@
       year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
     });
   }
-  function isNoticeNew(createdAt: string): boolean {
-    const publishDate = new Date(createdAt);
+  function isNoticeNew(
+    publishedDate?: string | null,
+    createdAt?: string,
+  ): boolean {
+    const sourceDate = publishedDate?.trim() || createdAt;
+    if (!sourceDate) return false;
+    const publishDate = new Date(sourceDate);
+    if (Number.isNaN(publishDate.getTime())) return false;
     const now = new Date();
     const diffMs = now.getTime() - publishDate.getTime();
     const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
@@ -249,9 +282,9 @@
   }
   function getAttachmentType(
     url: string | null,
-    name: string | null,
-  ): "image" | "pdf" {
-    if (!url) return "image";
+    name?: string | null,
+  ): "image" | "pdf" | "link" {
+    if (!url) return "link";
     const lowerUrl = url.toLowerCase();
     const lowerName = name?.toLowerCase() || "";
 
@@ -287,26 +320,38 @@
       return "image";
     }
 
-    // If it's a raw Cloudinary upload without extension, it might be tricky.
-    // But safely defaulting to PDF for unknown types might be better than broken image?
-    // However, the legacy behavior was "default to image".
-    // Let's stick to "default to image" IF it doesn't match the new PDF criteria?
-    // No, user complaint "detects as image instead of pdf" suggests "default image" is the problem for URL links.
-
-    // Let's assume if it's NOT a known image extension and NOT a PDF extension/domain,
-    // and it IS a URL provided manually (likely what happened), we should probably treat as link (pdf mode handles links safely).
-
-    return "image";
+    return "link";
+  }
+  function getAttachmentChipLabel(url: string | null, name?: string | null) {
+    const type = getAttachmentType(url, name);
+    if (type === "image") return "IMG";
+    if (type === "pdf") return "PDF";
+    return "LNK";
   }
   function toggleExpand(id: number) {
     expandedNoticeId = expandedNoticeId === id ? null : id;
+  }
+  function getAttachmentDisplayName(url: string | null, fallback: string) {
+    if (!url) return fallback;
+    try {
+      const parsed = new URL(url);
+      const lastSegment = parsed.pathname.split("/").filter(Boolean).pop();
+      return lastSegment ? decodeURIComponent(lastSegment) : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+  function getCategoryLabel(category: NoticeCategory) {
+    if (category === "application_forms") return "application forms";
+    if (category === "exam_centers") return "exam centers";
+    if (category === "general") return "general";
+    return "results";
   }
   function openCreateModal() {
     editingNotice = null;
     formTitle = "";
     formContent = "";
-    formSection = activeSection;
-    formSubsection = activeSubsection;
+    formCategory = activeCategory;
     formAttachmentUrl = "";
 
     formAttachmentName = "";
@@ -318,14 +363,13 @@
   function openEditModal(notice: Notice) {
     editingNotice = notice;
     formTitle = notice.title;
-    formContent = notice.content;
-    formSection = notice.section;
-    formSubsection = notice.subsection;
+    formContent = notice.content || "";
+    formCategory = (notice.category || "results") as NoticeCategory;
     formAttachmentUrl = notice.attachmentUrl || "";
     manualUrlInput = "";
     activeAttachmentTab = "upload";
 
-    formAttachmentName = notice.attachmentName || "";
+    formAttachmentName = "";
     attachmentUploadError = null;
     if (attachmentFileInput) attachmentFileInput.value = "";
     formError = null;
@@ -395,15 +439,9 @@
     const data = {
       title: formTitle.trim(),
       content: formContent.trim(),
-      section: formSection,
-      subsection: formSubsection,
+      category: formCategory,
       attachmentUrl: formAttachmentUrl.trim() || null,
-
-      attachmentName: formAttachmentName.trim() || null,
-    } satisfies Omit<
-      Notice,
-      "id" | "authorId" | "createdAt" | "updatedAt" | "author"
-    >;
+    } satisfies NoticeWritePayload;
     let result;
     if (editingNotice) {
       result = await updateNotice(editingNotice.id, data);
@@ -431,17 +469,19 @@
 
 <div class="min-h-[calc(100vh-4rem)] bg-gray-50/50 px-4 py-8 sm:px-6 lg:px-8">
   <div class="max-w-5xl mx-auto">
-    <!-- Section Tabs -->
-    <div class="flex justify-center gap-2 mb-4">
+    <!-- Category Tabs -->
+    <div class="flex flex-wrap justify-center gap-2 mb-5">
       <button
-        onclick={() => setSection("results")}
-        class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 {activeSection ===
+        onclick={() => setCategory("results")}
+        class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 {activeCategory ===
         'results'
           ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
           : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}"
       >
         <svg
-          class="w-4 h-4"
+          class="w-4 h-4 {activeCategory === 'results'
+            ? 'text-white'
+            : 'text-green-600'}"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -454,16 +494,92 @@
           />
         </svg>
         Results
+        <span
+          class="inline-flex items-center justify-center min-w-5 h-5 text-[10px] leading-none px-1.5 rounded-full {activeCategory ===
+          'results'
+            ? 'bg-white/20 text-white'
+            : 'bg-slate-100 text-slate-700'}">{categoryCounts.results}</span
+        >
       </button>
       <button
-        onclick={() => setSection("routines")}
-        class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 {activeSection ===
-        'routines'
+        onclick={() => setCategory("application_forms")}
+        class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 {activeCategory ===
+        'application_forms'
           ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
           : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}"
       >
         <svg
-          class="w-4 h-4"
+          class="w-4 h-4 {activeCategory === 'application_forms'
+            ? 'text-white'
+            : 'text-violet-600'}"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12h6m-6 4h6M8 7h8m2 14H6a2 2 0 01-2-2V5a2 2 0 012-2h9l5 5v11a2 2 0 01-2 2z"
+          />
+        </svg>
+        Application Forms
+        <span
+          class="inline-flex items-center justify-center min-w-5 h-5 text-[10px] leading-none px-1.5 rounded-full {activeCategory ===
+          'application_forms'
+            ? 'bg-white/20 text-white'
+            : 'bg-slate-100 text-slate-700'}"
+          >{categoryCounts.application_forms}</span
+        >
+      </button>
+      <button
+        onclick={() => setCategory("exam_centers")}
+        class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 {activeCategory ===
+        'exam_centers'
+          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+          : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}"
+      >
+        <svg
+          class="w-4 h-4 {activeCategory === 'exam_centers'
+            ? 'text-white'
+            : 'text-amber-600'}"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0L6.343 16.657a8 8 0 1111.314 0z"
+          />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+        Exam Centers
+        <span
+          class="inline-flex items-center justify-center min-w-5 h-5 text-[10px] leading-none px-1.5 rounded-full {activeCategory ===
+          'exam_centers'
+            ? 'bg-white/20 text-white'
+            : 'bg-slate-100 text-slate-700'}"
+          >{categoryCounts.exam_centers}</span
+        >
+      </button>
+      <button
+        onclick={() => setCategory("general")}
+        class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 {activeCategory ===
+        'general'
+          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+          : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}"
+      >
+        <svg
+          class="w-4 h-4 {activeCategory === 'general'
+            ? 'text-white'
+            : 'text-blue-600'}"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -475,44 +591,12 @@
             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
           />
         </svg>
-        Routines
-      </button>
-    </div>
-
-    <!-- Program Tabs -->
-    <div class="flex justify-center gap-2 mb-5">
-      <button
-        onclick={() => setSubsection("be")}
-        class="px-3.5 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 {activeSubsection ===
-        'be'
-          ? 'bg-slate-800 text-white'
-          : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}"
-      >
+        General
         <span
-          class="w-1.5 h-1.5 rounded-full {activeSubsection === 'be'
-            ? 'bg-green-400'
-            : 'bg-slate-300'}"
-        ></span>
-        BE Programs
-        <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full"
-          >{beResults}</span
-        >
-      </button>
-      <button
-        onclick={() => setSubsection("msc")}
-        class="px-3.5 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 {activeSubsection ===
-        'msc'
-          ? 'bg-slate-800 text-white'
-          : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}"
-      >
-        <span
-          class="w-1.5 h-1.5 rounded-full {activeSubsection === 'msc'
-            ? 'bg-purple-400'
-            : 'bg-slate-300'}"
-        ></span>
-        MSc Programs
-        <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full"
-          >{mscResults}</span
+          class="inline-flex items-center justify-center min-w-5 h-5 text-[10px] leading-none px-1.5 rounded-full {activeCategory ===
+          'general'
+            ? 'bg-white/20 text-white'
+            : 'bg-slate-100 text-slate-700'}">{categoryCounts.general}</span
         >
       </button>
     </div>
@@ -535,7 +619,7 @@
         </svg>
         <input
           type="text"
-          placeholder="Search results..."
+          placeholder="Search notices..."
           bind:value={searchQuery}
           class="w-full pl-9 pr-3 py-3 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
@@ -641,7 +725,7 @@
           <p class="text-slate-500 text-sm">
             {searchQuery
               ? "Try a different search term"
-              : `There are no examination ${activeSection} posted for ${activeSubsection.toUpperCase()} programs yet.`}
+              : `There are no ${getCategoryLabel(activeCategory)} notices posted yet.`}
           </p>
         </div>
       </div>
@@ -659,12 +743,16 @@
             >
               <!-- Icon -->
               <div
-                class="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center {activeSection ===
+                class="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center {activeCategory ===
                 'results'
                   ? 'bg-green-100 text-green-600'
-                  : 'bg-blue-100 text-blue-600'}"
+                  : activeCategory === 'application_forms'
+                    ? 'bg-violet-100 text-violet-600'
+                    : activeCategory === 'exam_centers'
+                      ? 'bg-amber-100 text-amber-600'
+                      : 'bg-blue-100 text-blue-600'}"
               >
-                {#if activeSection === "results"}
+                {#if activeCategory === "results"}
                   <svg
                     class="w-4 h-4"
                     fill="none"
@@ -676,6 +764,40 @@
                       stroke-linejoin="round"
                       stroke-width="2"
                       d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                {:else if activeCategory === "application_forms"}
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12h6m-6 4h6M8 7h8m2 14H6a2 2 0 01-2-2V5a2 2 0 012-2h9l5 5v11a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                {:else if activeCategory === "exam_centers"}
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0L6.343 16.657a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                     />
                   </svg>
                 {:else}
@@ -709,7 +831,7 @@
                     </p>
                   </div>
                   <div class="flex items-center gap-1.5 shrink-0">
-                    {#if isNoticeNew(notice.createdAt)}
+                    {#if isNoticeNew(notice.publishedDate, notice.createdAt)}
                       <span
                         class="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-semibold rounded-full"
                         >NEW</span
@@ -719,10 +841,7 @@
                       <span
                         class="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-semibold rounded-full uppercase"
                       >
-                        {getAttachmentType(
-                          notice.attachmentUrl,
-                          notice.attachmentName,
-                        ) || "file"}
+                        {getAttachmentChipLabel(notice.attachmentUrl)}
                       </span>
                     {/if}
                   </div>
@@ -731,10 +850,10 @@
                 <div
                   class="flex items-center gap-3 mt-1 text-[10px] text-slate-400"
                 >
-                  <span>{formatDate(notice.createdAt)}</span>
-                  {#if notice.author}
-                    <span>by {notice.author.name}</span>
-                  {/if}
+                  <span
+                    >{formatDate(notice.publishedDate, notice.createdAt)}</span
+                  >
+                  <span>By Exam Controller Division</span>
                 </div>
               </div>
 
@@ -770,7 +889,7 @@
 
                   {#if notice.attachmentUrl}
                     <div class="mt-4 p-4 bg-slate-50 rounded-xl">
-                      {#if getAttachmentType(notice.attachmentUrl, notice.attachmentName) === "image"}
+                      {#if getAttachmentType(notice.attachmentUrl) === "image"}
                         <button
                           onclick={() =>
                             openImagePreview(
@@ -809,7 +928,7 @@
                           {/if}
                           <img
                             src={notice.attachmentUrl}
-                            alt={notice.attachmentName || notice.title}
+                            alt={notice.title}
                             class="max-h-64 mx-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity {imagesLoaded[
                               notice.id
                             ]
@@ -821,10 +940,13 @@
                             }}
                           />
                         </button>
-                      {:else}
+                      {:else if getAttachmentType(notice.attachmentUrl) === "pdf"}
                         <a
                           href={notice.attachmentUrl}
-                          download={notice.attachmentName || "attachment.pdf"}
+                          download={getAttachmentDisplayName(
+                            notice.attachmentUrl,
+                            "attachment.pdf",
+                          )}
                           class="flex items-center gap-3 text-blue-600 hover:text-blue-700"
                         >
                           <img
@@ -833,9 +955,29 @@
                             class="size-7 shrink-0"
                             loading="lazy"
                           />
-                          <span class="font-medium"
-                            >{notice.attachmentName || "View PDF"}</span
+                          <span class="font-medium">View PDF</span>
+                        </a>
+                      {:else}
+                        <a
+                          href={notice.attachmentUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="flex items-center gap-3 text-blue-600 hover:text-blue-700"
+                        >
+                          <svg
+                            class="size-7 shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
                           >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M13.828 10.172a4 4 0 00-5.656 0l-2 2a4 4 0 105.656 5.656l1-1m-1.828-2.828a4 4 0 005.656 0l2-2a4 4 0 00-5.656-5.656l-1 1"
+                            />
+                          </svg>
+                          <span class="font-medium">View Notice</span>
                         </a>
                       {/if}
                     </div>
@@ -974,31 +1116,20 @@
           ></textarea>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div>
           <div>
             <!-- svelte-ignore a11y_label_has_associated_control -->
             <label class="block text-xs font-semibold text-slate-700 mb-1"
-              >Section</label
+              >Category</label
             >
             <select
-              bind:value={formSection}
+              bind:value={formCategory}
               class="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="results">Results</option>
-              <option value="routines">Routines</option>
-            </select>
-          </div>
-          <div>
-            <!-- svelte-ignore a11y_label_has_associated_control -->
-            <label class="block text-xs font-semibold text-slate-700 mb-1"
-              >Program</label
-            >
-            <select
-              bind:value={formSubsection}
-              class="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="be">BE</option>
-              <option value="msc">MSc</option>
+              <option value="application_forms">Application Forms</option>
+              <option value="exam_centers">Exam Centers</option>
+              <option value="general">General</option>
             </select>
           </div>
         </div>
@@ -1153,7 +1284,12 @@
                   {getAttachmentType(formAttachmentUrl, formAttachmentName) ===
                   "image"
                     ? "Image file"
-                    : "PDF Document"}
+                    : getAttachmentType(
+                          formAttachmentUrl,
+                          formAttachmentName,
+                        ) === "pdf"
+                      ? "PDF Document"
+                      : "External link"}
                 </p>
               </div>
               <button

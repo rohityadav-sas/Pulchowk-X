@@ -5,6 +5,7 @@ import {
   deleteNotice,
   getNotices,
   getNoticeStats,
+  syncIoeExamNotices,
   uploadNoticeAttachment,
   updateNotice,
 } from '../controllers/notice.controller.js'
@@ -16,6 +17,7 @@ const upload = multer({ storage: multer.memoryStorage() })
 // Public routes - anyone can view notices
 router.get('/', getNotices)
 router.get('/stats', getNoticeStats)
+router.get('/sync/ioe', syncIoeExamNotices)
 
 // Protected routes - require authentication
 router.post(

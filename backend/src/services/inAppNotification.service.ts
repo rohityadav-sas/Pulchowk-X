@@ -449,19 +449,7 @@ function buildVisibilityFilter(
     )`,
     sql`not (
       ${notifications.type} in ('notice_created', 'notice_updated', 'notice_deleted')
-      and (
-        coalesce(${notifications.data}->>'publisherId', '') = ${userId}
-        or (
-          coalesce(${notifications.data}->>'publisherId', '') = ''
-          and (${notifications.data}->>'noticeId') ~ '^[0-9]+$'
-          and exists (
-            select 1
-            from ${notice} n
-            where n.id = (${notifications.data}->>'noticeId')::int
-              and n.author_id = ${userId}
-          )
-        )
-      )
+      and coalesce(${notifications.data}->>'publisherId', '') = ${userId}
     )`,
     // Hide stale publish/update notifications if the notice no longer exists.
     sql`not (

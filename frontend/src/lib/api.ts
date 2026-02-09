@@ -1610,23 +1610,24 @@ export interface Notice {
   title: string
   content: string
   section: 'results' | 'routines'
+  category?: 'results' | 'application_forms' | 'exam_centers' | 'general'
+  level?: string | null
   subsection: 'be' | 'msc'
   attachmentUrl: string | null
-
-  attachmentName: string | null
-  authorId: string
+  publishedDate?: string | null
+  sourceUrl?: string | null
+  externalRef?: string | null
 
   createdAt: string
   updatedAt: string
-  author?: {
-    id: string
-    name: string
-    email?: string
-  }
 }
 
 export interface NoticeStats {
   total: number
+  results: number
+  applicationForms: number
+  examCenters: number
+  general: number
   beResults: number
   mscResults: number
   beRoutines: number
@@ -1635,11 +1636,26 @@ export interface NoticeStats {
 }
 
 export interface NoticeFilters {
-  section?: 'results' | 'routines'
-  subsection?: 'be' | 'msc'
+  section?: string
+  category?: 'results' | 'application_forms' | 'exam_centers' | 'general'
+  level?: string
+  subsection?: string
   search?: string
   limit?: number
   offset?: number
+}
+
+export interface NoticeWritePayload {
+  title: string
+  content?: string
+  section?: string
+  category?: 'results' | 'application_forms' | 'exam_centers' | 'general'
+  level?: string | null
+  subsection?: string | null
+  attachmentUrl?: string | null
+  publishedDate?: string | null
+  sourceUrl?: string | null
+  externalRef?: string | null
 }
 
 export interface PaginationMeta {
@@ -1658,6 +1674,8 @@ export async function getNotices(
 }> {
   try {
     const params = new URLSearchParams()
+    if (filters?.category) params.append('category', filters.category)
+    if (filters?.level) params.append('level', filters.level)
     if (filters?.section) params.append('section', filters.section)
     if (filters?.subsection) params.append('subsection', filters.subsection)
     if (filters?.search) params.append('search', filters.search)
@@ -1748,7 +1766,7 @@ export async function uploadNoticeAttachment(file: File): Promise<{
 }
 
 export async function createNotice(
-  data: Omit<Notice, 'id' | 'authorId' | 'createdAt' | 'updatedAt' | 'author'>,
+  data: NoticeWritePayload,
 ): Promise<{ success: boolean; data?: Notice; message?: string }> {
   try {
     const res = await fetch(API_NOTICES, {
@@ -1777,9 +1795,7 @@ export async function createNotice(
 
 export async function updateNotice(
   id: number,
-  data: Partial<
-    Omit<Notice, 'id' | 'authorId' | 'createdAt' | 'updatedAt' | 'author'>
-  >,
+  data: Partial<NoticeWritePayload>,
 ): Promise<{ success: boolean; data?: Notice; message?: string }> {
   try {
     const res = await fetch(`${API_NOTICES}/${id}`, {

@@ -22,8 +22,10 @@
 		"drizzle-orm": "^0.45.1",
 		"express": "5.1.0",
 		"firebase-admin": "^13.6.0",
+		"ky": "^1.7.5",
 		"multer": "^2.0.2",
 		"nepali-date-converter": "^3.4.0",
+		"node-html-parser": "^7.0.2",
 		"pdfkit": "^0.17.2"
 	},
 	"devDependencies": {

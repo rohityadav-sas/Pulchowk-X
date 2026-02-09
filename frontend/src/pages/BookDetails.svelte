@@ -848,7 +848,7 @@
                 (entry) => entry.blockedUserId === book.sellerId,
               )}
               <div
-                class="mt-8 relative group overflow-hidden rounded-[2rem] bg-slate-900 p-8 shadow-2xl transition-all hover:scale-[1.01]"
+                class="mt-8 relative group overflow-hidden rounded-4xl bg-slate-900 p-8 shadow-2xl transition-all hover:scale-[1.01]"
               >
                 <!-- Background decorative elements -->
                 <div
@@ -876,7 +876,7 @@
                   </div>
 
                   <div
-                    class="flex items-center gap-4 bg-white/5 backdrop-blur-md rounded-[1.5rem] p-4 border border-white/10 shadow-inner"
+                    class="flex items-center gap-4 bg-white/5 backdrop-blur-md rounded-3xl p-4 border border-white/10 shadow-inner"
                   >
                     <div
                       class="text-center px-4 border-r border-white/10 group/stat"
@@ -1432,6 +1432,7 @@
         <div class="flex justify-center gap-2 mb-8">
           {#each Array(5) as _, i}
             {@const starVal = i + 1}
+            <!-- svelte-ignore a11y_consider_explicit_label -->
             <button
               onclick={() => (ratingValue = starVal)}
               class="p-2 transition-transform hover:scale-110 active:scale-90"
