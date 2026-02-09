@@ -385,7 +385,7 @@
                       </span>
                     {/if}
                   </a>
-                  {#if currentRole !== 'admin'}
+                  {#if currentRole !== 'admin' && currentRole !== 'notice_manager'}
                     <a
                       use:route
                       href="/classroom"

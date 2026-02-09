@@ -1162,6 +1162,21 @@
             </div>
           {/if}
         </div>
+      {:else if userRole === 'notice_manager'}
+        <div
+          class="max-w-lg mx-auto text-center py-8 px-6 bg-white rounded-2xl border border-slate-200 shadow-sm"
+        >
+          <div
+            class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-3 text-amber-700 font-medium"
+          >
+            !
+          </div>
+          <h2 class="font-semibold text-slate-900 mb-1">Classroom Not Available</h2>
+          <p class="text-sm text-slate-500">
+            Your account is configured for notice management. Classroom is only
+            available to student and teacher roles.
+          </p>
+        </div>
       {:else}
         <div
           class="max-w-lg mx-auto text-center py-8 px-6 bg-white rounded-2xl border border-slate-200 shadow-sm"
