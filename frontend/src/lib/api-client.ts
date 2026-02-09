@@ -165,3 +165,17 @@ export function optimizeCloudinaryUrl(url: string, width?: number): string {
   }
   return url;
 }
+
+/**
+ * Build a sharp thumbnail URL for Cloudinary-hosted assets.
+ */
+export function optimizeCloudinaryThumbnailUrl(
+  url: string,
+  width: number,
+  height: number,
+): string {
+  if (!url.includes("cloudinary.com")) return url;
+  if (!url.includes("/upload/")) return url;
+  const transform = `f_auto,q_auto:best,dpr_auto,c_fill,g_auto,w_${width},h_${height}`;
+  return url.replace("/upload/", `/upload/${transform}/`);
+}

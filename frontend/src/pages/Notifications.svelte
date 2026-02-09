@@ -13,6 +13,7 @@
   } from "../lib/api";
   import LoadingSpinner from "../components/LoadingSpinner.svelte";
   import { route } from "@mateothegreat/svelte5-router";
+  import { optimizeCloudinaryThumbnailUrl } from "../lib/api-client";
 
   const queryClient = useQueryClient();
   const PAGE_SIZE = 5;
@@ -371,7 +372,8 @@
       (data.thumbnailUrl as string | undefined) ||
       (data.bannerUrl as string | undefined) ||
       (data.attachmentUrl as string | undefined);
-    return typeof value === "string" && value.trim().length > 0 ? value : null;
+    if (typeof value !== "string" || value.trim().length === 0) return null;
+    return optimizeCloudinaryThumbnailUrl(value, 56, 56);
   }
 
   function isPdfUrl(url: string | null) {
@@ -415,7 +417,8 @@
       (data.thumbnailUrl as string | undefined) ||
       (data.imageUrl as string | undefined) ||
       (data.bannerUrl as string | undefined);
-    return typeof value === "string" && value.trim().length > 0 ? value : null;
+    if (typeof value !== "string" || value.trim().length === 0) return null;
+    return optimizeCloudinaryThumbnailUrl(value, 56, 56);
   }
 
   function getActorName(notification: InAppNotification) {
