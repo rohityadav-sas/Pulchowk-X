@@ -373,7 +373,7 @@
       (data.bannerUrl as string | undefined) ||
       (data.attachmentUrl as string | undefined);
     if (typeof value !== "string" || value.trim().length === 0) return null;
-    return optimizeCloudinaryThumbnailUrl(value, 56, 56);
+    return optimizeCloudinaryThumbnailUrl(value, 140, 140);
   }
 
   function isPdfUrl(url: string | null) {
@@ -418,7 +418,7 @@
       (data.imageUrl as string | undefined) ||
       (data.bannerUrl as string | undefined);
     if (typeof value !== "string" || value.trim().length === 0) return null;
-    return optimizeCloudinaryThumbnailUrl(value, 56, 56);
+    return optimizeCloudinaryThumbnailUrl(value, 140, 140);
   }
 
   function getActorName(notification: InAppNotification) {
