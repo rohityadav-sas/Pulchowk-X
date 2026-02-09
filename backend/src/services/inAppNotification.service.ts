@@ -303,9 +303,12 @@ function getVisibleAudiencesForRole(role?: UserRole): Audience[] {
 }
 
 function getRoleTypeFilter(role?: UserRole): SQL | null {
-  if (role === "notice_manager") {
-    // Restrict notice managers to notice lifecycle notifications only.
-    return sql`${notifications.type} like 'notice_%'`;
+  if (role === "notice_manager" || role === "admin") {
+    // Keep admin/notice_manager feeds focused on notice or admin-system updates.
+    return sql`(
+      ${notifications.type} like 'notice_%'
+      or ${notifications.type} like 'admin_%'
+    )`;
   }
   return null;
 }
