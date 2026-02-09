@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createQuery, useQueryClient } from "@tanstack/svelte-query";
   import { route } from "@mateothegreat/svelte5-router";
+  import { slide } from "svelte/transition";
   import {
     getLostFoundItems,
     type LostFoundCategory,
@@ -40,6 +41,7 @@
   let category = $state<LostFoundCategory | "all">("all");
   let status = $state<LostFoundStatus | "all">("all");
   let search = $state("");
+  let showFilters = $state(false);
 
   let loadingMore = $state(false);
   let extraPages = $state<
@@ -99,17 +101,24 @@
     pages.length > 0 ? pages[pages.length - 1].nextCursor : null,
   );
 
-  function formatDate(dateLike: string) {
-    const date = new Date(dateLike);
-    if (Number.isNaN(date.getTime())) return "Unknown date";
-    return date.toLocaleDateString();
-  }
-
   function statusClass(value: LostFoundStatus) {
     if (value === "open") return "bg-emerald-100 text-emerald-700";
     if (value === "claimed") return "bg-amber-100 text-amber-700";
     if (value === "resolved") return "bg-blue-100 text-blue-700";
     return "bg-slate-100 text-slate-700";
+  }
+
+  function getTimeAgo(dateLike: string) {
+    const date = new Date(dateLike);
+    if (Number.isNaN(date.getTime())) return "Unknown";
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (days <= 0) return "Today";
+    if (days === 1) return "Yesterday";
+    if (days < 7) return `${days} days ago`;
+    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+    return `${Math.floor(days / 30)} months ago`;
   }
 
   async function loadMore() {
@@ -151,204 +160,298 @@
         extraPages = [...extraPages, nextPage];
       }
     } catch {
-      // keep existing list stable and show fetch error through query cache retries only
+      // keep existing list stable
     } finally {
       loadingMore = false;
     }
   }
 </script>
 
-<div class="min-h-[calc(100vh-4rem)] px-4 py-5 sm:px-6 lg:px-8">
-  <div class="mx-auto max-w-7xl space-y-4">
-    <section
-      class="rounded-3xl border border-cyan-100 bg-white/80 p-4 shadow-[0_14px_40px_rgba(14,116,144,0.08)] backdrop-blur-sm sm:p-5"
-    >
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div class="space-y-1.5">
-          <p
-            class="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-cyan-700"
-          >
-            Campus Support
-          </p>
-          <h1 class="text-3xl font-black tracking-tight text-slate-900">
-            Lost &amp; Found
-          </h1>
-          <p class="max-w-2xl text-sm text-slate-600">
-            Report and track campus items quickly. Compact feed, fast filters,
-            and claim workflow in one place.
-          </p>
+<div class="min-h-[calc(100vh-4rem)] bg-gray-50/50 px-4 py-8 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-7xl">
+    <div class="relative z-30 mb-5">
+      <div class="mx-auto max-w-4xl space-y-3">
+        <div
+          class="group flex flex-col items-center gap-1.5 rounded-2xl border border-slate-100 bg-white p-1.5 shadow-lg shadow-blue-100/50 transition-all duration-500 focus-within:ring-2 focus-within:ring-blue-500/10 sm:flex-row"
+        >
+          <div class="relative w-full flex-1">
+            <svg
+              class="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.5"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <input
+              type="text"
+              placeholder="What item are you looking for?"
+              bind:value={search}
+              class="w-full border-none bg-transparent py-3 pl-10 pr-8 text-sm font-semibold text-slate-900 placeholder:text-slate-300 focus:ring-0"
+            />
+          </div>
+
+          <div class="flex w-full items-center gap-2 p-1 sm:w-auto">
+            <button
+              onclick={() => (showFilters = !showFilters)}
+              class="relative flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all sm:flex-none {showFilters
+                ? 'bg-blue-600 text-white shadow-xl shadow-blue-200'
+                : 'border border-slate-100 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900'}"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.5"
+                  d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
+                />
+              </svg>
+              Filters
+            </button>
+            <button
+              onclick={() =>
+                queryClient.invalidateQueries({ queryKey: ["lost-found"] })}
+              class="flex-1 rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-slate-200/50 transition-all hover:bg-slate-800 sm:flex-none"
+            >
+              Search
+            </button>
+            {#if canManage}
+              <a
+                use:route
+                href="/lost-found/report"
+                class="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-slate-200 transition-all hover:bg-slate-800 active:scale-95"
+              >
+                <svg
+                  class="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2.5"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Report Item
+              </a>
+            {/if}
+          </div>
         </div>
-        {#if canManage}
-          <div class="flex flex-wrap items-center gap-2">
-            <a
-              use:route
-              href="/lost-found/my"
-              class="inline-flex h-9 items-center gap-1.5 rounded-xl border border-cyan-200 bg-cyan-50 px-3.5 text-sm font-semibold text-cyan-800 transition hover:border-cyan-300 hover:bg-cyan-100"
-            >
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7a2 2 0 012-2h5l2 2h3a2 2 0 012 2v8a2 2 0 01-2 2H7a2 2 0 01-2-2V7z" />
-              </svg>
-              My Posts
-            </a>
-            <a
-              use:route
-              href="/lost-found/report"
-              class="inline-flex h-9 items-center gap-1.5 rounded-xl bg-linear-to-r from-cyan-600 to-blue-600 px-3.5 text-sm font-semibold text-white shadow-sm transition hover:from-cyan-500 hover:to-blue-500"
-            >
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14" />
-              </svg>
-              Report Item
-            </a>
+
+        {#if showFilters}
+          <div
+            class="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl shadow-blue-900/5 ring-1 ring-black/5"
+            transition:slide={{ duration: 500 }}
+          >
+            <div class="grid grid-cols-1 gap-4 p-4 md:grid-cols-3">
+              <div>
+                <p
+                  class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500"
+                >
+                  Type
+                </p>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <button
+                    onclick={() => (itemType = "lost")}
+                    class="h-10 rounded-lg px-3 text-xs font-semibold transition {itemType ===
+                    'lost'
+                      ? 'bg-blue-600 text-white'
+                      : 'border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'}"
+                  >
+                    Lost
+                  </button>
+                  <button
+                    onclick={() => (itemType = "found")}
+                    class="h-10 rounded-lg px-3 text-xs font-semibold transition {itemType ===
+                    'found'
+                      ? 'bg-blue-600 text-white'
+                      : 'border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'}"
+                  >
+                    Found
+                  </button>
+                </div>
+              </div>
+
+              <div class="relative">
+                <label
+                  for="lf-category-filter"
+                  class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500"
+                  >Category</label
+                >
+                <select
+                  id="lf-category-filter"
+                  bind:value={category}
+                  class="h-10 w-full bg-none rounded-lg border border-slate-200 bg-slate-50 pl-3 pr-9 text-sm font-medium text-slate-700"
+                >
+                  {#each categories as option}
+                    <option value={option.value}>{option.label}</option>
+                  {/each}
+                </select>
+                <svg
+                  class="pointer-events-none absolute right-3 top-[33px] h-4 w-4 text-slate-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+
+              <div class="relative">
+                <label
+                  for="lf-status-filter"
+                  class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500"
+                  >Status</label
+                >
+                <select
+                  id="lf-status-filter"
+                  bind:value={status}
+                  class="h-10 w-full bg-none rounded-lg border border-slate-200 bg-slate-50 pl-3 pr-9 text-sm font-medium text-slate-700"
+                >
+                  {#each statuses as option}
+                    <option value={option.value}>{option.label}</option>
+                  {/each}
+                </select>
+                <svg
+                  class="pointer-events-none absolute right-3 top-[33px] h-4 w-4 text-slate-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
           </div>
         {/if}
+
       </div>
-    </section>
-
-    <section
-      class="rounded-3xl border border-cyan-100 bg-white/75 p-3.5 shadow-sm backdrop-blur-sm"
-    >
-      <div class="flex flex-wrap gap-2">
-        <button
-          class="inline-flex h-10 items-center rounded-xl px-3.5 text-sm font-semibold transition-colors whitespace-nowrap {itemType ===
-          'lost'
-            ? 'border border-cyan-200 bg-cyan-50 text-cyan-700'
-            : 'border border-slate-200 bg-white text-slate-700 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700'}"
-          onclick={() => (itemType = "lost")}
-        >
-          <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V7a2 2 0 00-2-2h-3V3H9v2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4" />
-          </svg>
-          Lost
-        </button>
-        <button
-          class="inline-flex h-10 items-center rounded-xl px-3.5 text-sm font-semibold transition-colors whitespace-nowrap {itemType ===
-          'found'
-            ? 'border border-cyan-200 bg-cyan-50 text-cyan-700'
-            : 'border border-slate-200 bg-white text-slate-700 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700'}"
-          onclick={() => (itemType = "found")}
-        >
-          <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Found
-        </button>
-
-        <div class="relative min-w-55 flex-1">
-          <svg
-            class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10.8 18a7.2 7.2 0 100-14.4 7.2 7.2 0 000 14.4z" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search title, location, description"
-            bind:value={search}
-            class="h-10 w-full rounded-xl border border-cyan-100 bg-white pl-9 pr-3 text-sm text-slate-700 focus:border-cyan-300 focus:outline-hidden focus:ring-2 focus:ring-cyan-100"
-          />
-        </div>
-
-        <div class="relative">
-          <select
-            bind:value={category}
-            class="h-10 rounded-xl border border-cyan-100 bg-none bg-white pl-3 pr-9 text-sm text-slate-700 focus:border-cyan-300 focus:outline-hidden focus:ring-2 focus:ring-cyan-100"
-          >
-            {#each categories as option}
-              <option value={option.value}>{option.label}</option>
-            {/each}
-          </select>
-          <svg
-            class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </div>
-
-        <div class="relative">
-          <select
-            bind:value={status}
-            class="h-10 rounded-xl border border-cyan-100 bg-none bg-white pl-3 pr-9 text-sm text-slate-700 focus:border-cyan-300 focus:outline-hidden focus:ring-2 focus:ring-cyan-100"
-          >
-            {#each statuses as option}
-              <option value={option.value}>{option.label}</option>
-            {/each}
-          </select>
-          <svg
-            class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </div>
-      </div>
-    </section>
+    </div>
 
     {#if listQuery.isLoading}
-      <div class="rounded-3xl border border-cyan-100 bg-white/80 p-8">
+      <div class="flex flex-col items-center justify-center py-32">
         <LoadingSpinner text="Loading items..." />
       </div>
     {:else if listQuery.error}
       <div
-        class="rounded-3xl border border-rose-200 bg-rose-50 p-5 text-rose-700"
+        class="mx-auto max-w-md rounded-[2rem] border border-rose-100 bg-white p-10 text-center shadow-2xl"
       >
-        <p class="font-semibold">Failed to load lost/found items</p>
-        <p class="mt-1 text-sm">{listQuery.error.message}</p>
+        <div
+          class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-rose-50 shadow-inner"
+        >
+          <svg
+            class="h-10 w-10 text-rose-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+        </div>
+        <p class="text-lg font-black text-slate-900">
+          Failed to load lost/found items
+        </p>
+        <p class="mt-2 text-sm text-slate-500">{listQuery.error.message}</p>
       </div>
     {:else}
       <div class="space-y-2.5">
-        <p class="text-xs text-slate-500">{items.length} of {total} items</p>
+        <div class="mb-4 flex items-center justify-between px-2">
+          <div class="flex items-center gap-3">
+            <div
+              class="rounded-full bg-blue-600 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-white shadow-md shadow-blue-200"
+            >
+              Results
+            </div>
+            <p class="text-sm font-bold text-slate-500">
+              {total} items discovered
+            </p>
+          </div>
+          {#if canManage}
+            <a
+              use:route
+              href="/lost-found/my"
+              class="inline-flex items-center gap-2 rounded-xl border border-slate-100 bg-white px-5 py-2.5 text-sm font-bold text-slate-600 transition-all hover:bg-slate-50"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+              Personal Dashboard
+            </a>
+          {/if}
+        </div>
 
         {#if items.length === 0}
           <div
-            class="rounded-3xl border border-cyan-100 bg-white/80 p-10 text-center"
+            class="mx-auto max-w-2xl rounded-[3rem] border border-slate-50 bg-white p-12 text-center shadow-xl"
           >
-            <p class="text-lg font-semibold text-slate-800">No items found</p>
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="text-3xl font-black tracking-tight text-slate-900">
+              No items found
+            </p>
+            <p class="mt-3 text-slate-500">
               Try changing filters or search terms.
             </p>
           </div>
         {:else}
-          {#each items as item (item.id)}
-            <a
-              use:route
-              href={`/lost-found/${item.id}`}
-              class="group block rounded-2xl border border-cyan-100 bg-white/85 p-3.5 shadow-sm transition hover:-translate-y-px hover:border-cyan-300 hover:shadow-[0_10px_28px_rgba(14,116,144,0.12)]"
-            >
-              <div class="flex items-start gap-3">
+          <div
+            class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+          >
+            {#each items as item (item.id)}
+              <a
+                use:route
+                href={`/lost-found/${item.id}`}
+                class="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
+              >
                 <div
-                  class="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-cyan-100 bg-cyan-50"
+                  class="relative h-28 overflow-hidden bg-linear-to-br from-blue-50 to-indigo-100"
                 >
                   {#if item.images?.[0]?.imageUrl}
                     <img
                       src={item.images[0].imageUrl}
                       alt={item.title}
-                      class="h-full w-full object-cover"
+                      class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                     />
                   {:else}
-                    <div
-                      class="flex h-full w-full items-center justify-center text-cyan-500"
-                    >
+                    <div class="flex h-full w-full items-center justify-center">
                       <svg
-                        class="h-4.5 w-4.5"
+                        class="h-8 w-8 text-indigo-500"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -362,66 +465,75 @@
                       </svg>
                     </div>
                   {/if}
-                </div>
 
-                <div class="min-w-0 flex-1">
-                  <div class="flex flex-wrap items-center gap-1.5">
-                    <h3
-                      class="truncate text-base font-bold text-slate-900 transition group-hover:text-cyan-800"
-                    >
-                      {item.title}
-                    </h3>
+                  <div class="absolute left-2 top-2">
                     <span
-                      class="inline-flex rounded-full px-2 py-0.5 text-[11px] font-bold {statusClass(
+                      class="inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-semibold {statusClass(
                         item.status,
-                      )}">{item.status}</span
+                      )}"
                     >
-                    <span
-                      class="inline-flex rounded-full bg-cyan-50 px-2 py-0.5 text-[11px] font-semibold text-cyan-800"
-                    >
-                      {item.category.replace("_", " ")}
+                      {item.status}
                     </span>
                   </div>
+                  <div class="absolute right-2 top-2">
+                    <span
+                      class="inline-flex rounded-full bg-white/90 px-1.5 py-0.5 text-[10px] font-bold text-gray-900 shadow-sm"
+                    >
+                      {item.itemType === "lost" ? "Lost" : "Found"}
+                    </span>
+                  </div>
+                </div>
 
-                  <p class="mt-1 text-sm text-slate-600 line-clamp-2">
+                <div class="p-3">
+                  <h3
+                    class="line-clamp-1 text-sm font-bold text-gray-900 transition-colors group-hover:text-blue-600"
+                  >
+                    {item.title}
+                  </h3>
+                  <p class="mt-0.5 line-clamp-1 text-xs text-gray-500">
                     {item.description}
                   </p>
 
-                  <div
-                    class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-500"
+                  <span
+                    class="mt-2 inline-block rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-600"
                   >
-                    <span
-                      class="inline-flex items-center gap-1"
-                      ><svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-13 9h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v11a2 2 0 002 2z" />
-                      </svg>{item.itemType === "lost" ? "Lost on" : "Found on"}
-                      {formatDate(item.lostFoundDate)}</span
-                    >
-                    <span class="inline-flex items-center gap-1"
-                      ><svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.7 8.3A5.7 5.7 0 116.3 8.3c0 4.9 5.7 10.7 5.7 10.7s5.7-5.8 5.7-10.7z" />
-                        <circle cx="12" cy="8.3" r="2.2" />
-                      </svg>{item.locationText}</span
-                    >
-                    {#if item.owner?.name}
-                      <span class="inline-flex items-center gap-1"
-                        ><svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.1 19a8 8 0 0113.8 0M12 11a4 4 0 100-8 4 4 0 000 8z" />
-                        </svg>By {item.owner.name}</span
+                    {item.category.replace("_", " ")}
+                  </span>
+
+                  <div
+                    class="mt-2 flex items-center justify-between border-t border-gray-50 pt-2 text-[10px] text-gray-400"
+                  >
+                    <div class="flex items-center gap-1.5">
+                      <svg
+                        class="h-3.5 w-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
-                    {/if}
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M5.1 19a8 8 0 0113.8 0M12 11a4 4 0 100-8 4 4 0 000 8z"
+                        />
+                      </svg>
+                      <span class="line-clamp-1"
+                        >{item.owner?.name || "Unknown"}</span
+                      >
+                    </div>
+                    <span>{getTimeAgo(item.createdAt)}</span>
                   </div>
                 </div>
-              </div>
-            </a>
-          {/each}
+              </a>
+            {/each}
+          </div>
         {/if}
       </div>
 
       {#if hasMore}
-        <div class="flex justify-center pt-1">
+        <div class="mt-6 flex justify-center">
           <button
-            class="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-800 transition hover:border-cyan-300 hover:bg-cyan-100 disabled:opacity-60"
+            class="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-gray-50 disabled:opacity-60"
             onclick={loadMore}
             disabled={loadingMore}
           >
@@ -434,6 +546,14 @@
 </div>
 
 <style>
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;

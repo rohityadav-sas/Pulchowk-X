@@ -202,7 +202,7 @@
             <p class="inline-flex items-center gap-1.5"><svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.95.68l1.5 4.5a1 1 0 01-.24 1.02l-1.8 1.8a16 16 0 006.36 6.36l1.8-1.8a1 1 0 011.02-.24l4.5 1.5a1 1 0 01.68.95V19a2 2 0 01-2 2h-1C10.85 21 3 13.15 3 3V5z" /></svg><span><span class="font-semibold text-slate-800">Contact note:</span> {item.contactNote}</span></p>
           {/if}
           {#if item.rewardText}
-            <p><span class="font-semibold text-slate-800">Reward:</span> {item.rewardText}</p>
+            <p class="inline-flex items-center gap-1.5"><svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v18m4-13c0-1.7-1.8-3-4-3s-4 1.3-4 3 1.8 3 4 3 4 1.3 4 3-1.8 3-4 3-4-1.3-4-3" /></svg><span><span class="font-semibold text-slate-800">Reward:</span> {item.rewardText}</span></p>
           {/if}
           {#if item.owner?.name}
             <p class="inline-flex items-center gap-1.5"><svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.1 19a8 8 0 0113.8 0M12 11a4 4 0 100-8 4 4 0 000 8z" /></svg><span><span class="font-semibold text-slate-800">Posted by:</span> {item.owner.name}</span></p>

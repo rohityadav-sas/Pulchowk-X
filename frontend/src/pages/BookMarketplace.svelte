@@ -27,46 +27,6 @@
   let currentPage = $state(1)
   let showFilters = $state(false)
 
-  type QuickFilter =
-    | { label: string; value: number | undefined; type: 'category' }
-    | { label: string; value: number | undefined; type: 'price' }
-    | { label: string; value: BookFilters['sortBy']; type: 'sort' }
-
-  const quickFilters = $derived.by(() => {
-    const categories = categoriesQuery.data || []
-    const insights = categories.find((c) => c.name === 'Insights')
-    const manual = categories.find((c) => c.name === 'Manual')
-    const textbook = categories.find((c) => c.name === 'Text Book')
-
-    const filters: QuickFilter[] = [
-      { label: 'All', value: undefined, type: 'category' },
-    ]
-
-    if (textbook)
-      filters.push({
-        label: 'Text Books',
-        value: textbook.id,
-        type: 'category',
-      })
-    if (insights)
-      filters.push({
-        label: 'Insights',
-        value: insights.id,
-        type: 'category',
-      })
-    if (manual)
-      filters.push({
-        label: 'Manuals',
-        value: manual.id,
-        type: 'category',
-      })
-
-    filters.push({ label: 'Under 500', value: 500, type: 'price' })
-    filters.push({ label: 'Newest', value: 'newest', type: 'sort' })
-
-    return filters
-  })
-
   $effect(() => {
     if (hasRedirectedToLogin) return
 
@@ -188,32 +148,6 @@
 
 <div class="min-h-[calc(100vh-4rem)] bg-gray-50/50 px-4 py-8 sm:px-6 lg:px-8">
   <div class="max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="text-center mb-6 animate-fade-in">
-      {#if $session.data?.user}
-        <a
-          href="/books/sell"
-          use:routeAction
-          class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 active:scale-95 group"
-        >
-          <svg
-            class="w-4 h-4 group-hover:rotate-90 transition-transform duration-300"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2.5"
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          Start Selling
-        </a>
-      {/if}
-    </div>
-
     <!-- Search and Filters Section -->
     <div class="relative z-30 mb-5">
       <!-- Main Search Shell -->
@@ -291,6 +225,28 @@
             >
               Search
             </button>
+            {#if $session.data?.user}
+              <a
+                href="/books/sell"
+                use:routeAction
+                class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 active:scale-95 group"
+              >
+                <svg
+                  class="w-4 h-4 group-hover:rotate-90 transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2.5"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Start Selling
+              </a>
+            {/if}
           </div>
         </div>
 
@@ -638,21 +594,6 @@
         </div>
       {/if}
 
-      <!-- Quick Filter Presets -->
-      <div class="mt-5 flex flex-wrap justify-center items-center gap-2">
-        {#each quickFilters as chip}
-          <button
-            onclick={() => {
-              if (chip.type === 'category') selectedCategory = chip.value
-              else if (chip.type === 'price') maxPrice = chip.value
-              else if (chip.type === 'sort') sortBy = chip.value
-            }}
-            class="px-4 py-2 bg-white border border-slate-100 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-100 hover:shadow-md hover:shadow-blue-500/5 transition-all active:scale-95"
-          >
-            {chip.label}
-          </button>
-        {/each}
-      </div>
     </div>
 
     <!-- Results Info -->
@@ -696,10 +637,7 @@
     <!-- Listings Grid -->
     {#if listingsQuery.isLoading}
       <div class="flex flex-col items-center justify-center py-32">
-        <LoadingSpinner size="lg" text="Analyzing Marketplace..." />
-        <p class="mt-4 text-slate-400 font-medium animate-pulse">
-          Syncing with Pulchowk database...
-        </p>
+        <LoadingSpinner size="lg" text="Loading..." />
       </div>
     {:else if listingsQuery.error}
       <div
