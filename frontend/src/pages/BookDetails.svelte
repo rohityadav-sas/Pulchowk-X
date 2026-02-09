@@ -49,9 +49,13 @@
   let trustFeedback = $state<string | null>(null);
   let trustError = $state<string | null>(null);
 
-  // Purchase Request State
+  // Modal States
   let requestToBuyModalOpen = $state(false);
   let reviewsModalOpen = $state(false);
+  let rateModalOpen = $state(false);
+  let reportModalOpen = $state(false);
+  let blockModalOpen = $state(false);
+
   let requestMessage = $state("");
   let requestSubmitting = $state(false);
   let cancellingRequest = $state(false);
@@ -497,21 +501,36 @@
       >
         <div class="grid grid-cols-1 lg:grid-cols-2">
           <div
-            class="bg-linear-to-br from-slate-50 to-blue-50 p-4 sm:p-5 border-b lg:border-b-0 lg:border-r border-gray-100"
+            class="bg-slate-50/50 p-4 sm:p-6 border-b lg:border-b-0 lg:border-r border-slate-100"
           >
             <div
-              class="h-80 sm:h-96 lg:h-112 w-full bg-white rounded-xl border border-gray-100 overflow-hidden flex items-center justify-center"
+              class="group relative h-80 sm:h-96 lg:h-128 w-full bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex items-center justify-center transition-all hover:shadow-md"
             >
               {#if activeImage}
                 <img
                   src={activeImage.imageUrl}
                   alt={book.title}
-                  class="w-full h-full object-contain p-2"
+                  class="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-[1.02]"
                 />
+
+                {#if hasImages && book.images!.length > 1}
+                  <div
+                    class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/10 backdrop-blur-md border border-white/20"
+                  >
+                    {#each book.images as _, i}
+                      <div
+                        class="h-1.5 rounded-full transition-all duration-300 {i ===
+                        activeImageIndex
+                          ? 'w-4 bg-slate-900'
+                          : 'w-1.5 bg-slate-400'}"
+                      ></div>
+                    {/each}
+                  </div>
+                {/if}
               {:else}
-                <div class="text-center text-gray-300">
+                <div class="text-center text-slate-300">
                   <svg
-                    class="w-14 h-14 mx-auto"
+                    class="w-16 h-16 mx-auto opacity-20"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -519,24 +538,26 @@
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
-                      stroke-width="1.6"
-                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                      stroke-width="1.5"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
                   </svg>
-                  <p class="text-xs mt-2">No image uploaded</p>
+                  <p class="text-xs mt-3 font-medium tracking-wide">
+                    NO IMAGES AVAILABLE
+                  </p>
                 </div>
               {/if}
             </div>
 
             {#if hasImages && book.images!.length > 1}
-              <div class="mt-3 grid grid-cols-5 sm:grid-cols-6 gap-2">
+              <div class="mt-4 grid grid-cols-5 sm:grid-cols-6 gap-3">
                 {#each book.images as image, index (image.id)}
                   <button
                     onclick={() => (activeImageIndex = index)}
-                    class="aspect-square rounded-lg overflow-hidden border transition {index ===
+                    class="aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 {index ===
                     activeImageIndex
-                      ? 'border-blue-500 ring-2 ring-blue-100'
-                      : 'border-gray-200 hover:border-gray-300'}"
+                      ? 'border-blue-500 shadow-lg shadow-blue-100 scale-105'
+                      : 'border-transparent hover:border-slate-300 opacity-60 hover:opacity-100'}"
                     aria-label={`Open image ${index + 1}`}
                   >
                     <img
@@ -581,67 +602,181 @@
               {formatPrice(book.price)}
             </div>
 
-            <div class="mt-5 grid grid-cols-2 gap-3 text-sm">
+            <div class="mt-6 grid grid-cols-2 gap-4">
+              {#if book.condition}
+                <div
+                  class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
+                >
+                  <span
+                    class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    <svg
+                      class="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      /></svg
+                    >
+                    Condition
+                  </span>
+                  <p class="mt-1 font-black text-slate-900">
+                    {conditionLabel[book.condition]}
+                  </p>
+                </div>
+              {/if}
               {#if book.edition}
-                <div class="rounded-lg bg-gray-50 border border-gray-100 p-2.5">
-                  <p class="text-[11px] uppercase tracking-wide text-gray-500">
+                <div
+                  class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
+                >
+                  <span
+                    class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    <svg
+                      class="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                      /></svg
+                    >
                     Edition
-                  </p>
-                  <p class="font-semibold text-gray-900 mt-0.5">
-                    {book.edition}
-                  </p>
+                  </span>
+                  <p class="mt-1 font-black text-slate-900">{book.edition}</p>
                 </div>
               {/if}
               {#if book.publisher}
-                <div class="rounded-lg bg-gray-50 border border-gray-100 p-2.5">
-                  <p class="text-[11px] uppercase tracking-wide text-gray-500">
+                <div
+                  class="col-span-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
+                >
+                  <span
+                    class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    <svg
+                      class="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      /></svg
+                    >
                     Publisher
-                  </p>
-                  <p class="font-semibold text-gray-900 mt-0.5">
-                    {book.publisher}
-                  </p>
+                  </span>
+                  <p class="mt-1 font-black text-slate-900">{book.publisher}</p>
                 </div>
               {/if}
               {#if book.publicationYear}
-                <div class="rounded-lg bg-gray-50 border border-gray-100 p-2.5">
-                  <p class="text-[11px] uppercase tracking-wide text-gray-500">
+                <div
+                  class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
+                >
+                  <span
+                    class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    <svg
+                      class="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      /></svg
+                    >
                     Year
-                  </p>
-                  <p class="font-semibold text-gray-900 mt-0.5">
+                  </span>
+                  <p class="mt-1 font-black text-slate-900">
                     {book.publicationYear}
                   </p>
                 </div>
               {/if}
               {#if book.category}
-                <div class="rounded-lg bg-gray-50 border border-gray-100 p-2.5">
-                  <p class="text-[11px] uppercase tracking-wide text-gray-500">
+                <div
+                  class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
+                >
+                  <span
+                    class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    <svg
+                      class="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                      /></svg
+                    >
                     Category
-                  </p>
-                  <p class="font-semibold text-gray-900 mt-0.5">
+                  </span>
+                  <p class="mt-1 font-black text-slate-900 text-sm truncate">
                     {book.category.name}
                   </p>
                 </div>
               {/if}
               {#if book.isbn}
                 <div
-                  class="rounded-lg bg-gray-50 border border-gray-100 p-2.5 col-span-2"
+                  class="col-span-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
                 >
-                  <p class="text-[11px] uppercase tracking-wide text-gray-500">
+                  <span
+                    class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    <svg
+                      class="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                      /></svg
+                    >
                     ISBN
-                  </p>
-                  <p class="font-semibold text-gray-900 mt-0.5 break-all">
+                  </span>
+                  <p class="mt-1 font-black text-slate-900 break-all">
                     {book.isbn}
                   </p>
                 </div>
               {/if}
               {#if book.courseCode}
                 <div
-                  class="rounded-lg bg-gray-50 border border-gray-100 p-2.5 col-span-2"
+                  class="col-span-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
                 >
-                  <p class="text-[11px] uppercase tracking-wide text-gray-500">
+                  <span
+                    class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    <svg
+                      class="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M12 6.03L12 12m0 0l3.586-3.586a2 2 0 112.828 2.828L12 17.657l-6.414-6.415a2 2 0 112.828-2.828L12 12z"
+                      /></svg
+                    >
                     Course
-                  </p>
-                  <p class="font-semibold text-gray-900 mt-0.5">
+                  </span>
+                  <p class="mt-1 font-black text-slate-900">
                     {book.courseCode}
                   </p>
                 </div>
@@ -713,164 +848,186 @@
                 (entry) => entry.blockedUserId === book.sellerId,
               )}
               <div
-                class="mt-4 rounded-xl border border-gray-200 bg-white p-3.5"
+                class="mt-8 relative group overflow-hidden rounded-[2rem] bg-slate-900 p-8 shadow-2xl transition-all hover:scale-[1.01]"
               >
-                <p
-                  class="text-xs font-bold uppercase tracking-wide text-gray-500"
-                >
-                  Seller Trust
-                </p>
+                <!-- Background decorative elements -->
+                <div
+                  class="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-blue-500/10 blur-3xl"
+                ></div>
+                <div
+                  class="absolute -left-8 -bottom-8 h-32 w-32 rounded-full bg-cyan-500/10 blur-3xl"
+                ></div>
 
                 <div
-                  class="mt-2 rounded-lg border border-gray-100 bg-gray-50 p-3"
+                  class="relative flex flex-col sm:flex-row items-start sm:items-center gap-6"
                 >
-                  <div class="flex items-center justify-between gap-2">
-                    <p class="text-xs font-semibold text-gray-700">Rating</p>
-                    {#if sellerReputationQuery.isLoading}
-                      <span class="text-xs text-gray-500">Loading...</span>
-                    {:else if sellerReputationQuery.data}
-                      <span class="text-xs font-semibold text-gray-700">
-                        {sellerReputationQuery.data.averageRating.toFixed(1)} / 5
-                        ({sellerReputationQuery.data.totalRatings})
-                        <button
-                          onclick={() => (reviewsModalOpen = true)}
-                          class="ml-2 text-blue-600 hover:underline text-[10px] font-bold"
-                        >
-                          See Reviews
-                        </button>
-                      </span>
-                    {:else}
-                      <span class="text-xs text-gray-500">No ratings yet</span>
-                    {/if}
+                  <div class="flex-1">
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] font-black text-blue-300 uppercase tracking-[0.2em] mb-4"
+                    >
+                      Seller Reputation
+                    </span>
+                    <h3 class="text-2xl font-black text-white tracking-tight">
+                      Trust Profile
+                    </h3>
+                    <p class="mt-1 text-slate-400 text-sm font-medium">
+                      Verified marketplace participant
+                    </p>
                   </div>
 
-                  <div class="mt-2 flex items-center gap-2">
-                    <label for="ratingValue" class="text-xs text-gray-600"
-                      >Your rating</label
-                    >
-                    <div class="relative inline-flex">
-                      <select
-                        id="ratingValue"
-                        bind:value={ratingValue}
-                        class="appearance-none bg-none rounded-lg border border-gray-200 bg-white pl-3 pr-8 py-1.5 text-sm text-gray-700 leading-none focus:border-blue-400 focus:outline-none"
+                  <div
+                    class="flex items-center gap-4 bg-white/5 backdrop-blur-md rounded-[1.5rem] p-4 border border-white/10"
+                  >
+                    <div class="text-center px-4 border-r border-white/10">
+                      <p
+                        class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1"
                       >
-                        <option value={5}>5</option>
-                        <option value={4}>4</option>
-                        <option value={3}>3</option>
-                        <option value={2}>2</option>
-                        <option value={1}>1</option>
-                      </select>
+                        Rating
+                      </p>
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-2xl font-black text-white">
+                          {sellerReputationQuery.data?.averageRating.toFixed(
+                            1,
+                          ) || "0.0"}
+                        </span>
+                        <svg
+                          class="w-5 h-5 text-amber-400"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="text-center px-4">
+                      <p
+                        class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1"
+                      >
+                        Reviews
+                      </p>
+                      <button
+                        onclick={() => (reviewsModalOpen = true)}
+                        class="text-2xl font-black text-white hover:text-blue-400 transition-colors"
+                      >
+                        {sellerReputationQuery.data?.totalRatings || 0}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-8 grid grid-cols-3 gap-3">
+                  <button
+                    onclick={() => (rateModalOpen = true)}
+                    class="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 transition-all hover:bg-white/10 hover:border-white/20 active:scale-95"
+                  >
+                    <div
+                      class="p-3 rounded-xl bg-blue-500/20 text-blue-400 group-hover/btn:scale-110 transition-transform"
+                    >
                       <svg
-                        class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500"
+                        class="w-5 h-5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                      >
-                        <path
+                        ><path
                           stroke-linecap="round"
                           stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                  <textarea
-                    bind:value={ratingReview}
-                    rows="2"
-                    placeholder="Optional review"
-                    class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-400 focus:outline-none"
-                  ></textarea>
-                  <button
-                    onclick={() => handleRateSeller(book)}
-                    disabled={ratingSubmitting}
-                    class="mt-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-                  >
-                    {ratingSubmitting ? "Submitting..." : "Submit Rating"}
-                  </button>
-                </div>
-
-                <div
-                  class="mt-3 rounded-lg border border-gray-100 bg-gray-50 p-3"
-                >
-                  <p class="text-xs font-semibold text-gray-700">
-                    Report Seller
-                  </p>
-                  <div
-                    class="mt-2 grid grid-cols-1 sm:grid-cols-[10rem_1fr] gap-2"
-                  >
-                    <select
-                      bind:value={reportCategory}
-                      class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-700"
-                    >
-                      <option value="spam">Spam</option>
-                      <option value="fraud">Fraud</option>
-                      <option value="abusive">Abusive</option>
-                      <option value="fake_listing">Fake listing</option>
-                      <option value="suspicious_payment"
-                        >Suspicious payment</option
+                          stroke-width="2.5"
+                          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                        /></svg
                       >
-                      <option value="other">Other</option>
-                    </select>
-                    <textarea
-                      bind:value={reportDescription}
-                      rows="2"
-                      placeholder="What happened?"
-                      class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-400 focus:outline-none"
-                    ></textarea>
-                  </div>
-                  <button
-                    onclick={() => handleReportSeller(book)}
-                    disabled={reportSubmitting}
-                    class="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-60"
-                  >
-                    {reportSubmitting ? "Submitting..." : "Submit Report"}
+                    </div>
+                    <span
+                      class="text-[11px] font-black text-slate-300 uppercase tracking-widest"
+                      >Rate</span
+                    >
                   </button>
-                </div>
 
-                <div
-                  class="mt-3 rounded-lg border border-gray-100 bg-gray-50 p-3"
-                >
-                  <p class="text-xs font-semibold text-gray-700">
-                    Block Seller
-                  </p>
-                  {#if !sellerBlocked}
-                    <textarea
-                      bind:value={blockReason}
-                      rows="2"
-                      placeholder="Optional reason"
-                      class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-400 focus:outline-none"
-                    ></textarea>
-                    <button
-                      onclick={() => handleBlockSeller(book)}
-                      disabled={blockSubmitting}
-                      class="mt-2 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-100 disabled:opacity-60"
+                  <button
+                    onclick={() => (reportModalOpen = true)}
+                    class="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 transition-all hover:bg-rose-500/20 hover:border-rose-500/30 active:scale-95"
+                  >
+                    <div
+                      class="p-3 rounded-xl bg-rose-500/20 text-rose-400 group-hover/btn:scale-110 transition-transform"
                     >
-                      {blockSubmitting ? "Blocking..." : "Block Seller"}
-                    </button>
-                  {:else}
-                    <p class="mt-1 text-xs text-gray-600">
-                      You have blocked this seller.
-                    </p>
-                    <button
-                      onclick={() => handleUnblockSeller(book)}
-                      disabled={unblockSubmitting}
-                      class="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
+                      <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        ><path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        /></svg
+                      >
+                    </div>
+                    <span
+                      class="text-[11px] font-black text-slate-300 uppercase tracking-widest"
+                      >Report</span
                     >
-                      {unblockSubmitting ? "Updating..." : "Unblock Seller"}
-                    </button>
-                  {/if}
+                  </button>
+
+                  <button
+                    onclick={() => (blockModalOpen = true)}
+                    class="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 transition-all hover:bg-slate-500/20 hover:border-slate-500/30 active:scale-95"
+                  >
+                    <div
+                      class="p-3 rounded-xl bg-slate-500/20 text-slate-400 group-hover/btn:scale-110 transition-transform"
+                    >
+                      {#if sellerBlocked}
+                        <svg
+                          class="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          ><path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.5"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                          /></svg
+                        >
+                      {:else}
+                        <svg
+                          class="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          ><path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.5"
+                            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                          /></svg
+                        >
+                      {/if}
+                    </div>
+                    <span
+                      class="text-[11px] font-black text-slate-300 uppercase tracking-widest text-center"
+                    >
+                      {sellerBlocked ? "Unblock" : "Block"}
+                    </span>
+                  </button>
                 </div>
 
                 {#if trustFeedback}
-                  <p class="mt-2 text-xs font-medium text-emerald-700">
+                  <div
+                    class="mt-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold text-center"
+                    in:fade
+                  >
                     {trustFeedback}
-                  </p>
+                  </div>
                 {/if}
                 {#if trustError}
-                  <p class="mt-2 text-xs font-medium text-rose-700">
+                  <div
+                    class="mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold text-center"
+                    in:fade
+                  >
                     {trustError}
-                  </p>
+                  </div>
                 {/if}
               </div>
             {/if}
@@ -984,10 +1141,13 @@
   >
     <!-- Backdrop -->
     <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
       class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
       onclick={() => (requestToBuyModalOpen = false)}
+      onkeydown={(e) => e.key === "Escape" && (requestToBuyModalOpen = false)}
+      role="button"
+      tabindex="-1"
+      aria-label="Close modal"
     ></div>
 
     <!-- Modal Content -->
@@ -1003,7 +1163,7 @@
           <button
             onclick={() => (requestToBuyModalOpen = false)}
             class="p-2 hover:bg-slate-100 rounded-xl transition-colors"
-            aria-label="Close"
+            aria-label="Close modal"
           >
             <svg
               class="w-5 h-5 text-slate-500"
@@ -1067,101 +1227,423 @@
     class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
     transition:fade={{ duration: 200 }}
   >
-    <!-- Backdrop -->
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
-      class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+      class="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
       onclick={() => (reviewsModalOpen = false)}
+      onkeydown={(e) => e.key === "Escape" && (reviewsModalOpen = false)}
+      role="button"
+      tabindex="-1"
+      aria-label="Close reviews"
     ></div>
 
-    <!-- Modal Content -->
     <div
-      class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-cyan-100/50"
+      class="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200"
       transition:fly={{ y: 20, duration: 400 }}
     >
-      <div class="p-6 sm:p-8">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-xl font-black text-slate-900 tracking-tight">
-            Seller Reviews
-          </h3>
+      <div class="p-8 sm:p-10 flex flex-col max-h-[85vh]">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="text-2xl font-black text-slate-900 tracking-tight">
+              Seller Reviews
+            </h3>
+            <p class="text-slate-500 text-sm font-medium mt-1">
+              Based on {sellerReputationQuery.data.totalRatings} transactions
+            </p>
+          </div>
           <button
             onclick={() => (reviewsModalOpen = false)}
-            class="p-2 hover:bg-slate-100 rounded-xl transition-colors"
-            aria-label="Close"
+            class="p-3 hover:bg-slate-100 rounded-2xl transition-colors"
+            aria-label="Close reviews"
           >
             <svg
-              class="w-5 h-5 text-slate-500"
+              class="w-6 h-6 text-slate-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-            >
-              <path
+              ><path
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2.5"
                 d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+              /></svg
+            >
           </button>
         </div>
 
-        <div class="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-          <div class="space-y-4">
-            {#each sellerReputationQuery.data.recentRatings as rating}
-              <div
-                class="p-4 rounded-2xl bg-slate-50/80 border border-slate-100"
-              >
-                <div class="flex items-center justify-between mb-2">
-                  <div class="flex text-amber-400">
-                    {#each Array(5) as _, i}
-                      <svg
-                        class="w-3.5 h-3.5"
-                        fill={i < rating.rating ? "currentColor" : "none"}
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+        <div class="overflow-y-auto pr-2 custom-scrollbar space-y-4">
+          {#each sellerReputationQuery.data.recentRatings as rating}
+            <div
+              class="p-6 rounded-3xl bg-slate-50 border border-slate-100 transition-all hover:shadow-sm"
+            >
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="relative">
+                    {#if rating.rater?.image}
+                      <img
+                        src={rating.rater.image}
+                        alt=""
+                        class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                      />
+                    {:else}
+                      <div
+                        class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-xs font-black text-blue-600 border-2 border-white shadow-sm"
                       >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-                        />
-                      </svg>
-                    {/each}
+                        {rating.rater?.name?.charAt(0).toUpperCase() || "U"}
+                      </div>
+                    {/if}
                   </div>
-                  <span
-                    class="text-[10px] font-bold text-slate-400 uppercase tracking-widest"
-                  >
-                    {formatDate(rating.createdAt)}
-                  </span>
+                  <div>
+                    <p class="text-sm font-black text-slate-900">
+                      {rating.rater?.name || "Anonymous User"}
+                    </p>
+                    <div class="flex items-center gap-1 mt-0.5">
+                      {#each Array(5) as _, i}
+                        <svg
+                          class="w-3 h-3 {i < rating.rating
+                            ? 'text-amber-400'
+                            : 'text-slate-200'}"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                          />
+                        </svg>
+                      {/each}
+                    </div>
+                  </div>
                 </div>
-                <p class="text-sm text-slate-700 italic leading-relaxed">
-                  "{rating.review || "No comment provided."}"
-                </p>
-                <div
-                  class="mt-3 pt-3 border-t border-slate-200/50 flex items-center gap-2"
+                <span
+                  class="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap"
                 >
-                  <div
-                    class="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center text-[10px] font-bold text-violet-600"
-                  >
-                    {rating.rater?.name?.charAt(0).toUpperCase() || "U"}
-                  </div>
-                  <span class="text-[11px] font-black text-slate-900">
-                    {rating.rater?.name || "Anonymous User"}
-                  </span>
-                </div>
+                  {formatDate(rating.createdAt)}
+                </span>
               </div>
-            {/each}
-          </div>
+
+              {#if rating.review}
+                <div class="mt-4 relative">
+                  <svg
+                    class="absolute -left-1 -top-1 w-6 h-6 text-slate-200 opacity-50"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C20.1216 16 21.017 16.8954 21.017 18V21C21.017 22.1046 20.1216 23 19.017 23H16.017C14.9124 23 14.017 22.1046 14.017 21ZM5.017 21V18C5.017 16.8954 5.91243 16 7.017 16H10.017C11.1216 16 12.017 16.8954 12.017 18V21C12.017 22.1046 11.1216 23 10.017 23H7.017C5.91243 23 5.017 22.1046 5.017 21ZM19.017 13H16.017C13.8079 13 12.017 14.7909 12.017 17V18.1046C12.017 18.5442 11.6596 18.9016 11.22 18.9016H10.017C8.91243 18.9016 8.017 18.0062 8.017 16.9016V16.017C8.017 13.8079 9.80786 12.017 12.017 12.017V10C12.017 8.89543 11.1216 8 10.017 8H7.017C4.80786 8 3.017 9.80786 3.017 12V21M21.017 13C21.017 10.7909 19.2261 9 17.017 9H16.017C13.8079 9 12.017 10.7909 12.017 13V21"
+                    /></svg
+                  >
+                  <p
+                    class="text-slate-700 text-sm font-medium leading-relaxed pl-6 relative z-10"
+                  >
+                    "{rating.review}"
+                  </p>
+                </div>
+              {/if}
+            </div>
+          {/each}
+
+          {#if sellerReputationQuery.data.recentRatings.length === 0}
+            <div class="py-12 text-center">
+              <div
+                class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100"
+              >
+                <svg
+                  class="w-8 h-8 text-slate-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                  /></svg
+                >
+              </div>
+              <p
+                class="text-slate-400 text-sm font-bold uppercase tracking-widest"
+              >
+                No reviews yet
+              </p>
+            </div>
+          {/if}
         </div>
 
         <button
           onclick={() => (reviewsModalOpen = false)}
-          class="w-full mt-6 py-4 rounded-2xl bg-slate-900 text-white font-black text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
+          class="w-full mt-8 py-5 rounded-2xl bg-slate-900 text-white font-black text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 active:scale-[0.98]"
         >
-          Close
+          DONE
         </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+<!-- Rate Seller Modal -->
+{#if rateModalOpen && bookQuery.data}
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+    transition:fade={{ duration: 200 }}
+  >
+    <div
+      class="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+      onclick={() => (rateModalOpen = false)}
+      onkeydown={(e) => e.key === "Escape" && (rateModalOpen = false)}
+      role="button"
+      tabindex="-1"
+      aria-label="Close rating modal"
+    ></div>
+    <div
+      class="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200"
+      transition:fly={{ y: 20, duration: 400 }}
+    >
+      <div class="p-8 sm:p-10">
+        <div class="text-center mb-8">
+          <div
+            class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-200"
+          >
+            <svg
+              class="w-8 h-8 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.5"
+                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+              /></svg
+            >
+          </div>
+          <h3 class="text-2xl font-black text-slate-900 tracking-tight">
+            Rate Seller
+          </h3>
+          <p class="text-slate-500 text-sm font-medium mt-1">
+            How was your experience with {bookQuery.data.seller?.name}?
+          </p>
+        </div>
+
+        <div class="flex justify-center gap-2 mb-8">
+          {#each Array(5) as _, i}
+            {@const starVal = i + 1}
+            <button
+              onclick={() => (ratingValue = starVal)}
+              class="p-2 transition-transform hover:scale-110 active:scale-90"
+            >
+              <svg
+                class="w-10 h-10 {starVal <= ratingValue
+                  ? 'text-amber-400'
+                  : 'text-slate-200'}"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                />
+              </svg>
+            </button>
+          {/each}
+        </div>
+
+        <textarea
+          bind:value={ratingReview}
+          rows="4"
+          placeholder="Share more details about the transaction... (optional)"
+          class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-medium resize-none shadow-inner"
+        ></textarea>
+
+        <div class="mt-8 flex gap-4">
+          <button
+            onclick={() => (rateModalOpen = false)}
+            class="flex-1 py-4 bg-slate-100 text-slate-600 font-black text-sm rounded-2xl hover:bg-slate-200 transition-all active:scale-95"
+          >
+            CANCEL
+          </button>
+          <button
+            onclick={async () => {
+              await handleRateSeller(bookQuery.data!);
+              if (!trustError) rateModalOpen = false;
+            }}
+            disabled={ratingSubmitting}
+            class="flex-1 py-4 bg-blue-600 text-white font-black text-sm rounded-2xl hover:bg-blue-700 disabled:opacity-50 transition-all shadow-xl shadow-blue-200 active:scale-95"
+          >
+            {ratingSubmitting ? "SUBMITTING..." : "SUBMIT RATING"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+{/if}
+
+<!-- Report Seller Modal -->
+{#if reportModalOpen && bookQuery.data}
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+    transition:fade={{ duration: 200 }}
+  >
+    <div
+      class="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+      onclick={() => (reportModalOpen = false)}
+      onkeydown={(e) => e.key === "Escape" && (reportModalOpen = false)}
+      role="button"
+      tabindex="-1"
+      aria-label="Close report modal"
+    ></div>
+    <div
+      class="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200"
+      transition:fly={{ y: 20, duration: 400 }}
+    >
+      <div class="p-8 sm:p-10">
+        <div class="text-center mb-8">
+          <div
+            class="w-16 h-16 bg-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-rose-200"
+          >
+            <svg
+              class="w-8 h-8 text-rose-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.5"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              /></svg
+            >
+          </div>
+          <h3 class="text-2xl font-black text-slate-900 tracking-tight">
+            Report Seller
+          </h3>
+          <p class="text-slate-500 text-sm font-medium mt-1">
+            Is there something wrong with this listing?
+          </p>
+        </div>
+
+        <select
+          bind:value={reportCategory}
+          class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 transition-all text-sm font-bold mb-4 appearance-none shadow-inner"
+        >
+          <option value="spam">Spam</option>
+          <option value="fraud">Fraud</option>
+          <option value="abusive">Abusive</option>
+          <option value="fake_listing">Fake listing</option>
+          <option value="suspicious_payment">Suspicious payment</option>
+          <option value="other">Other</option>
+        </select>
+
+        <textarea
+          bind:value={reportDescription}
+          rows="4"
+          placeholder="Please describe the issue in detail..."
+          class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 transition-all text-sm font-medium resize-none shadow-inner"
+        ></textarea>
+
+        <div class="mt-8 flex gap-4">
+          <button
+            onclick={() => (reportModalOpen = false)}
+            class="flex-1 py-4 bg-slate-100 text-slate-600 font-black text-sm rounded-2xl hover:bg-slate-200 transition-all active:scale-95"
+          >
+            CANCEL
+          </button>
+          <button
+            onclick={async () => {
+              await handleReportSeller(bookQuery.data!);
+              if (!trustError) reportModalOpen = false;
+            }}
+            disabled={reportSubmitting}
+            class="flex-1 py-4 bg-rose-600 text-white font-black text-sm rounded-2xl hover:bg-rose-700 disabled:opacity-50 transition-all shadow-xl shadow-rose-200 active:scale-95"
+          >
+            {reportSubmitting ? "SUBMITTING..." : "SEND REPORT"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+{/if}
+
+<!-- Block Seller Modal -->
+{#if blockModalOpen && bookQuery.data}
+  {@const sellerBlocked = !!blockedUsersQuery.data?.some(
+    (entry) => entry.blockedUserId === bookQuery.data!.sellerId,
+  )}
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+    transition:fade={{ duration: 200 }}
+  >
+    <div
+      class="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+      onclick={() => (blockModalOpen = false)}
+      onkeydown={(e) => e.key === "Escape" && (blockModalOpen = false)}
+      role="button"
+      tabindex="-1"
+      aria-label="Close block modal"
+    ></div>
+    <div
+      class="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200"
+      transition:fly={{ y: 20, duration: 400 }}
+    >
+      <div class="p-8 sm:p-10">
+        <div class="text-center mb-8">
+          <div
+            class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-200"
+          >
+            <svg
+              class="w-8 h-8 text-slate-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.5"
+                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+              /></svg
+            >
+          </div>
+          <h3 class="text-2xl font-black text-slate-900 tracking-tight">
+            {#if sellerBlocked}Unblock{:else}Block{/if}
+            {bookQuery.data.seller?.name}
+          </h3>
+          <p class="text-slate-500 text-sm font-medium mt-1">
+            {#if sellerBlocked}
+              Are you sure you want to unblock this user?
+            {:else}
+              You will no longer see any listings or messages from this user.
+            {/if}
+          </p>
+        </div>
+
+        {#if !sellerBlocked}
+          <textarea
+            bind:value={blockReason}
+            rows="3"
+            placeholder="Reason for blocking (optional)"
+            class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-slate-500 focus:ring-4 focus:ring-slate-500/10 transition-all text-sm font-medium resize-none shadow-inner"
+          ></textarea>
+        {/if}
+
+        <div class="mt-8 flex gap-4">
+          <button
+            onclick={() => (blockModalOpen = false)}
+            class="flex-1 py-4 bg-slate-100 text-slate-600 font-black text-sm rounded-2xl hover:bg-slate-200 transition-all active:scale-95"
+          >
+            CANCEL
+          </button>
+          <button
+            onclick={async () => {
+              if (sellerBlocked) await handleUnblockSeller(bookQuery.data!);
+              else await handleBlockSeller(bookQuery.data!);
+              if (!trustError) blockModalOpen = false;
+            }}
+            disabled={blockSubmitting || unblockSubmitting}
+            class="flex-1 py-4 bg-slate-900 text-white font-black text-sm rounded-2xl hover:bg-slate-800 disabled:opacity-50 transition-all shadow-xl shadow-slate-200 active:scale-95"
+          >
+            {#if sellerBlocked}
+              {unblockSubmitting ? "UNBLOCKING..." : "CONFIRM UNBLOCK"}
+            {:else}
+              {blockSubmitting ? "BLOCKING..." : "CONFIRM BLOCK"}
+            {/if}
+          </button>
+        </div>
       </div>
     </div>
   </div>
