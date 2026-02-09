@@ -3,8 +3,6 @@ import ENV from "../config/ENV.js";
 import { db } from "../lib/db.js";
 import { user } from "../models/auth-schema.js";
 import { eq } from "drizzle-orm";
-import fs from "fs";
-import path from "path";
 import {
   createInAppNotificationForAudience,
   createInAppNotificationForUser,
@@ -25,21 +23,11 @@ function initializeFirebase() {
     if (ENV.FIREBASE_SERVICE_ACCOUNT_JSON) {
       serviceAccount = JSON.parse(ENV.FIREBASE_SERVICE_ACCOUNT_JSON);
       console.log("Firebase initializing from environment variable.");
-    } else if (ENV.FIREBASE_SERVICE_ACCOUNT_PATH) {
-      const keyPath = ENV.FIREBASE_SERVICE_ACCOUNT_PATH;
-      const absolutePath = path.isAbsolute(keyPath)
-        ? keyPath
-        : path.join(process.cwd(), keyPath);
-
-      if (fs.existsSync(absolutePath)) {
-        serviceAccount = JSON.parse(fs.readFileSync(absolutePath, "utf8"));
-        console.log(`Firebase initializing from file: ${absolutePath}`);
-      }
     }
 
     if (!serviceAccount) {
       console.warn(
-        "No Firebase credentials found (JSON or Path). Automated notifications disabled.",
+        "No Firebase credentials found in FIREBASE_SERVICE_ACCOUNT_JSON. Automated notifications disabled.",
       );
       return;
     }

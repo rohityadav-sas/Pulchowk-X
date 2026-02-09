@@ -2,8 +2,6 @@ import { fromNodeHeaders } from "better-auth/node";
 import { auth } from "../lib/auth.js";
 import { Request, Response, NextFunction } from "express";
 import admin from "firebase-admin";
-import fs from "fs";
-import path from "path";
 import { db } from "../lib/db.js";
 import { user } from "../models/auth-schema.js";
 import { eq } from "drizzle-orm";
@@ -23,17 +21,6 @@ const loadFirebaseServiceAccount = () => {
     try {
         if (ENV.FIREBASE_SERVICE_ACCOUNT_JSON) {
             return JSON.parse(ENV.FIREBASE_SERVICE_ACCOUNT_JSON);
-        }
-
-        if (ENV.FIREBASE_SERVICE_ACCOUNT_PATH) {
-            const keyPath = ENV.FIREBASE_SERVICE_ACCOUNT_PATH;
-            const absolutePath = path.isAbsolute(keyPath)
-                ? keyPath
-                : path.join(process.cwd(), keyPath);
-
-            if (fs.existsSync(absolutePath)) {
-                return JSON.parse(fs.readFileSync(absolutePath, "utf8"));
-            }
         }
     } catch (error) {
         console.error("Failed to load Firebase service account:", error);
