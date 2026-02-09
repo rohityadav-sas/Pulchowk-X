@@ -54,14 +54,14 @@
 
   const pulchowkData = pulchowk as FeatureCollection;
 
-  // Assign icons based on description
+  // Assign icons based on place title
   pulchowkData.features.forEach((feature) => {
     if (!feature.properties) feature.properties = {};
 
-    // Skip features without a description (like the boundary mask)
-    if (!feature.properties.description) return;
+    // Skip features without a title (like the boundary mask)
+    if (!feature.properties.title) return;
 
-    const desc = feature.properties.description.toLowerCase();
+    const desc = feature.properties.title.toLowerCase();
 
     if (desc.includes("bank") || desc.includes("atm")) {
       feature.properties.icon = "bank-icon";
@@ -459,32 +459,26 @@
       const normalizedName = focusName.toLowerCase();
       targetFeature =
         labels.find((label) => {
-          const description = label.properties?.description;
           const title = label.properties?.title;
           return (
-            (typeof description === "string" &&
-              description.toLowerCase() === normalizedName) ||
-            (typeof title === "string" &&
-              title.toLowerCase() === normalizedName)
+            typeof title === "string" &&
+            title.toLowerCase() === normalizedName
           );
         }) ||
         labels.find((label) => {
-          const description = label.properties?.description;
           const title = label.properties?.title;
           return (
-            (typeof description === "string" &&
-              description.toLowerCase().includes(normalizedName)) ||
-            (typeof title === "string" &&
-              title.toLowerCase().includes(normalizedName))
+            typeof title === "string" &&
+            title.toLowerCase().includes(normalizedName)
           );
         });
     }
 
     if (targetFeature) {
       const center = getCentroid(targetFeature);
-      const description = targetFeature.properties?.description;
-      if (typeof description === "string") {
-        search = description;
+      const title = targetFeature.properties?.title;
+      if (typeof title === "string") {
+        search = title;
       } else if (focusName) {
         search = focusName;
       }
@@ -702,7 +696,7 @@
     }
 
     const destName =
-      destinationFeature.properties?.description || "Destination";
+      destinationFeature.properties?.title || "Destination";
     const destCoords = getCentroid(destinationFeature);
 
     // Store feature to optimize routing point later
@@ -839,7 +833,7 @@
     navStartSearch.trim() && navStartSearch !== "Your Location"
       ? labels
           .filter((label) =>
-            label.properties?.description
+            label.properties?.title
               ?.toLowerCase()
               .includes(navStartSearch.toLowerCase()),
           )
@@ -851,7 +845,7 @@
     navEndSearch.trim()
       ? labels
           .filter((label) =>
-            label.properties?.description
+            label.properties?.title
               ?.toLowerCase()
               .includes(navEndSearch.toLowerCase()),
           )
@@ -863,10 +857,10 @@
     const coords = getCentroid(suggestion);
     startPoint = {
       coords,
-      name: suggestion.properties.description,
+      name: suggestion.properties.title,
       feature: suggestion,
     };
-    navStartSearch = suggestion.properties.description;
+    navStartSearch = suggestion.properties.title;
     showNavStartSuggestions = false;
     getDirections();
   }
@@ -875,10 +869,10 @@
     const coords = getCentroid(suggestion);
     endPoint = {
       coords,
-      name: suggestion.properties.description,
+      name: suggestion.properties.title,
       feature: suggestion,
     };
-    navEndSearch = suggestion.properties.description;
+    navEndSearch = suggestion.properties.title;
     showNavEndSuggestions = false;
     getDirections();
   }
@@ -1110,7 +1104,7 @@
     search.trim()
       ? labels
           .filter((label) =>
-            label.properties?.description
+            label.properties?.title
               ?.toLowerCase()
               .includes(search.toLowerCase()),
           )
@@ -1118,13 +1112,13 @@
       : [],
   );
 
-  function selectSuggestion(description: string) {
-    search = description;
+  function selectSuggestion(titleName: string) {
+    search = titleName;
     showSuggestions = false;
     selectedIndex = -1;
 
     const selectedLocation = labels.find(
-      (label) => label.properties?.description === description,
+      (label) => label.properties?.title === titleName,
     );
 
     if (selectedLocation?.geometry?.type === "Polygon") {
@@ -1179,8 +1173,7 @@
     } else if (e.key === "Enter" && selectedIndex >= 0) {
       e.preventDefault();
       const selectedProperties = filteredSuggestions[selectedIndex].properties;
-      if (selectedProperties?.description)
-        selectSuggestion(selectedProperties.description);
+      if (selectedProperties?.title) selectSuggestion(selectedProperties.title);
     } else if (e.key === "Escape") {
       showSuggestions = false;
       selectedIndex = -1;
@@ -1730,8 +1723,8 @@
                     data-suggestion-index={index}
                     onmousedown={(e) => e.preventDefault()}
                     onclick={() =>
-                      suggestion.properties?.description &&
-                      selectSuggestion(suggestion.properties.description)}
+                      suggestion.properties?.title &&
+                      selectSuggestion(suggestion.properties.title)}
                     class="w-full px-4 py-2.5 text-left hover:bg-blue-50/80 transition-colors flex items-center gap-3 {index ===
                     selectedIndex
                       ? 'bg-blue-50 text-blue-700'
@@ -1773,7 +1766,7 @@
                     </div>
                     <div class="flex-1 min-w-0">
                       <p class="font-medium text-sm truncate">
-                        {suggestion.properties?.description}
+                        {suggestion.properties?.title}
                       </p>
                       <p class="text-[11px] text-gray-500 truncate mt-0.5">
                         Pulchowk Campus
@@ -2003,7 +1996,7 @@
                           class="w-4 h-4 object-contain"
                         />
                         <span class="truncate"
-                          >{suggestion.properties?.description}</span
+                          >{suggestion.properties?.title}</span
                         >
                       </button>
                     {/each}
@@ -2071,7 +2064,7 @@
                           class="w-4 h-4 object-contain"
                         />
                         <span class="truncate"
-                          >{suggestion.properties?.description}</span
+                          >{suggestion.properties?.title}</span
                         >
                       </button>
                     {/each}
@@ -2373,7 +2366,7 @@
                             class="w-4 h-4 object-contain"
                           />
                           <span class="truncate"
-                            >{suggestion.properties?.description}</span
+                            >{suggestion.properties?.title}</span
                           >
                         </button>
                       {/each}
@@ -2439,7 +2432,7 @@
                             class="w-4 h-4 object-contain"
                           />
                           <span class="truncate"
-                            >{suggestion.properties?.description}</span
+                            >{suggestion.properties?.title}</span
                           >
                         </button>
                       {/each}
@@ -2586,8 +2579,8 @@
                       data-suggestion-index={index}
                       onmousedown={(e) => e.preventDefault()}
                       onclick={() =>
-                        suggestion.properties?.description &&
-                        selectSuggestion(suggestion.properties.description)}
+                        suggestion.properties?.title &&
+                        selectSuggestion(suggestion.properties.title)}
                       class="w-full px-4 py-2.5 text-left hover:bg-blue-50/80 transition-colors flex items-center gap-3 {index ===
                       selectedIndex
                         ? 'bg-blue-50 text-blue-700'
@@ -2629,7 +2622,7 @@
                       </div>
                       <div class="flex-1 min-w-0">
                         <p class="font-medium text-sm truncate">
-                          {suggestion.properties?.description}
+                          {suggestion.properties?.title}
                         </p>
                         <p class="text-[11px] text-gray-500 truncate mt-0.5">
                           Pulchowk Campus
@@ -2702,7 +2695,7 @@
           layout={{
             "icon-image": ["get", "icon"],
             "icon-size": 1,
-            "text-field": "{description}",
+            "text-field": "{title}",
             "text-size": 10,
             "text-anchor": "top",
             "text-offset": [0, 1.4],
@@ -2712,7 +2705,7 @@
           paint={{
             "text-color": isSatellite ? "#ffffff" : "green",
           }}
-          filter={["has", "description"]}
+          filter={["has", "title"]}
           onclick={(e: any) => {
             console.log("Symbol clicked", e);
             if (e.features && e.features[0]) {
@@ -2747,7 +2740,7 @@
               }
 
               if (isNavigating) {
-                const name = props.description || "Location";
+                const name = props.title || "Location";
                 const point = {
                   coords: [centerLngLat.lng, centerLngLat.lat],
                   name: name,
@@ -2789,7 +2782,7 @@
               }
 
               popupData = {
-                title: props.title || props.description || "Unknown Location",
+                title: props.title || "Unknown Location",
                 description: props.about || "",
                 image: image || undefined,
               };
@@ -3116,7 +3109,7 @@
               onclick={() =>
                 startNavigation({
                   properties: {
-                    description: popupData.title,
+                    title: popupData.title,
                   },
                   geometry: {
                     type: "Point",

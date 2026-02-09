@@ -1,2144 +1,2057 @@
 {
-    "type": "FeatureCollection",
-    "features": [
-        {
-            "type": "Feature",
-            "properties": {},
-            "geometry": {
-                "type": "Polygon",
-                "coordinates": [
-                    [
-                        [
-                            180,
-                            90
-                        ],
-                        [
-                            -180,
-                            90
-                        ],
-                        [
-                            -180,
-                            -90
-                        ],
-                        [
-                            180,
-                            -90
-                        ],
-                        [
-                            180,
-                            90
-                        ]
-                    ],
-                    [
-                        [
-                            85.318662,
-                            27.683404
-                        ],
-                        [
-                            85.318586,
-                            27.683142
-                        ],
-                        [
-                            85.318494,
-                            27.682972
-                        ],
-                        [
-                            85.318208,
-                            27.682623
-                        ],
-                        [
-                            85.318099,
-                            27.682482
-                        ],
-                        [
-                            85.317856,
-                            27.681998
-                        ],
-                        [
-                            85.31767,
-                            27.681511
-                        ],
-                        [
-                            85.31755,
-                            27.681249
-                        ],
-                        [
-                            85.31741,
-                            27.680886
-                        ],
-                        [
-                            85.31725,
-                            27.680475
-                        ],
-                        [
-                            85.317834,
-                            27.680253
-                        ],
-                        [
-                            85.3193,
-                            27.679745
-                        ],
-                        [
-                            85.319659,
-                            27.67962
-                        ],
-                        [
-                            85.32049,
-                            27.67934
-                        ],
-                        [
-                            85.320518,
-                            27.679834
-                        ],
-                        [
-                            85.32052,
-                            27.680234
-                        ],
-                        [
-                            85.3205,
-                            27.68047
-                        ],
-                        [
-                            85.32044,
-                            27.68072
-                        ],
-                        [
-                            85.3204,
-                            27.68084
-                        ],
-                        [
-                            85.32028,
-                            27.68109
-                        ],
-                        [
-                            85.32007,
-                            27.681474
-                        ],
-                        [
-                            85.320279,
-                            27.681363
-                        ],
-                        [
-                            85.320488,
-                            27.681143
-                        ],
-                        [
-                            85.320845,
-                            27.680882
-                        ],
-                        [
-                            85.321064,
-                            27.680698
-                        ],
-                        [
-                            85.32141043062103,
-                            27.68046861858221
-                        ],
-                        [
-                            85.32158075511848,
-                            27.680339024754886
-                        ],
-                        [
-                            85.3216959323347,
-                            27.68080546490083
-                        ],
-                        [
-                            85.32171187166813,
-                            27.680929243396847
-                        ],
-                        [
-                            85.3217755942934,
-                            27.681056101884323
-                        ],
-                        [
-                            85.3218271531162,
-                            27.681133192467257
-                        ],
-                        [
-                            85.32190398752391,
-                            27.681248620262267
-                        ],
-                        [
-                            85.32197583607979,
-                            27.681399804060888
-                        ],
-                        [
-                            85.32200943677253,
-                            27.681460011252838
-                        ],
-                        [
-                            85.32212555074943,
-                            27.68171678713253
-                        ],
-                        [
-                            85.32193218480609,
-                            27.682022019495875
-                        ],
-                        [
-                            85.32189029843039,
-                            27.682126476203152
-                        ],
-                        [
-                            85.3220394544465,
-                            27.68209802746557
-                        ],
-                        [
-                            85.32212514507796,
-                            27.682013563751184
-                        ],
-                        [
-                            85.32220433794242,
-                            27.68193808366628
-                        ],
-                        [
-                            85.32228447637465,
-                            27.681860339074944
-                        ],
-                        [
-                            85.32240989771952,
-                            27.681733462152607
-                        ],
-                        [
-                            85.32260862182716,
-                            27.68162468224655
-                        ],
-                        [
-                            85.32271285770986,
-                            27.68156821143269
-                        ],
-                        [
-                            85.32301629905987,
-                            27.68140928648934
-                        ],
-                        [
-                            85.32307091249493,
-                            27.681398978998843
-                        ],
-                        [
-                            85.32316415342552,
-                            27.681381473736906
-                        ],
-                        [
-                            85.32320066964326,
-                            27.681374322083087
-                        ],
-                        [
-                            85.32324098206442,
-                            27.68136616877058
-                        ],
-                        [
-                            85.32325530728235,
-                            27.68135668241959
-                        ],
-                        [
-                            85.323286681316,
-                            27.681330811892124
-                        ],
-                        [
-                            85.32333726234754,
-                            27.681287126574233
-                        ],
-                        [
-                            85.32343238084388,
-                            27.68120910502732
-                        ],
-                        [
-                            85.32349905753318,
-                            27.68115487423742
-                        ],
-                        [
-                            85.32354005745651,
-                            27.681122153392906
-                        ],
-                        [
-                            85.32356071082768,
-                            27.681105870159428
-                        ],
-                        [
-                            85.32358958111234,
-                            27.681082863857597
-                        ],
-                        [
-                            85.32361430785659,
-                            27.68106268184289
-                        ],
-                        [
-                            85.32365132356483,
-                            27.681040842627866
-                        ],
-                        [
-                            85.32365473298523,
-                            27.681057952060968
-                        ],
-                        [
-                            85.32373955784516,
-                            27.681048302717315
-                        ],
-                        [
-                            85.32373553453135,
-                            27.681023659775676
-                        ],
-                        [
-                            85.3237660446585,
-                            27.6810169794593
-                        ],
-                        [
-                            85.32381845731743,
-                            27.681005787717126
-                        ],
-                        [
-                            85.32387265612658,
-                            27.681004416413515
-                        ],
-                        [
-                            85.3239096122108,
-                            27.68100388425178
-                        ],
-                        [
-                            85.32394476381762,
-                            27.68100341975618
-                        ],
-                        [
-                            85.32404519229635,
-                            27.681001551403625
-                        ],
-                        [
-                            85.32408844291638,
-                            27.681000809146354
-                        ],
-                        [
-                            85.32412081911758,
-                            27.6810113954745
-                        ],
-                        [
-                            85.324145925832,
-                            27.681018558870065
-                        ],
-                        [
-                            85.32433033111215,
-                            27.681076413567894
-                        ],
-                        [
-                            85.3245607844371,
-                            27.68110981120438
-                        ],
-                        [
-                            85.32456552702763,
-                            27.681106000043613
-                        ],
-                        [
-                            85.32463688938236,
-                            27.68106796049085
-                        ],
-                        [
-                            85.32476730103667,
-                            27.681183341917475
-                        ],
-                        [
-                            85.32476788888573,
-                            27.681184090731875
-                        ],
-                        [
-                            85.32500949072664,
-                            27.681521713948413
-                        ],
-                        [
-                            85.32512696504114,
-                            27.681618478979004
-                        ],
-                        [
-                            85.32524418459991,
-                            27.681710765091893
-                        ],
-                        [
-                            85.32528085862509,
-                            27.68174269040547
-                        ],
-                        [
-                            85.32533398697973,
-                            27.681858908967996
-                        ],
-                        [
-                            85.32538293317805,
-                            27.681970002128892
-                        ],
-                        [
-                            85.32546873537342,
-                            27.682152715085834
-                        ],
-                        [
-                            85.3255582800146,
-                            27.68236444592155
-                        ],
-                        [
-                            85.32562876627674,
-                            27.682706339093997
-                        ],
-                        [
-                            85.32566022789916,
-                            27.68278138089947
-                        ],
-                        [
-                            85.32569544011602,
-                            27.682862131240228
-                        ],
-                        [
-                            85.32554144525528,
-                            27.68305471846611
-                        ],
-                        [
-                            85.32543332695093,
-                            27.683077418303455
-                        ],
-                        [
-                            85.32536875453127,
-                            27.683096380765505
-                        ],
-                        [
-                            85.32526907602693,
-                            27.683124725994475
-                        ],
-                        [
-                            85.32518510207302,
-                            27.683165031167732
-                        ],
-                        [
-                            85.3250919709011,
-                            27.683209984640087
-                        ],
-                        [
-                            85.32500840669348,
-                            27.683268032702188
-                        ],
-                        [
-                            85.32493418660607,
-                            27.68331585302279
-                        ],
-                        [
-                            85.32486087946751,
-                            27.683360297332683
-                        ],
-                        [
-                            85.32470187775505,
-                            27.683443630669984
-                        ],
-                        [
-                            85.32459278428064,
-                            27.683496198137703
-                        ],
-                        [
-                            85.32454103998452,
-                            27.68351598124258
-                        ],
-                        [
-                            85.32448571963278,
-                            27.68353781654197
-                        ],
-                        [
-                            85.32444345461147,
-                            27.683546895421415
-                        ],
-                        [
-                            85.3244429659369,
-                            27.68354707765542
-                        ],
-                        [
-                            85.32440295555449,
-                            27.68354729064788
-                        ],
-                        [
-                            85.3242338285512,
-                            27.68347097151164
-                        ],
-                        [
-                            85.32419072328452,
-                            27.683456725909537
-                        ],
-                        [
-                            85.32410389401514,
-                            27.683481016487235
-                        ],
-                        [
-                            85.32389094109294,
-                            27.683578936294552
-                        ],
-                        [
-                            85.32369220497782,
-                            27.6836690282682
-                        ],
-                        [
-                            85.32347749338152,
-                            27.68373344069812
-                        ],
-                        [
-                            85.32330735551096,
-                            27.683783102533653
-                        ],
-                        [
-                            85.32319253116441,
-                            27.683826480939047
-                        ],
-                        [
-                            85.32311010386798,
-                            27.683994358605304
-                        ],
-                        [
-                            85.32302563092469,
-                            27.68416390577849
-                        ],
-                        [
-                            85.32293462946342,
-                            27.684350765226753
-                        ],
-                        [
-                            85.32293523998902,
-                            27.684350459184984
-                        ],
-                        [
-                            85.32266060290601,
-                            27.684393403177523
-                        ],
-                        [
-                            85.32254081214336,
-                            27.684438821074664
-                        ],
-                        [
-                            85.3224259752397,
-                            27.684482547918805
-                        ],
-                        [
-                            85.32236796812157,
-                            27.684417373203942
-                        ],
-                        [
-                            85.32231458565695,
-                            27.68435657615977
-                        ],
-                        [
-                            85.32225909063806,
-                            27.684294795262446
-                        ],
-                        [
-                            85.32222184905424,
-                            27.684246710044235
-                        ],
-                        [
-                            85.32216250434288,
-                            27.684171033475735
-                        ],
-                        [
-                            85.32212170577884,
-                            27.684117035454847
-                        ],
-                        [
-                            85.32206919336426,
-                            27.684049544098883
-                        ],
-                        [
-                            85.32201763446358,
-                            27.683984317067754
-                        ],
-                        [
-                            85.32193592714765,
-                            27.683989326832204
-                        ],
-                        [
-                            85.32181400655094,
-                            27.684055270292433
-                        ],
-                        [
-                            85.32169627597494,
-                            27.684088372185116
-                        ],
-                        [
-                            85.321617,
-                            27.684043
-                        ],
-                        [
-                            85.32156245841827,
-                            27.684065051017114
-                        ],
-                        [
-                            85.32138549238385,
-                            27.68413625148351
-                        ],
-                        [
-                            85.321338,
-                            27.684163
-                        ],
-                        [
-                            85.321133,
-                            27.684226
-                        ],
-                        [
-                            85.320968,
-                            27.684239
-                        ],
-                        [
-                            85.320864,
-                            27.68424
-                        ],
-                        [
-                            85.32083,
-                            27.684154
-                        ],
-                        [
-                            85.320751,
-                            27.684157
-                        ],
-                        [
-                            85.320679,
-                            27.68404
-                        ],
-                        [
-                            85.32063950342518,
-                            27.68403466188147
-                        ],
-                        [
-                            85.3205759530577,
-                            27.68394551821183
-                        ],
-                        [
-                            85.32061284688234,
-                            27.68380823013858
-                        ],
-                        [
-                            85.32032267674288,
-                            27.6836561670234
-                        ],
-                        [
-                            85.320164,
-                            27.683601
-                        ],
-                        [
-                            85.31975845719683,
-                            27.68345665186456
-                        ],
-                        [
-                            85.319416,
-                            27.683214
-                        ],
-                        [
-                            85.31918,
-                            27.683102
-                        ],
-                        [
-                            85.319062,
-                            27.68305
-                        ],
-                        [
-                            85.318952,
-                            27.683223
-                        ],
-                        [
-                            85.31887887895806,
-                            27.683340888872877
-                        ],
-                        [
-                            85.31883142100685,
-                            27.683419999677255
-                        ],
-                        [
-                            85.31878882209372,
-                            27.683476569583746
-                        ],
-                        [
-                            85.31868067765026,
-                            27.683470262811667
-                        ],
-                        [
-                            85.318662,
-                            27.683404
-                        ]
-                    ]
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "ICTC Building",
-                "title": "ICTC Building",
-                "about": "This is the location for ICTC Building.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050705/AG0ilSxop441mNoVp1q2alOx39U1Xc1ujV2JPZ-XDIpIAX2qqMyE0kie8i4qzm31JWbIIJrIsSHveV5oD3gmrCOnCzucQkovceqHP-V7-Voy7L3pw0w5drA4ILOU47XBQvl5KUqDtW_y_s0_x2lt8m.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050722/photo5_vghj6m.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31914514155119,
-                    27.68224422611749
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Campus Mess",
-                "title": "Campus Mess",
-                "about": "This is the location for Campus Mess.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768048831/campus_mess_kcyirm.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31953172446174,
-                    27.68100688137129
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Dean Office",
-                "title": "Dean Office",
-                "about": "This is the location for Dean Office.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768048868/c29c75aabe8395ef3972_vkwpsh.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768048879/ab6b8746f0397c5e6bd1_ltezo3.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31860772765805,
-                    27.681033526909417
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Department of Architecture",
-                "title": "Department of Architecture",
-                "about": "This is the location for Department of Architecture.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768048987/94c8a6cb627b4d29415e_hfo4kw.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31831152476735,
-                    27.68044934237453
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "ASA Office",
-                "title": "ASA Office",
-                "about": "This is the location for ASA Office.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31840952112645,
-                    27.680433693360456
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "MSC Hostel",
-                "title": "MSC Hostel",
-                "about": "This is the location for MSC Hostel.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.319017191439,
-                    27.680091477233432
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Hydro Lab",
-                "title": "Hydro Lab",
-                "about": "This is the location for Hydro Lab.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31942804361722,
-                    27.68018924241545
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Department of Roads",
-                "title": "Department of Roads",
-                "about": "This is the location for Department of Roads.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31987423799086,
-                    27.680752787168743
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Locus Office",
-                "title": "Locus Office",
-                "about": "This is the location for Locus Office.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049031/16c6f4436ab30f8770c5_hc7chy.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3185504866151,
-                    27.68139565322535
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Department of Electrical, Electronics and Computer Engineering",
-                "title": "Department of Electrical, Electronics and Computer Engineering",
-                "about": "This is the location for Department of Electrical, Electronics and Computer Engineering.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049050/df60e34d608189b1eec0_xelok8.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049063/577b7492ac230083e987_kmvltq.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31871288839,
-                    27.68181692613163
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Robotics Club",
-                "title": "Robotics Club",
-                "about": "This is the location for Robotics Club.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3190521926656,
-                    27.681470604000538
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Continuing Education Center",
-                "title": "Continuing Education Center",
-                "about": "This is the location for Continuing Education Center.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049083/888d37bdf1f73fdf0d3d_syxckl.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049101/38b5b50bb2346a286a8d_fu0y1i.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049114/a45729c1dd74b49198dc_djp5qp.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31895314397525,
-                    27.681494777843028
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Pulchowk Library",
-                "title": "Pulchowk Library",
-                "about": "This is the location for Pulchowk Library.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049129/e65054690fa0e14b565a_uyeekd.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049140/4a8f875e3d20f0af9263_vv4mj6.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049152/2e8246580d6eb8f4b325_uiwicr.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3194349446735,
-                    27.681579366803874
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Electrical Club",
-                "title": "Electrical Club",
-                "about": "This is the location for Electrical Club.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049166/a3040e599637be7f7c17_mhsyhu.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3182927681815,
-                    27.682291135732115
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Block C",
-                "title": "Block C",
-                "about": "This is the location for Block C.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31833975128347,
-                    27.682140047755496
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "ICT Building",
-                "title": "ICT Building",
-                "about": "This is the location for ICT Building.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049181/554d81fe37e15e94fc60_wwopgc.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049194/499c26c422739e1565e4_htyqx1.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31910927158208,
-                    27.68172332246239
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Embark College",
-                "title": "Embark College",
-                "about": "This is the location for Embark College.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049211/AG0ilSzFjaGXicBwAkWEbh1CGVQepFdLr9-BmMLIr4A1iDp3lpvRL7ab7Z2MP565CX_FE9cFOLdLuIbewX23FpODCpl63DUbp_J7POn7h5A9SFbKzSI_tkfPJxClo_js5dFfvzOsEK41Kg_s0_sf8hma.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049223/embark_highview_eybcwf.webp"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31888939994957,
-                    27.682712891619232
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Nabil Bank ATM",
-                "title": "Nabil Bank ATM",
-                "about": "This is the location for Nabil Bank ATM.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049241/AG0ilSzkyfUqvlmdNqUbRRRsoefDSQoXbAC4vnzWKCi5GMP0XcF4nNybZ_hqhJTY8gci8M4jzcVjqOlOWgYdk5FLfieqAu02N6OG7ysRgMyoBAH4qeBaRg1VVcymd_M3o7EsyBIl29ac_s0_ooafgc.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31853678585821,
-                    27.682829607001196
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Siddhartha Bank ATM",
-                "title": "Siddhartha Bank ATM",
-                "about": "This is the location for Siddhartha Bank ATM.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049255/AG0ilSwpHMU3GAn4qs9oHsOyx5EIMXLmlvN4VL9Cxuq4_q55349bhqqjdLmZuB2doK6ALbjAMpHz6TUehQW90qwfUbQdECmSIoWbaM4C5ol8pHaQ9IROzZUWlFUZpTL3DxUxvr4K2P67_s0_bn8duo.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31945726206425,
-                    27.68210633185008
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Heavy Lab Block",
-                "title": "Heavy Lab Block",
-                "about": "This is the location for Heavy Lab Block.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049270/575f003d6aa36f80d6a3_y7at3h.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32044738817302,
-                    27.68209387245163
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Heavy Lab",
-                "title": "Heavy Lab",
-                "about": "This is the location for Heavy Lab.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049283/b6862e30c9e529c84325_nvv6zp.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32050399856865,
-                    27.682214022253916
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Hydraulic Lab",
-                "title": "Hydraulic Lab",
-                "about": "This is the location for Hydraulic Lab.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049302/dc83c93080d20e386e10_aaptcy.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049317/9f043c5d254326482655_qlo7qp.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049330/e63ebebf30681d10c5c7_zghcqo.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049344/d1ccc4673921579ffd3f_x8npuf.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3203413798231,
-                    27.68216722059954
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Parking",
-                "title": "Parking",
-                "about": "Parking for the vehicles",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049360/7631a9eed0f76db484bc_rwjwme.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31992845601593,
-                    27.68214769544541
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Helicopter Parking",
-                "title": "Helicopter Parking",
-                "about": "The iconic Helicopter Parking.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049372/aa36557e54f04fd4c2b7_twalak.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31969443930882,
-                    27.68228789473575
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "PI Chautari",
-                "title": "PI Chautari",
-                "about": "This is the location for PI Chautari.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049395/c130c782c05a00f00dc6_vlzdhc.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049409/afcf404c3a65642de799_njzrvb.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31987844126758,
-                    27.68267661712244
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Department of Mechanical and Aerospace Engineering",
-                "title": "Department of Mechanical and Aerospace Engineering",
-                "about": "This is the location for Department of Mechanical and Aerospace Engineering.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049427/AG0ilSy57X7F1U1HldC9-kK8aozkm4SJAm_RIGy4R09eliY36RFG3Fx_qpMvfoCu-v7NXrfiCI5jctGss-YJZt2cdlgY0h0PhXP4Gz8RieLsmywf3YN5c-bitDv8sW3hGM2ERsuXiBli_s0_o18oiz.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049439/AG0ilSxMUqAflGq52AKLFxjHukIxgaMvYoLvTPBSEKmfxmOG0ywjmMnPDJpOvigCUWRwAy8g13fLFF5BIf0Z9av5lrEpKqFcEEnoKedS-8tY9A51P7P9HVLxWlQcDpvNg_nUhqOqHLReIA_s0_tadp7i.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31986930605723,
-                    27.682462244093173
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Saraswati Mandir",
-                "title": "Saraswati Mandir",
-                "about": "This is Saraswati Mandir to worship.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049454/AG0ilSx7wypYKOcn127tTAnZrnvvtRNp-PWjw9vQ2prmBf2ywpQDf3_oItdgezFNmoy2tvYChS-FkUZm6wm-T2FRgzPl-W2tUTUWP9J1SzNYHKAuy_qRjCmUDabINl66ebJliAFMzeQG8Q_s4000_txpcaw.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049468/0e13fedc81f23c13412d_f2fr08.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049481/75f287835a439c22eeee_gvqxlq.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31939527713587,
-                    27.68256455316562
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Department of Civil Engineering",
-                "title": "Department of Civil Engineering",
-                "about": "This is the location for Department of Civil Engineering.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049499/AG0ilSx9OmbBii3by02nQKjvSrKXTEPbO1acKQNk4tF6WfgU8Ojn0CDJ4TYcefJoExhDmFlrHKXcZ3KsozQZspYDPy2Hs1ZthxhrIA42zp2_ExFNqI1B3zp-K3nrKYB4EEEraBKNHHDi_w408-h544-k-no_riz3ve.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31936398409704,
-                    27.682968475303554
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "F Block",
-                "title": "F Block",
-                "about": "This is the location for F Block.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049516/AG0ilSx8HiL_SL_epEpzepLpOspwuOSeOgUWqz3MEfc6cBvMTCCAQhYWrACkzrVwKz5aXiyzzieSd1gHR2H4GyeRHbouhWmyOIrpoCeaYxBlknlC0UiJxRr6DPcr75BMzHi__QjSJN--UQ_s0_qazxzp.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049538/AG0ilSx9OmbBii3by02nQKjvSrKXTEPbO1acKQNk4tF6WfgU8Ojn0CDJ4TYcefJoExhDmFlrHKXcZ3KsozQZspYDPy2Hs1ZthxhrIA42zp2_ExFNqI1B3zp-K3nrKYB4EEEraBKNHHDi_w408-h544-k-no_x10szp.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049570/AG0ilSwULJ3WSdju8qjjm3v9oxVSorgq1f0DyblyQo_hIao58Qdob0Jqd-7yV2ULqza5XDXZgZYcygafI5GZPJKMJad-q9FUgdBm6q3goYGXoJLl9FwlKZX5x8haWr1Pb8bWGl3yd6IiC5_Xrsc_s0_yc29cv.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3196061234986,
-                    27.682788668714352
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Department of Mechanical and Aerospace Engineering",
-                "title": "Department of Mechanical and Aerospace Engineering",
-                "about": "This is the location for Department of Mechanical and Aerospace Engineering.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049584/9ba01ed76debb8515be6_myow9q.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049597/36cfb68a7870538d650e_agszuw.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32078190861336,
-                    27.682393906140106
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "The Helm of IOE Pulchowk",
-                "title": "The Helm of IOE Pulchowk",
-                "about": "This is the location for The Helm of IOE Pulchowk.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049615/d504e434b4a7eeb3a4ad_xzpigq.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32083316993328,
-                    27.682629953546424
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "FSU Office",
-                "title": "FSU Office",
-                "about": "This is the location for FSU Office.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049635/fcb9107e741cc93e9c07_rxqzry.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32075560082757,
-                    27.682847709268373
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "NTBNS",
-                "title": "NTBNS",
-                "about": "This is the location for NTBNS.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049651/4196f6c89da06431860a_mppgqk.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32070194666937,
-                    27.68301615325798
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Pulchowk Girls",
-                "title": "Pulchowk Girls",
-                "about": "This is the location for Pulchowk Girls.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049666/4ca588aa5c97d0b6ca7d_dfjnbs.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3206748356111,
-                    27.682918543955225
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Department of Applied Sciences and Chemical Engineering",
-                "title": "Department of Applied Sciences and Chemical Engineering",
-                "about": "This is the location for Department of Applied Sciences and Chemical Engineering.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3203848726879,
-                    27.682935941133437
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Department of Applied Sciences and chemical engineering",
-                "title": "Department of Applied Sciences and chemical engineering",
-                "about": "This is the location for Department of Applied Sciences and chemical engineering.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049683/AG0ilSwiodqC9QVG6IOgmrdicUur07onisM3G2ONp51Z1JnbislKt_rhctnI4c8SPgBtzaYwIXvQPGuB-bRhA9UN-u3UpyR4ebCf9DnJG090u37CNDM59E1p4gpSKRUcG_pm0wCJ1AuulF5idNw_w408-h544-k-no_vom8mm.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3200449911119,
-                    27.683220527000756
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "G Block",
-                "title": "G Block",
-                "about": "This is the location for G Block.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32018128025857,
-                    27.68310430877834
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "CIDS",
-                "title": "CIDS",
-                "about": "This is the location for CIDS.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049703/AG0ilSxiPpIErbbczjxGn4AgjO8A3DsLcJT5j7nOLCBXthvKWatBlUHcshgoADqNaH6SGDt7OmBwn5YQUxReugXpJRs74kv38gT-QU5_u2jkQXF3lmdNiRhI-FlEuWfY0fwYUDU8YCma_w408-h306-k-no_cdo2d4.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31990266456802,
-                    27.683010663794747
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Department of Science and Humanities",
-                "title": "Department of Science and Humanities",
-                "about": "This is the location for Department of Science and Humanities.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32054395296416,
-                    27.683041212054775
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Main Entrance",
-                "title": "Main Entrance",
-                "about": "This is the location for Main Entrance.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049719/662d59819c48fa131738_zq7cbz.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049732/94047dc912b8e68b170c_d9vcbs.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3177517448579,
-                    27.681366883564905
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "First Entrance",
-                "title": "First Entrance",
-                "about": "This is the location for First Entrance.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3194594635064,
-                    27.68207456812752
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Second Entrance",
-                "title": "Second Entrance",
-                "about": "This is the Entrance for Block D, F and G.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049748/4e94d012793008140001_dqjfw1.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31959562985224,
-                    27.682147085370673
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Hydropower Testing Lab",
-                "title": "Hydropower Testing Lab",
-                "about": "This is the location for Hydropower Testing Lab.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049771/AG0ilSx_lW3pmcJQSQxYloepyS7ce1ZOe6gbXZYbyh2D1DV56BSFoEuRbBFhtoB_y5ZSlSKtVVkZo5nw9il0j1h77L4o5eJiC6M_VteSYoE13Q5ecy32EzYpSDrKs597VhVP9MMFWNHB_w408-h240-k-no-pi-20-ya261_kt0un8.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32052846482077,
-                    27.68346942813116
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "SEDS Pulchowk",
-                "title": "SEDS Pulchowk",
-                "about": "This is the location for SEDS Pulchowk.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049784/AG0ilSy0v82-kn_aT3e_5AeNTk43nGxebrataZXO-IcmCEc2IextjvAeRSoSjMEUveLyBiWVZNZU2WarJTfIMz_vAjFhrrrO7VaPFYZD5a-Ol0xX6BoE0s2fCXXbyodLgRcVmdxXTQulvWRgVso3_s0_bmt59c.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32041220727473,
-                    27.683617545231883
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Center for Energy Studies",
-                "title": "Center for Energy Studies",
-                "about": "This is the location for Center for Energy Studies.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049802/AG0ilSwlZ-oLvi9Ee2nfjBO8SjsTkPzxP1LM-GkCm03h4h90GE85MDU84n7BScJzFcoU000-GzE5yj6EUtdVRnQGK_1zS5LKi50OTmE30s8EEx6PBwSDPE0nTSS0ujThHJFt-NMDd8Ex6w_w408-h306-k-no_biq5ft.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3208610299663,
-                    27.68321662681744
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Pulchowk Cricket Ground",
-                "title": "Pulchowk Cricket Ground",
-                "about": "This is the location for Pulchowk Cricket Ground.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049816/0dfccd73292c9a01934a_g5o2h3.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32215173345384,
-                    27.683328511076553
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Pulchowk Football Ground",
-                "title": "Pulchowk Football Ground",
-                "about": "This is the location for Pulchowk Football Ground.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049831/d2aa167241903a0edf2d_vtxisq.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.322933342042,
-                    27.682630231202694
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Pulchowk Volleyball Court",
-                "title": "Pulchowk Volleyball Court",
-                "about": "This is the location for Pulchowk Volleyball Court.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049845/c6f41e67e20f9e8f42af_jpdow5.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3232165987614,
-                    27.682254992538773
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Cricket Practice Pitch",
-                "title": "Cricket Practice Pitch",
-                "about": "This is the location for Cricket Practice Pitch.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049860/0b64cb1743860cf5df53_w7hlsk.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32345024929077,
-                    27.682835875995877
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Basketball Court",
-                "title": "Basketball Court",
-                "about": "This is the location for Basketball Court.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049873/AG0ilSzPZBZKss36UihBeCeuwDUGMLDXVxSfDeQ61MtFiI32mWC7_MGbkzHhVY3btJV-N7dxnMIuzf8EYOPTxRURlogdsRGoVV0cCKeLN8e1jtibLOmKKqBlseQXtLDeBtRp6Gjc9cC5_w408-h544-k-no_yelhtq.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32258776220266,
-                    27.681816863769555
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Block A Pulchowk Boys Hostel",
-                "title": "Block A Pulchowk Boys Hostel",
-                "about": "This is the location for Block A Pulchowk Boys Hostel.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049889/225b30ab0b72debe11eb_ithz36.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049901/dc332493009ca6201cfa_lqikda.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3239283186274,
-                    27.682188311416212
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Block B Pulchowk Boys Hostel",
-                "title": "Block B Pulchowk Boys Hostel",
-                "about": "This is the location for Block B Pulchowk Boys Hostel.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049916/225b30ab0b72debe11eb_qp044p.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049929/dc332493009ca6201cfa_c9jbb9.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32390377692212,
-                    27.68184284511355
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Block C Pulchowk Boys Hostel",
-                "title": "Block C Pulchowk Boys Hostel",
-                "about": "This is the location for Block C Pulchowk Boys Hostel.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049946/225b30ab0b72debe11eb_awbvzo.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049959/dc332493009ca6201cfa_g9rqul.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32390894588298,
-                    27.681485585500837
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Niraula Stores",
-                "title": "Niraula Stores",
-                "about": "Store for ",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049975/AG0ilSzRDCmU9brtc5xB_89V-xUzlvopFiyHb9gRwTMS5w0Oozmr8fnbprHXOukQhXuuULXHfhmv1PVF9ge2O89iiUtZI_SR2DWb0RPJNGIQQt1qQi5-gq3YJmkRlUCqTXeYczQ72pcK_w426-h240-k-no_h1pzf2.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32321651934609,
-                    27.681833530683008
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Calisthenics park, Outdoor Gym",
-                "title": "Calisthenics park, Outdoor Gym",
-                "about": "This is the location for Calisthenics park, Outdoor Gym.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049989/AG0ilSyLilpBb3svpsr-SEGh5AKDA3alTwmQcr0ZcUvZPGOeTwmOv05AyZEhbe3p7-BhBge8zNE8ItDtGDNVcIOcgh__z0aRxDfO4R-ZdlDrwDtNdTqOqNBKBy4ha3FzuueTu4ojVixQZw_w426-h240-k-no_itv6bn.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32277525891658,
-                    27.68190370401871
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Chemical Engineering Lab",
-                "title": "Chemical Engineering Lab",
-                "about": "This is the location for Chemical Engineering Lab.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050005/0e902a8de97b15838f5a_nmyxnh.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32328685569604,
-                    27.681784531262693
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Pulchowk Gym Hall",
-                "title": "Pulchowk Gym Hall",
-                "about": "Gym for students. Open from 9 AM to 6 PM.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050032/694ab492094fc3094b65_mkdxkp.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050049/AG0ilSz95SXqwaOong86nhfvpzTeyPKRYu8_NBUZaqTnUBGkJtXCLhdGYzG6PEY5dVy90bi0pHjlj13tY7dUADMnVe96yZtLpWgk3o6pLwPsP1hR8ke2edxEz0wn5fT3K8QBIo0hvTeu1ztLREg_w408-h408-k-no_bdk6do.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32348793354589,
-                    27.681514289414693
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Campus Canteen",
-                "title": "Campus Canteen",
-                "about": "Campus Canteen near ground.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050068/AG0ilSwo8muh3tm-AMAJIvVq-aY1OdkBHZQvDCIp39-MgqB7c7tH13rHgC04QXcD6q5xks6BN2MnCKxSt1oGpLZaRYvAuQwv2-wR955uGfXsasW8gYzz9yl31hpVngmTawz5yKhXNRprEw_w408-h306-k-no_sdk4kk.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32354899843239,
-                    27.68125093458133
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Pulchowk Music Club",
-                "title": "Pulchowk Music Club",
-                "about": "This is the location for Pulchowk Music Club.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050083/2e9d7a1264d3f9b4c79e_efwmt6.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32322012669403,
-                    27.6816237436294
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Pulchowk Girls Hostel",
-                "title": "Pulchowk Girls Hostel",
-                "about": "This is the location for Pulchowk Girls Hostel.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050099/f794fc7a2584769f73b0_g5ytoh.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32406172989181,
-                    27.68307449361768
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Pulchowk Teacher's Quarter",
-                "title": "Pulchowk Teacher's Quarter",
-                "about": "This is the location for Pulchowk Teacher's Quarter.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050129/a550dff0c0182f0ffc86_qug0ag.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050133/60d13632cc66f62a3b19_rzhb1s.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050138/c678e1ee0160da32f7f9_v7aktr.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050142/73566251e6eba1e89799_a2lan8.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.324714775784,
-                    27.683030311890363
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Staff Quarter",
-                "title": "Staff Quarter",
-                "about": "This is the location for Staff Quarter.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050181/1f358f5991fff22b80b0_zchj48.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050200/dedfab6cbf1539734115_qtzikl.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32411254835387,
-                    27.68249831633632
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Exam Control Office, IOE",
-                "title": "Exam Control Office, IOE",
-                "about": "This is the location for Exam Control Office, IOE.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32103017170311,
-                    27.681071855710286
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Om Stationery Store",
-                "title": "Om Stationery Store",
-                "about": "Place for printing and stationery items.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050221/554c87f7ae29a76ac688_sflb2c.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31984862292666,
-                    27.681843392083223
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "E Block",
-                "title": "E Block",
-                "about": "This is the location for E Block.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050234/d60a388b187d9058c42e_xtn0ug.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31839835594832,
-                    27.680604750704575
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "D Block",
-                "title": "D Block",
-                "about": "This is the location for D Block.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31998717938649,
-                    27.682486205309274
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "FSU Clinic",
-                "title": "FSU Clinic",
-                "about": "This is the location for FSU Clinic.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050259/2db16f144f106851348a_v1sjrv.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050264/3f3a8deb1cc70544f7d6_fi8zte.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3192558536719,
-                    27.681596676189187
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Badminton Court",
-                "title": "Badminton Court",
-                "about": "This is the location for Badminton Court.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050293/ec68fb8f53311cce59ef_ijvpxu.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31850453478063,
-                    27.68195320004999
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Central Material Testing Laboratory",
-                "title": "Central Material Testing Laboratory",
-                "about": "This is the location for Central Material Testing Laboratory.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050313/34a78b41ff36ed2ab6ab_aflrlh.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050331/7afddecdcaaa438aaecd_isqx06.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31862939361366,
-                    27.682452614638663
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Badminton Court",
-                "title": "Badminton Court",
-                "about": "This is the location for Badminton Court.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050347/85c94fb86c9e7227a4a4_hpg1uk.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.3187278522779,
-                    27.68049264560473
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Cave",
-                "title": "Cave",
-                "about": "There is a hidden treasure in this cave. Find it if you can!",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050368/5da52e1c7f0ddfb5ec47_sggzb4.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31794947683699,
-                    27.680847307223573
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Fountain",
-                "title": "Fountain",
-                "about": "This is the location for Fountain.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050389/614903d792e09af4e7ec_eo2yt5.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31887941661347,
-                    27.68235589280647
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Workshop Area",
-                "title": "Workshop Area",
-                "about": "This is the location for Workshop Area.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31950279900741,
-                    27.68124302750384
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "High Voltage Lab",
-                "title": "High Voltage Lab",
-                "about": "This is the location for High Voltage Lab.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050408/ff552f57d017829aaeff_fzokbl.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31934978609263,
-                    27.6809369819715
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Machine Workshop",
-                "title": "Machine Workshop",
-                "about": "This is the location for Machine Workshop.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050424/daf8166314cf9efad4e0_vpqozx.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31906537040504,
-                    27.681269249391733
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Water Vending Machine",
-                "title": "Water Vending Machine",
-                "about": "This is the location for Water Vending Machine.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050439/16467e87e31dcc004d85_z273if.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050453/2c97209de3cb21239fd0_juspua.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31950605845594,
-                    27.681725654706653
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Saheed Shukra Park",
-                "title": "Saheed Shukra Park",
-                "about": "This is the location for Saheed Shukra Park.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050471/0623811f4a239c8a54d6_cyxtok.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050484/0bd2e2ef072d41c86ed1_aetsxp.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050498/eb3272d3fc17b8f367ad_jh1wc6.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31886558617163,
-                    27.683175191488672
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Toilet",
-                "title": "Toilet",
-                "about": "This is the location for Toilet.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31981281262972,
-                    27.681596180356692
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Parking",
-                "title": "Parking",
-                "about": "This is the location for Parking.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050518/e971d631d17b9427c6f5_jprlit.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31866212805386,
-                    27.68219940335537
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Parking",
-                "title": "Parking",
-                "about": "This is the location for Parking.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31945116821976,
-                    27.681456757347078
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Water Tap",
-                "title": "Water Tap",
-                "about": "This is the location for Water Tap.",
-                "image": ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.31962706669509,
-                    27.68185543970918
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Badminton Court",
-                "title": "Badminton Court",
-                "about": "This is the location for Badminton Court.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050536/7e74755e5b96bb3f2777_siqeg7.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050552/a61519f628caddba150b_lfmacb.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32354890743278,
-                    27.68178302016902
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Garden Area",
-                "title": "Garden Area",
-                "about": "This is the location for Garden Area.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050569/d429a23f6d926673af5d_rmga24.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32366555744233,
-                    27.681687524653015
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Paraphet",
-                "title": "Paraphet",
-                "about": "This is the location for Paraphet.",
-                "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768048296/Paraphet_hb7pqt.jpg"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32149154665098,
-                    27.682909787818645
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Changing Room and Toilet",
-                "title": "Changing Room and Toilet",
-                "about": "This is the location for Changing Room and Toilet.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050586/dd1e491988cf51f5956d_ysuvqr.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050612/0d03baeb0edf6606ea42_a3ldqw.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32170295101872,
-                    27.682637979662985
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Parking",
-                "title": "Parking",
-                "about": "This is the location for Parking.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050635/a7ab0b6555a6787c3def_kcycy8.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32092042329674,
-                    27.68277752595847
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "description": "Suspension Bridge",
-                "title": "Suspension Bridge",
-                "about": "This is the location for Suspension Bridge.",
-                "image": [
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050651/01fe9ff9766ee15e9bfe_motbnb.jpg",
-                    "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050667/ac7b55922920924ceaab_gdsacq.jpg"
-                ]
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    85.32131159196621,
-                    27.682608301646283
-                ]
-            }
-        }
-    ]
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              180,
+              90
+            ],
+            [
+              -180,
+              90
+            ],
+            [
+              -180,
+              -90
+            ],
+            [
+              180,
+              -90
+            ],
+            [
+              180,
+              90
+            ]
+          ],
+          [
+            [
+              85.318662,
+              27.683404
+            ],
+            [
+              85.318586,
+              27.683142
+            ],
+            [
+              85.318494,
+              27.682972
+            ],
+            [
+              85.318208,
+              27.682623
+            ],
+            [
+              85.318099,
+              27.682482
+            ],
+            [
+              85.317856,
+              27.681998
+            ],
+            [
+              85.31767,
+              27.681511
+            ],
+            [
+              85.31755,
+              27.681249
+            ],
+            [
+              85.31741,
+              27.680886
+            ],
+            [
+              85.31725,
+              27.680475
+            ],
+            [
+              85.317834,
+              27.680253
+            ],
+            [
+              85.3193,
+              27.679745
+            ],
+            [
+              85.319659,
+              27.67962
+            ],
+            [
+              85.32049,
+              27.67934
+            ],
+            [
+              85.320518,
+              27.679834
+            ],
+            [
+              85.32052,
+              27.680234
+            ],
+            [
+              85.3205,
+              27.68047
+            ],
+            [
+              85.32044,
+              27.68072
+            ],
+            [
+              85.3204,
+              27.68084
+            ],
+            [
+              85.32028,
+              27.68109
+            ],
+            [
+              85.32007,
+              27.681474
+            ],
+            [
+              85.320279,
+              27.681363
+            ],
+            [
+              85.320488,
+              27.681143
+            ],
+            [
+              85.320845,
+              27.680882
+            ],
+            [
+              85.321064,
+              27.680698
+            ],
+            [
+              85.32141043062103,
+              27.68046861858221
+            ],
+            [
+              85.32158075511848,
+              27.680339024754886
+            ],
+            [
+              85.3216959323347,
+              27.68080546490083
+            ],
+            [
+              85.32171187166813,
+              27.680929243396847
+            ],
+            [
+              85.3217755942934,
+              27.681056101884323
+            ],
+            [
+              85.3218271531162,
+              27.681133192467257
+            ],
+            [
+              85.32190398752391,
+              27.681248620262267
+            ],
+            [
+              85.32197583607979,
+              27.681399804060888
+            ],
+            [
+              85.32200943677253,
+              27.681460011252838
+            ],
+            [
+              85.32212555074943,
+              27.68171678713253
+            ],
+            [
+              85.32193218480609,
+              27.682022019495875
+            ],
+            [
+              85.32189029843039,
+              27.682126476203152
+            ],
+            [
+              85.3220394544465,
+              27.68209802746557
+            ],
+            [
+              85.32212514507796,
+              27.682013563751184
+            ],
+            [
+              85.32220433794242,
+              27.68193808366628
+            ],
+            [
+              85.32228447637465,
+              27.681860339074944
+            ],
+            [
+              85.32240989771952,
+              27.681733462152607
+            ],
+            [
+              85.32260862182716,
+              27.68162468224655
+            ],
+            [
+              85.32271285770986,
+              27.68156821143269
+            ],
+            [
+              85.32301629905987,
+              27.68140928648934
+            ],
+            [
+              85.32307091249493,
+              27.681398978998843
+            ],
+            [
+              85.32316415342552,
+              27.681381473736906
+            ],
+            [
+              85.32320066964326,
+              27.681374322083087
+            ],
+            [
+              85.32324098206442,
+              27.68136616877058
+            ],
+            [
+              85.32325530728235,
+              27.68135668241959
+            ],
+            [
+              85.323286681316,
+              27.681330811892124
+            ],
+            [
+              85.32333726234754,
+              27.681287126574233
+            ],
+            [
+              85.32343238084388,
+              27.68120910502732
+            ],
+            [
+              85.32349905753318,
+              27.68115487423742
+            ],
+            [
+              85.32354005745651,
+              27.681122153392906
+            ],
+            [
+              85.32356071082768,
+              27.681105870159428
+            ],
+            [
+              85.32358958111234,
+              27.681082863857597
+            ],
+            [
+              85.32361430785659,
+              27.68106268184289
+            ],
+            [
+              85.32365132356483,
+              27.681040842627866
+            ],
+            [
+              85.32365473298523,
+              27.681057952060968
+            ],
+            [
+              85.32373955784516,
+              27.681048302717315
+            ],
+            [
+              85.32373553453135,
+              27.681023659775676
+            ],
+            [
+              85.3237660446585,
+              27.6810169794593
+            ],
+            [
+              85.32381845731743,
+              27.681005787717126
+            ],
+            [
+              85.32387265612658,
+              27.681004416413515
+            ],
+            [
+              85.3239096122108,
+              27.68100388425178
+            ],
+            [
+              85.32394476381762,
+              27.68100341975618
+            ],
+            [
+              85.32404519229635,
+              27.681001551403625
+            ],
+            [
+              85.32408844291638,
+              27.681000809146354
+            ],
+            [
+              85.32412081911758,
+              27.6810113954745
+            ],
+            [
+              85.324145925832,
+              27.681018558870065
+            ],
+            [
+              85.32433033111215,
+              27.681076413567894
+            ],
+            [
+              85.3245607844371,
+              27.68110981120438
+            ],
+            [
+              85.32456552702763,
+              27.681106000043613
+            ],
+            [
+              85.32463688938236,
+              27.68106796049085
+            ],
+            [
+              85.32476730103667,
+              27.681183341917475
+            ],
+            [
+              85.32476788888573,
+              27.681184090731875
+            ],
+            [
+              85.32500949072664,
+              27.681521713948413
+            ],
+            [
+              85.32512696504114,
+              27.681618478979004
+            ],
+            [
+              85.32524418459991,
+              27.681710765091893
+            ],
+            [
+              85.32528085862509,
+              27.68174269040547
+            ],
+            [
+              85.32533398697973,
+              27.681858908967996
+            ],
+            [
+              85.32538293317805,
+              27.681970002128892
+            ],
+            [
+              85.32546873537342,
+              27.682152715085834
+            ],
+            [
+              85.3255582800146,
+              27.68236444592155
+            ],
+            [
+              85.32562876627674,
+              27.682706339093997
+            ],
+            [
+              85.32566022789916,
+              27.68278138089947
+            ],
+            [
+              85.32569544011602,
+              27.682862131240228
+            ],
+            [
+              85.32554144525528,
+              27.68305471846611
+            ],
+            [
+              85.32543332695093,
+              27.683077418303455
+            ],
+            [
+              85.32536875453127,
+              27.683096380765505
+            ],
+            [
+              85.32526907602693,
+              27.683124725994475
+            ],
+            [
+              85.32518510207302,
+              27.683165031167732
+            ],
+            [
+              85.3250919709011,
+              27.683209984640087
+            ],
+            [
+              85.32500840669348,
+              27.683268032702188
+            ],
+            [
+              85.32493418660607,
+              27.68331585302279
+            ],
+            [
+              85.32486087946751,
+              27.683360297332683
+            ],
+            [
+              85.32470187775505,
+              27.683443630669984
+            ],
+            [
+              85.32459278428064,
+              27.683496198137703
+            ],
+            [
+              85.32454103998452,
+              27.68351598124258
+            ],
+            [
+              85.32448571963278,
+              27.68353781654197
+            ],
+            [
+              85.32444345461147,
+              27.683546895421415
+            ],
+            [
+              85.3244429659369,
+              27.68354707765542
+            ],
+            [
+              85.32440295555449,
+              27.68354729064788
+            ],
+            [
+              85.3242338285512,
+              27.68347097151164
+            ],
+            [
+              85.32419072328452,
+              27.683456725909537
+            ],
+            [
+              85.32410389401514,
+              27.683481016487235
+            ],
+            [
+              85.32389094109294,
+              27.683578936294552
+            ],
+            [
+              85.32369220497782,
+              27.6836690282682
+            ],
+            [
+              85.32347749338152,
+              27.68373344069812
+            ],
+            [
+              85.32330735551096,
+              27.683783102533653
+            ],
+            [
+              85.32319253116441,
+              27.683826480939047
+            ],
+            [
+              85.32311010386798,
+              27.683994358605304
+            ],
+            [
+              85.32302563092469,
+              27.68416390577849
+            ],
+            [
+              85.32293462946342,
+              27.684350765226753
+            ],
+            [
+              85.32293523998902,
+              27.684350459184984
+            ],
+            [
+              85.32266060290601,
+              27.684393403177523
+            ],
+            [
+              85.32254081214336,
+              27.684438821074664
+            ],
+            [
+              85.3224259752397,
+              27.684482547918805
+            ],
+            [
+              85.32236796812157,
+              27.684417373203942
+            ],
+            [
+              85.32231458565695,
+              27.68435657615977
+            ],
+            [
+              85.32225909063806,
+              27.684294795262446
+            ],
+            [
+              85.32222184905424,
+              27.684246710044235
+            ],
+            [
+              85.32216250434288,
+              27.684171033475735
+            ],
+            [
+              85.32212170577884,
+              27.684117035454847
+            ],
+            [
+              85.32206919336426,
+              27.684049544098883
+            ],
+            [
+              85.32201763446358,
+              27.683984317067754
+            ],
+            [
+              85.32193592714765,
+              27.683989326832204
+            ],
+            [
+              85.32181400655094,
+              27.684055270292433
+            ],
+            [
+              85.32169627597494,
+              27.684088372185116
+            ],
+            [
+              85.321617,
+              27.684043
+            ],
+            [
+              85.32156245841827,
+              27.684065051017114
+            ],
+            [
+              85.32138549238385,
+              27.68413625148351
+            ],
+            [
+              85.321338,
+              27.684163
+            ],
+            [
+              85.321133,
+              27.684226
+            ],
+            [
+              85.320968,
+              27.684239
+            ],
+            [
+              85.320864,
+              27.68424
+            ],
+            [
+              85.32083,
+              27.684154
+            ],
+            [
+              85.320751,
+              27.684157
+            ],
+            [
+              85.320679,
+              27.68404
+            ],
+            [
+              85.32063950342518,
+              27.68403466188147
+            ],
+            [
+              85.3205759530577,
+              27.68394551821183
+            ],
+            [
+              85.32061284688234,
+              27.68380823013858
+            ],
+            [
+              85.32032267674288,
+              27.6836561670234
+            ],
+            [
+              85.320164,
+              27.683601
+            ],
+            [
+              85.31975845719683,
+              27.68345665186456
+            ],
+            [
+              85.319416,
+              27.683214
+            ],
+            [
+              85.31918,
+              27.683102
+            ],
+            [
+              85.319062,
+              27.68305
+            ],
+            [
+              85.318952,
+              27.683223
+            ],
+            [
+              85.31887887895806,
+              27.683340888872877
+            ],
+            [
+              85.31883142100685,
+              27.683419999677255
+            ],
+            [
+              85.31878882209372,
+              27.683476569583746
+            ],
+            [
+              85.31868067765026,
+              27.683470262811667
+            ],
+            [
+              85.318662,
+              27.683404
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "ICTC Building",
+        "about": "ICTC supports campus information technology services, networking, and digital infrastructure used for academic, administrative, and laboratory computing needs.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050705/AG0ilSxop441mNoVp1q2alOx39U1Xc1ujV2JPZ-XDIpIAX2qqMyE0kie8i4qzm31JWbIIJrIsSHveV5oD3gmrCOnCzucQkovceqHP-V7-Voy7L3pw0w5drA4ILOU47XBQvl5KUqDtW_y_s0_x2lt8m.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050722/photo5_vghj6m.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31914514155119,
+          27.68224422611749
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Campus Mess",
+        "about": "Campus Mess provides affordable daily meals and basic dining services for students, staff, and residents within the Pulchowk premises.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768048831/campus_mess_kcyirm.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31953172446174,
+          27.68100688137129
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Dean Office",
+        "about": "The Dean Office is the central administrative office of IOE, overseeing academic policy, coordination, and institute-level governance functions.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768048868/c29c75aabe8395ef3972_vkwpsh.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768048879/ab6b8746f0397c5e6bd1_ltezo3.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31860772765805,
+          27.681033526909417
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Department of Architecture",
+        "about": "This department runs architecture and planning programs, with design studios and coursework that blend technical, social, and environmental perspectives.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768048987/94c8a6cb627b4d29415e_hfo4kw.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31831152476735,
+          27.68044934237453
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "ASA Office",
+        "about": "ASA Office serves as a student coordination space for architecture-related activities, meetings, event planning, and academic collaboration.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31840952112645,
+          27.680433693360456
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "MSC Hostel",
+        "about": "MSc Hostel provides residential accommodation for postgraduate students enrolled in graduate-level engineering and research programs at the campus.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.319017191439,
+          27.680091477233432
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Hydro Lab",
+        "about": "Hydro Lab is a hydropower-focused research and testing facility within IOE premises, supporting hydraulic studies, consultancy, and engineering services.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31942804361722,
+          27.68018924241545
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Department of Roads",
+        "about": "This office represents Nepal?s Department of Roads unit near campus, associated with transport infrastructure coordination and technical engagement.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31987423799086,
+          27.680752787168743
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Locus Office",
+        "about": "Locus Office supports the student-led LOCUS technology festival team for planning events, projects, competitions, and coordination activities.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049031/16c6f4436ab30f8770c5_hc7chy.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3185504866151,
+          27.68139565322535
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Department of Electrical, Electronics and Computer Engineering",
+        "about": "This department delivers electronics, communication, and computer engineering education with laboratories, projects, and research-driven undergraduate and graduate learning.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049050/df60e34d608189b1eec0_xelok8.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049063/577b7492ac230083e987_kmvltq.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31871288839,
+          27.68181692613163
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Robotics Club",
+        "about": "Robotics Club is a student innovation space known for robotics projects and ABU Robocon participation, with open collaborative technical activities.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3190521926656,
+          27.681470604000538
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Continuing Education Center",
+        "about": "The Continuing Education Center hosts training, professional development, and short technical programs for students, graduates, and working professionals.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049083/888d37bdf1f73fdf0d3d_syxckl.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049101/38b5b50bb2346a286a8d_fu0y1i.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049114/a45729c1dd74b49198dc_djp5qp.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31895314397525,
+          27.681494777843028
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Pulchowk Library",
+        "about": "Pulchowk Library maintains a large engineering collection and study spaces, supporting coursework, thesis work, reference access, and research activities.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049129/e65054690fa0e14b565a_uyeekd.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049140/4a8f875e3d20f0af9263_vv4mj6.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049152/2e8246580d6eb8f4b325_uiwicr.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3194349446735,
+          27.681579366803874
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Electrical Club",
+        "about": "Electrical Club is a student-led platform from the electrical department that runs workshops, projects, and peer learning activities.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049166/a3040e599637be7f7c17_mhsyhu.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3182927681815,
+          27.682291135732115
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Block C",
+        "about": "Block C is an academic building zone used for classrooms, departmental rooms, and routine teaching activities on campus.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31833975128347,
+          27.682140047755496
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "ICT Building",
+        "about": "ICT Building houses computing-related classes, labs, and digital facilities that support software, networking, and technology-focused academic work.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049181/554d81fe37e15e94fc60_wwopgc.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049194/499c26c422739e1565e4_htyqx1.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31910927158208,
+          27.68172332246239
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Embark College",
+        "about": "Embark College area is used for affiliated academic activities and student programs operating within the broader campus environment.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049211/AG0ilSzFjaGXicBwAkWEbh1CGVQepFdLr9-BmMLIr4A1iDp3lpvRL7ab7Z2MP565CX_FE9cFOLdLuIbewX23FpODCpl63DUbp_J7POn7h5A9SFbKzSI_tkfPJxClo_js5dFfvzOsEK41Kg_s0_sf8hma.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049223/embark_highview_eybcwf.webp"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31888939994957,
+          27.682712891619232
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Nabil Bank ATM",
+        "about": "Nabil Bank ATM provides on-campus cash withdrawal and basic banking convenience for students, staff, and visitors.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049241/AG0ilSzkyfUqvlmdNqUbRRRsoefDSQoXbAC4vnzWKCi5GMP0XcF4nNybZ_hqhJTY8gci8M4jzcVjqOlOWgYdk5FLfieqAu02N6OG7ysRgMyoBAH4qeBaRg1VVcymd_M3o7EsyBIl29ac_s0_ooafgc.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31853678585821,
+          27.682829607001196
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Siddhartha Bank ATM",
+        "about": "Siddhartha Bank ATM provides quick access to cash withdrawal and standard ATM banking services inside the campus area.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049255/AG0ilSwpHMU3GAn4qs9oHsOyx5EIMXLmlvN4VL9Cxuq4_q55349bhqqjdLmZuB2doK6ALbjAMpHz6TUehQW90qwfUbQdECmSIoWbaM4C5ol8pHaQ9IROzZUWlFUZpTL3DxUxvr4K2P67_s0_bn8duo.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31945726206425,
+          27.68210633185008
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Heavy Lab Block",
+        "about": "Heavy Lab Block accommodates large-scale engineering laboratories and practical sessions involving machinery, equipment handling, and applied experiments.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049270/575f003d6aa36f80d6a3_y7at3h.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32044738817302,
+          27.68209387245163
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Heavy Lab",
+        "about": "Heavy Lab supports hands-on mechanical and industrial experiments with heavier equipment used in training, testing, and practical coursework.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049283/b6862e30c9e529c84325_nvv6zp.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32050399856865,
+          27.682214022253916
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Hydraulic Lab",
+        "about": "Hydraulic Lab is used for fluid mechanics and hydraulic engineering experiments, model testing, and practical demonstrations for students.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049302/dc83c93080d20e386e10_aaptcy.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049317/9f043c5d254326482655_qlo7qp.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049330/e63ebebf30681d10c5c7_zghcqo.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049344/d1ccc4673921579ffd3f_x8npuf.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3203413798231,
+          27.68216722059954
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Parking",
+        "about": "This parking area is designated for campus vehicles and helps reduce traffic congestion around nearby academic buildings.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049360/7631a9eed0f76db484bc_rwjwme.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31992845601593,
+          27.68214769544541
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Helicopter Parking",
+        "about": "Helicopter Parking functions as the campus helipad area and an open emergency-access zone near surrounding facilities.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049372/aa36557e54f04fd4c2b7_twalak.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31969443930882,
+          27.68228789473575
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "PI Chautari",
+        "about": "PI Chautari is a common student gathering and discussion spot used for breaks, informal meetings, and peer interaction.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049395/c130c782c05a00f00dc6_vlzdhc.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049409/afcf404c3a65642de799_njzrvb.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31987844126758,
+          27.68267661712244
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Department of Mechanical and Aerospace Engineering",
+        "about": "This department offers mechanical and aerospace-related education, laboratories, and research activities focused on design, energy, and manufacturing systems.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049427/AG0ilSy57X7F1U1HldC9-kK8aozkm4SJAm_RIGy4R09eliY36RFG3Fx_qpMvfoCu-v7NXrfiCI5jctGss-YJZt2cdlgY0h0PhXP4Gz8RieLsmywf3YN5c-bitDv8sW3hGM2ERsuXiBli_s0_o18oiz.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049439/AG0ilSxMUqAflGq52AKLFxjHukIxgaMvYoLvTPBSEKmfxmOG0ywjmMnPDJpOvigCUWRwAy8g13fLFF5BIf0Z9av5lrEpKqFcEEnoKedS-8tY9A51P7P9HVLxWlQcDpvNg_nUhqOqHLReIA_s0_tadp7i.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31986930605723,
+          27.682462244093173
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Saraswati Mandir",
+        "about": "Saraswati Mandir is a small temple space where students and staff visit for worship, reflection, and cultural observances.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049454/AG0ilSx7wypYKOcn127tTAnZrnvvtRNp-PWjw9vQ2prmBf2ywpQDf3_oItdgezFNmoy2tvYChS-FkUZm6wm-T2FRgzPl-W2tUTUWP9J1SzNYHKAuy_qRjCmUDabINl66ebJliAFMzeQG8Q_s4000_txpcaw.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049468/0e13fedc81f23c13412d_f2fr08.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049481/75f287835a439c22eeee_gvqxlq.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31939527713587,
+          27.68256455316562
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Department of Civil Engineering",
+        "about": "The Civil Engineering department is a major and long-established unit offering undergraduate, graduate, and research programs in core civil fields.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049499/AG0ilSx9OmbBii3by02nQKjvSrKXTEPbO1acKQNk4tF6WfgU8Ojn0CDJ4TYcefJoExhDmFlrHKXcZ3KsozQZspYDPy2Hs1ZthxhrIA42zp2_ExFNqI1B3zp-K3nrKYB4EEEraBKNHHDi_w408-h544-k-no_riz3ve.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31936398409704,
+          27.682968475303554
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "F Block",
+        "about": "F Block is a multi-use academic block supporting classrooms, department spaces, and regular teaching operations.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049516/AG0ilSx8HiL_SL_epEpzepLpOspwuOSeOgUWqz3MEfc6cBvMTCCAQhYWrACkzrVwKz5aXiyzzieSd1gHR2H4GyeRHbouhWmyOIrpoCeaYxBlknlC0UiJxRr6DPcr75BMzHi__QjSJN--UQ_s0_qazxzp.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049538/AG0ilSx9OmbBii3by02nQKjvSrKXTEPbO1acKQNk4tF6WfgU8Ojn0CDJ4TYcefJoExhDmFlrHKXcZ3KsozQZspYDPy2Hs1ZthxhrIA42zp2_ExFNqI1B3zp-K3nrKYB4EEEraBKNHHDi_w408-h544-k-no_x10szp.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049570/AG0ilSwULJ3WSdju8qjjm3v9oxVSorgq1f0DyblyQo_hIao58Qdob0Jqd-7yV2ULqza5XDXZgZYcygafI5GZPJKMJad-q9FUgdBm6q3goYGXoJLl9FwlKZX5x8haWr1Pb8bWGl3yd6IiC5_Xrsc_s0_yc29cv.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3196061234986,
+          27.682788668714352
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Department of Mechanical and Aerospace Engineering",
+        "about": "This second mechanical and aerospace location includes additional offices, classrooms, and laboratory support areas for departmental activities.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049584/9ba01ed76debb8515be6_myow9q.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049597/36cfb68a7870538d650e_agszuw.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32078190861336,
+          27.682393906140106
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "The Helm of IOE Pulchowk",
+        "about": "The Helm is a student-led collaborative space for technical initiatives, mentoring, and cross-disciplinary project coordination within campus.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049615/d504e434b4a7eeb3a4ad_xzpigq.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32083316993328,
+          27.682629953546424
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "FSU Office",
+        "about": "FSU Office serves the Free Students? Union for student representation, coordination, welfare issues, and campus-level communication.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049635/fcb9107e741cc93e9c07_rxqzry.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32075560082757,
+          27.682847709268373
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "NTBNS",
+        "about": "NTBNS office hosts the student organization supporting Terai-origin students through educational, social, and cultural activities.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049651/4196f6c89da06431860a_mppgqk.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32070194666937,
+          27.68301615325798
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Pulchowk Girls",
+        "about": "Pulchowk Girls is a women-focused student space used for coordination, support activities, and participation in campus programs.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049666/4ca588aa5c97d0b6ca7d_dfjnbs.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3206748356111,
+          27.682918543955225
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Department of Applied Sciences and Chemical Engineering",
+        "about": "This department teaches foundational sciences for many BE programs and runs chemical engineering and advanced graduate programs.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3203848726879,
+          27.682935941133437
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Department of Applied Sciences and chemical engineering",
+        "about": "This section of the applied sciences and chemical engineering department supports classes, labs, and faculty offices for coursework and research.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049683/AG0ilSwiodqC9QVG6IOgmrdicUur07onisM3G2ONp51Z1JnbislKt_rhctnI4c8SPgBtzaYwIXvQPGuB-bRhA9UN-u3UpyR4ebCf9DnJG090u37CNDM59E1p4gpSKRUcG_pm0wCJ1AuulF5idNw_w408-h544-k-no_vom8mm.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3200449911119,
+          27.683220527000756
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "G Block",
+        "about": "G Block is an academic building area used for classes, departmental rooms, and student academic activities.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32018128025857,
+          27.68310430877834
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "CIDS",
+        "about": "CIDS is a student organization office used for meetings, coordination, and community-driven academic or social initiatives.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049703/AG0ilSxiPpIErbbczjxGn4AgjO8A3DsLcJT5j7nOLCBXthvKWatBlUHcshgoADqNaH6SGDt7OmBwn5YQUxReugXpJRs74kv38gT-QU5_u2jkQXF3lmdNiRhI-FlEuWfY0fwYUDU8YCma_w408-h306-k-no_cdo2d4.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31990266456802,
+          27.683010663794747
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Department of Science and Humanities",
+        "about": "The Science and Humanities department provides foundational mathematics, physics, chemistry, and allied courses for engineering students.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32054395296416,
+          27.683041212054775
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Main Entrance",
+        "about": "Main Entrance is the primary vehicle and pedestrian access point for entering and exiting Pulchowk Campus.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049719/662d59819c48fa131738_zq7cbz.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049732/94047dc912b8e68b170c_d9vcbs.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3177517448579,
+          27.681366883564905
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "First Entrance",
+        "about": "First Entrance is a secondary campus gate that provides convenient access to nearby blocks and internal pathways.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3194594635064,
+          27.68207456812752
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Second Entrance",
+        "about": "Second Entrance provides direct access toward D, F, and G block zones and adjacent internal roads.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049748/4e94d012793008140001_dqjfw1.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31959562985224,
+          27.682147085370673
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Hydropower Testing Lab",
+        "about": "Hydropower Testing Lab supports hydropower-related experiments, model studies, and performance testing for academic and research purposes.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049771/AG0ilSx_lW3pmcJQSQxYloepyS7ce1ZOe6gbXZYbyh2D1DV56BSFoEuRbBFhtoB_y5ZSlSKtVVkZo5nw9il0j1h77L4o5eJiC6M_VteSYoE13Q5ecy32EzYpSDrKs597VhVP9MMFWNHB_w408-h240-k-no-pi-20-ya261_kt0un8.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32052846482077,
+          27.68346942813116
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "SEDS Pulchowk",
+        "about": "SEDS Pulchowk is a student space-technology organization focused on outreach, hands-on projects, and collaborative learning in space sciences.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049784/AG0ilSy0v82-kn_aT3e_5AeNTk43nGxebrataZXO-IcmCEc2IextjvAeRSoSjMEUveLyBiWVZNZU2WarJTfIMz_vAjFhrrrO7VaPFYZD5a-Ol0xX6BoE0s2fCXXbyodLgRcVmdxXTQulvWRgVso3_s0_bmt59c.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32041220727473,
+          27.683617545231883
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Center for Energy Studies",
+        "about": "Center for Energy Studies conducts renewable energy research, training, and policy-oriented technical programs under IOE.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049802/AG0ilSwlZ-oLvi9Ee2nfjBO8SjsTkPzxP1LM-GkCm03h4h90GE85MDU84n7BScJzFcoU000-GzE5yj6EUtdVRnQGK_1zS5LKi50OTmE30s8EEx6PBwSDPE0nTSS0ujThHJFt-NMDd8Ex6w_w408-h306-k-no_biq5ft.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3208610299663,
+          27.68321662681744
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Pulchowk Cricket Ground",
+        "about": "Pulchowk Cricket Ground is the main open field for cricket practice, inter-batch matches, and student sports events.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049816/0dfccd73292c9a01934a_g5o2h3.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32215173345384,
+          27.683328511076553
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Pulchowk Football Ground",
+        "about": "Pulchowk Football Ground is used for football training, friendly matches, and larger campus sporting activities.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049831/d2aa167241903a0edf2d_vtxisq.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.322933342042,
+          27.682630231202694
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Pulchowk Volleyball Court",
+        "about": "This volleyball court supports regular student practice sessions, recreational games, and campus-level sports competitions.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049845/c6f41e67e20f9e8f42af_jpdow5.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3232165987614,
+          27.682254992538773
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Cricket Practice Pitch",
+        "about": "Cricket Practice Pitch is a focused training strip for batting, bowling drills, and skill development sessions.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049860/0b64cb1743860cf5df53_w7hlsk.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32345024929077,
+          27.682835875995877
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Basketball Court",
+        "about": "Basketball Court is a dedicated space for daily practice, recreational play, and student tournament games.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049873/AG0ilSzPZBZKss36UihBeCeuwDUGMLDXVxSfDeQ61MtFiI32mWC7_MGbkzHhVY3btJV-N7dxnMIuzf8EYOPTxRURlogdsRGoVV0cCKeLN8e1jtibLOmKKqBlseQXtLDeBtRp6Gjc9cC5_w408-h544-k-no_yelhtq.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32258776220266,
+          27.681816863769555
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Block A Pulchowk Boys Hostel",
+        "about": "Block A of the boys? hostel provides student accommodation and shared residential facilities within the campus hostel complex.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049889/225b30ab0b72debe11eb_ithz36.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049901/dc332493009ca6201cfa_lqikda.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3239283186274,
+          27.682188311416212
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Block B Pulchowk Boys Hostel",
+        "about": "Block B of the boys? hostel provides residential rooms and common facilities for undergraduate students living on campus.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049916/225b30ab0b72debe11eb_qp044p.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049929/dc332493009ca6201cfa_c9jbb9.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32390377692212,
+          27.68184284511355
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Block C Pulchowk Boys Hostel",
+        "about": "Block C of the boys? hostel provides additional student housing and shared services within the Pulchowk hostel area.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049946/225b30ab0b72debe11eb_awbvzo.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049959/dc332493009ca6201cfa_g9rqul.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32390894588298,
+          27.681485585500837
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Niraula Stores",
+        "about": "Niraula Stores is a convenience shop point for everyday student essentials, snacks, and quick purchases near hostel and class areas.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049975/AG0ilSzRDCmU9brtc5xB_89V-xUzlvopFiyHb9gRwTMS5w0Oozmr8fnbprHXOukQhXuuULXHfhmv1PVF9ge2O89iiUtZI_SR2DWb0RPJNGIQQt1qQi5-gq3YJmkRlUCqTXeYczQ72pcK_w426-h240-k-no_h1pzf2.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32321651934609,
+          27.681833530683008
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Calisthenics park, Outdoor Gym",
+        "about": "This outdoor fitness zone supports bodyweight training, calisthenics routines, and general physical exercise for students.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768049989/AG0ilSyLilpBb3svpsr-SEGh5AKDA3alTwmQcr0ZcUvZPGOeTwmOv05AyZEhbe3p7-BhBge8zNE8ItDtGDNVcIOcgh__z0aRxDfO4R-ZdlDrwDtNdTqOqNBKBy4ha3FzuueTu4ojVixQZw_w426-h240-k-no_itv6bn.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32277525891658,
+          27.68190370401871
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Chemical Engineering Lab",
+        "about": "Chemical Engineering Lab supports experiments in process, reaction, and material-related topics aligned with chemical engineering coursework.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050005/0e902a8de97b15838f5a_nmyxnh.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32328685569604,
+          27.681784531262693
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Pulchowk Gym Hall",
+        "about": "Pulchowk Gym Hall is an indoor fitness facility used for strength training, exercise sessions, and student wellness activities.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050032/694ab492094fc3094b65_mkdxkp.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050049/AG0ilSz95SXqwaOong86nhfvpzTeyPKRYu8_NBUZaqTnUBGkJtXCLhdGYzG6PEY5dVy90bi0pHjlj13tY7dUADMnVe96yZtLpWgk3o6pLwPsP1hR8ke2edxEz0wn5fT3K8QBIo0hvTeu1ztLREg_w408-h408-k-no_bdk6do.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32348793354589,
+          27.681514289414693
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Campus Canteen",
+        "about": "Campus Canteen offers quick meals, snacks, and beverages, and serves as a common social break point for students.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050068/AG0ilSwo8muh3tm-AMAJIvVq-aY1OdkBHZQvDCIp39-MgqB7c7tH13rHgC04QXcD6q5xks6BN2MnCKxSt1oGpLZaRYvAuQwv2-wR955uGfXsasW8gYzz9yl31hpVngmTawz5yKhXNRprEw_w408-h306-k-no_sdk4kk.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32354899843239,
+          27.68125093458133
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Pulchowk Music Club",
+        "about": "Pulchowk Music Club is a creative student space for musical practice, performances, and collaborative cultural events.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050083/2e9d7a1264d3f9b4c79e_efwmt6.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32322012669403,
+          27.6816237436294
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Pulchowk Girls Hostel",
+        "about": "Pulchowk Girls Hostel provides residential accommodation and essential living facilities for female students on campus.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050099/f794fc7a2584769f73b0_g5ytoh.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32406172989181,
+          27.68307449361768
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Pulchowk Teacher's Quarter",
+        "about": "Teacher?s Quarter is a residential area allocated for faculty accommodation within or near the campus premises.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050129/a550dff0c0182f0ffc86_qug0ag.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050133/60d13632cc66f62a3b19_rzhb1s.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050138/c678e1ee0160da32f7f9_v7aktr.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050142/73566251e6eba1e89799_a2lan8.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.324714775784,
+          27.683030311890363
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Staff Quarter",
+        "about": "Staff Quarter provides housing facilities for campus administrative and support staff members.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050181/1f358f5991fff22b80b0_zchj48.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050200/dedfab6cbf1539734115_qtzikl.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32411254835387,
+          27.68249831633632
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Exam Control Office, IOE",
+        "about": "Exam Control Office manages examination scheduling, records, results coordination, and related academic evaluation processes for IOE programs.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32103017170311,
+          27.681071855710286
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Om Stationery Store",
+        "about": "Om Stationery Store provides printing, photocopying, stationery supplies, and small academic essentials for day-to-day student needs.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050221/554c87f7ae29a76ac688_sflb2c.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31984862292666,
+          27.681843392083223
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "E Block",
+        "about": "E Block is an academic block used for classes, laboratories, and departmental academic operations.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050234/d60a388b187d9058c42e_xtn0ug.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31839835594832,
+          27.680604750704575
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "D Block",
+        "about": "D Block is a campus academic block supporting classroom teaching, practical sessions, and faculty offices.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31998717938649,
+          27.682486205309274
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "FSU Clinic",
+        "about": "FSU Clinic provides basic first-aid and primary health support for students and campus community members.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050259/2db16f144f106851348a_v1sjrv.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050264/3f3a8deb1cc70544f7d6_fi8zte.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3192558536719,
+          27.681596676189187
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Badminton Court",
+        "about": "This badminton court is used for regular practice, casual play, and student sports meet activities.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050293/ec68fb8f53311cce59ef_ijvpxu.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31850453478063,
+          27.68195320004999
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Central Material Testing Laboratory",
+        "about": "Central Material Testing Laboratory supports testing of construction materials and related quality assessment for academic and professional work.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050313/34a78b41ff36ed2ab6ab_aflrlh.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050331/7afddecdcaaa438aaecd_isqx06.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31862939361366,
+          27.682452614638663
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Badminton Court",
+        "about": "This additional badminton court helps distribute training and recreational demand during busy sports hours.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050347/85c94fb86c9e7227a4a4_hpg1uk.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.3187278522779,
+          27.68049264560473
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Cave",
+        "about": "Cave is a small landmarked zone and informal campus point commonly used for orientation and nearby meetups.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050368/5da52e1c7f0ddfb5ec47_sggzb4.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31794947683699,
+          27.680847307223573
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Fountain",
+        "about": "Fountain is a central landscape feature that functions as a visual landmark and resting point within campus pathways.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050389/614903d792e09af4e7ec_eo2yt5.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31887941661347,
+          27.68235589280647
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Workshop Area",
+        "about": "Workshop Area hosts practical fabrication, machining, and hands-on engineering sessions linked to laboratory and project work.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31950279900741,
+          27.68124302750384
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "High Voltage Lab",
+        "about": "High Voltage Lab supports experiments and demonstrations related to high-voltage systems, insulation, safety, and power engineering studies.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050408/ff552f57d017829aaeff_fzokbl.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31934978609263,
+          27.6809369819715
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Machine Workshop",
+        "about": "Machine Workshop provides machining and manufacturing practice using tools and equipment for mechanical training and prototyping.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050424/daf8166314cf9efad4e0_vpqozx.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31906537040504,
+          27.681269249391733
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Water Vending Machine",
+        "about": "Water Vending Machine provides accessible drinking water refill service for students, staff, and visitors.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050439/16467e87e31dcc004d85_z273if.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050453/2c97209de3cb21239fd0_juspua.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31950605845594,
+          27.681725654706653
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Saheed Shukra Park",
+        "about": "Saheed Shukra Park is a landscaped open area used for relaxation, short breaks, and informal student gatherings.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050471/0623811f4a239c8a54d6_cyxtok.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050484/0bd2e2ef072d41c86ed1_aetsxp.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050498/eb3272d3fc17b8f367ad_jh1wc6.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31886558617163,
+          27.683175191488672
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Toilet",
+        "about": "This restroom block provides essential sanitation facilities for students, staff, and visitors in this campus zone.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31981281262972,
+          27.681596180356692
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Parking",
+        "about": "This parking zone serves nearby academic and service blocks, supporting two-wheel and four-wheel vehicle parking.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050518/e971d631d17b9427c6f5_jprlit.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31866212805386,
+          27.68219940335537
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Parking",
+        "about": "This parking area provides overflow vehicle space during class hours and larger campus events.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31945116821976,
+          27.681456757347078
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Water Tap",
+        "about": "Water Tap is a utility point for quick access to non-vended drinking or washing water.",
+        "image": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.31962706669509,
+          27.68185543970918
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Badminton Court",
+        "about": "This court supports additional badminton sessions and helps reduce crowding during peak sports periods.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050536/7e74755e5b96bb3f2777_siqeg7.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050552/a61519f628caddba150b_lfmacb.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32354890743278,
+          27.68178302016902
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Garden Area",
+        "about": "Garden Area is a green open space used for walking, short breaks, and informal student interaction.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050569/d429a23f6d926673af5d_rmga24.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32366555744233,
+          27.681687524653015
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Paraphet",
+        "about": "Paraphet is a commonly referenced edge-side sitting area used as a casual meetup and waiting point.",
+        "image": "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768048296/Paraphet_hb7pqt.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32149154665098,
+          27.682909787818645
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Changing Room and Toilet",
+        "about": "This facility provides changing and restroom services for users of nearby sports grounds and activity areas.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050586/dd1e491988cf51f5956d_ysuvqr.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050612/0d03baeb0edf6606ea42_a3ldqw.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32170295101872,
+          27.682637979662985
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Parking",
+        "about": "This parking section serves nearby residential and recreational zones and helps organize vehicle movement inside campus.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050635/a7ab0b6555a6787c3def_kcycy8.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32092042329674,
+          27.68277752595847
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Suspension Bridge",
+        "about": "Suspension Bridge is a pedestrian connector and recognizable landmark that links pathways between nearby campus sections.",
+        "image": [
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050651/01fe9ff9766ee15e9bfe_motbnb.jpg",
+          "https://res.cloudinary.com/drvr9wk8j/image/upload/v1768050667/ac7b55922920924ceaab_gdsacq.jpg"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.32131159196621,
+          27.682608301646283
+        ]
+      }
+    }
+  ]
 }
