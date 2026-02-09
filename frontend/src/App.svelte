@@ -29,6 +29,10 @@
   import SellBook from "./pages/SellBook.svelte";
   import MyBooks from "./pages/MyBooks.svelte";
   import Messages from "./pages/Messages.svelte";
+  import LostFound from "./pages/LostFound.svelte";
+  import LostFoundDetails from "./pages/LostFoundDetails.svelte";
+  import ReportLostFound from "./pages/ReportLostFound.svelte";
+  import MyLostFound from "./pages/MyLostFound.svelte";
   import Notices from "./pages/Notices.svelte";
   import Search from "./pages/Search.svelte";
   import Admin from "./pages/Admin.svelte";
@@ -232,6 +236,10 @@
     if (normalized === "/create-club" || normalized.startsWith("/create-club/"))
       return false;
     if (/^\/clubs\/\d+\/events\/create(?:\/|$)/.test(normalized)) return false;
+    if (normalized === "/lost-found/report" || normalized.startsWith("/lost-found/report/"))
+      return false;
+    if (normalized === "/lost-found/my" || normalized.startsWith("/lost-found/my/"))
+      return false;
     return true;
   }
 
@@ -358,6 +366,22 @@
     {
       path: /^\/messages\/?$/,
       component: Messages,
+    },
+    {
+      path: /^\/lost-found\/report\/?$/,
+      component: ReportLostFound,
+    },
+    {
+      path: /^\/lost-found\/my\/?$/,
+      component: MyLostFound,
+    },
+    {
+      path: /^\/lost-found\/(?<id>\d+)\/?$/,
+      component: LostFoundDetails,
+    },
+    {
+      path: /^\/lost-found\/?$/,
+      component: LostFound,
     },
     {
       path: /^\/notices\/(?<category>results|application_forms|exam_centers|general)\/?$/,
@@ -634,6 +658,22 @@
                     Books
                   </a>
                 {/if}
+                <a use:route href="/lost-found" class={navPillClass("/lost-found")}>
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M20 13V7a2 2 0 00-2-2h-3V3H9v2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4"
+                    />
+                  </svg>
+                  Lost &amp; Found
+                </a>
                 <a use:route href="/map" class={navPillClass("/map")}>
                   <svg
                     class="w-4 h-4"

@@ -382,8 +382,12 @@
       const prevIndex =
         (currentImageIndex - 1 + popupData.image.length) %
         popupData.image.length;
-      prefetchFullscreenImage(getMapFullscreenImageUrl(popupData.image[nextIndex]));
-      prefetchFullscreenImage(getMapFullscreenImageUrl(popupData.image[prevIndex]));
+      prefetchFullscreenImage(
+        getMapFullscreenImageUrl(popupData.image[nextIndex]),
+      );
+      prefetchFullscreenImage(
+        getMapFullscreenImageUrl(popupData.image[prevIndex]),
+      );
     }
   });
 
@@ -466,8 +470,7 @@
         labels.find((label) => {
           const title = label.properties?.title;
           return (
-            typeof title === "string" &&
-            title.toLowerCase() === normalizedName
+            typeof title === "string" && title.toLowerCase() === normalizedName
           );
         }) ||
         labels.find((label) => {
@@ -572,7 +575,10 @@
       window.removeEventListener("pushState", syncMapStateFromUrl);
       window.removeEventListener("replaceState", syncMapStateFromUrl);
       window.removeEventListener("popstate", syncMapStateFromUrl);
-      document.removeEventListener("fullscreenchange", updateMapFullscreenState);
+      document.removeEventListener(
+        "fullscreenchange",
+        updateMapFullscreenState,
+      );
     };
   });
 
@@ -700,8 +706,7 @@
       );
     }
 
-    const destName =
-      destinationFeature.properties?.title || "Destination";
+    const destName = destinationFeature.properties?.title || "Destination";
     const destCoords = getCentroid(destinationFeature);
 
     // Store feature to optimize routing point later
@@ -1525,8 +1530,8 @@
               <div>
                 <p class="text-gray-900 font-semibold text-sm">Hello there!</p>
                 <p class="text-gray-500 text-xs mt-1">
-                  Ask admissions, office, hostel, library, notice, or
-                  navigation questions. I only answer verified campus info.
+                  Ask admissions, office, hostel, library, notice, or navigation
+                  questions. I only answer verified campus info.
                 </p>
               </div>
             </div>
@@ -1548,25 +1553,35 @@
                     : 'bg-white text-gray-800 rounded-bl-none border border-gray-100'}"
               >
                 {#if message.role === "assistant"}
-                  <div class="mb-1.5 flex flex-wrap items-center gap-1.5 text-[10px]">
+                  <div
+                    class="mb-1.5 flex flex-wrap items-center gap-1.5 text-[10px]"
+                  >
                     {#if message.verified === true}
-                      <span class="rounded-full bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700">
+                      <span
+                        class="rounded-full bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700"
+                      >
                         Verified
                       </span>
                     {:else if message.verified === false}
-                      <span class="rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-700">
+                      <span
+                        class="rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-700"
+                      >
                         Unverified fallback
                       </span>
                     {/if}
                     {#if message.intent}
-                      <span class="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-700 capitalize">
+                      <span
+                        class="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-700 capitalize"
+                      >
                         {formatIntentLabel(message.intent)}
                       </span>
                     {/if}
                   </div>
                 {/if}
 
-                <p class="whitespace-pre-line break-words">{message.content}</p>
+                <p class="whitespace-pre-line wrap-break-word">
+                  {message.content}
+                </p>
 
                 {#if message.role === "assistant" && message.locations && message.locations.length > 0}
                   <div class="mt-2 flex flex-wrap gap-1.5">
@@ -1596,7 +1611,6 @@
                     Where to go next: {message.follow_up[0]}
                   </p>
                 {/if}
-
               </div>
             </div>
           {/each}
@@ -2373,7 +2387,9 @@
                   <div
                     class="w-0.5 grow my-1 border-l-2 border-dotted border-gray-300"
                   ></div>
-                  <div class="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></div>
+                  <div
+                    class="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"
+                  ></div>
                 </div>
 
                 <div class="relative">
@@ -2542,7 +2558,9 @@
                   class="bg-white rounded-lg border border-gray-200 p-3.5 flex items-center justify-between shadow-sm"
                 >
                   <div class="flex flex-col gap-2">
-                    <div class="h-5 w-20 bg-gray-100 rounded animate-pulse"></div>
+                    <div
+                      class="h-5 w-20 bg-gray-100 rounded animate-pulse"
+                    ></div>
                     <div
                       class="h-2.5 w-28 bg-gray-50 rounded animate-pulse"
                     ></div>
@@ -2768,7 +2786,9 @@
                   ></path>
                 </svg>
               </div>
-              <p class="text-gray-900 text-sm font-medium">No locations found</p>
+              <p class="text-gray-900 text-sm font-medium">
+                No locations found
+              </p>
               <p class="text-xs text-gray-500 mt-1">
                 Try searching for a different building or department
               </p>
@@ -3332,7 +3352,9 @@
                     <div class="text-sm font-semibold">
                       {fullscreenImageProgress[i]}%
                     </div>
-                    <div class="w-36 h-1.5 bg-white/30 rounded-full overflow-hidden">
+                    <div
+                      class="w-36 h-1.5 bg-white/30 rounded-full overflow-hidden"
+                    >
                       <div
                         class="h-full bg-cyan-300 transition-all duration-200"
                         style="width: {fullscreenImageProgress[i]}%"
@@ -3433,11 +3455,17 @@
         {/if}
       {:else}
         {#if !fullscreenImagesLoaded[0]}
-          <div class="absolute inset-0 z-10 flex items-center justify-center bg-black/45">
+          <div
+            class="absolute inset-0 z-10 flex items-center justify-center bg-black/45"
+          >
             {#if fullscreenImageProgress[0] !== undefined}
               <div class="flex flex-col items-center gap-3 text-white">
-                <div class="text-sm font-semibold">{fullscreenImageProgress[0]}%</div>
-                <div class="w-36 h-1.5 bg-white/30 rounded-full overflow-hidden">
+                <div class="text-sm font-semibold">
+                  {fullscreenImageProgress[0]}%
+                </div>
+                <div
+                  class="w-36 h-1.5 bg-white/30 rounded-full overflow-hidden"
+                >
                   <div
                     class="h-full bg-cyan-300 transition-all duration-200"
                     style="width: {fullscreenImageProgress[0]}%"

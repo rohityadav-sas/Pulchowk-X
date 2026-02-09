@@ -5,6 +5,7 @@ const API_CLUBS = '/api/clubs'
 const API_BOOKS = '/api/books'
 const API_CLASSROOM = '/api/classroom'
 const API_CHAT = '/api/chat'
+const API_LOST_FOUND = '/api/lost-found'
 
 export interface Club {
   id: number
@@ -1497,6 +1498,307 @@ export async function deletePurchaseRequest(
       method: 'DELETE',
       credentials: 'include',
     })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export type LostFoundItemType = 'lost' | 'found'
+export type LostFoundCategory =
+  | 'documents'
+  | 'electronics'
+  | 'accessories'
+  | 'ids_cards'
+  | 'keys'
+  | 'bags'
+  | 'other'
+export type LostFoundStatus = 'open' | 'claimed' | 'resolved' | 'closed'
+export type LostFoundClaimStatus =
+  | 'pending'
+  | 'accepted'
+  | 'rejected'
+  | 'cancelled'
+
+export interface LostFoundImage {
+  id: number
+  itemId: number
+  imageUrl: string
+  cloudinaryPublicId?: string | null
+  sortOrder: number
+  createdAt: string
+}
+
+export interface LostFoundItem {
+  id: number
+  ownerId: string
+  itemType: LostFoundItemType
+  title: string
+  description: string
+  category: LostFoundCategory
+  lostFoundDate: string
+  locationText: string
+  contactNote?: string | null
+  status: LostFoundStatus
+  rewardText?: string | null
+  createdAt: string
+  updatedAt: string
+  owner?: {
+    id: string
+    name: string
+    image?: string | null
+    role?: string
+  }
+  images?: LostFoundImage[]
+  claimSummary?: {
+    total: number
+    pending: number
+    accepted: number
+  }
+  viewerClaim?: LostFoundClaim | null
+  isOwner?: boolean
+}
+
+export interface LostFoundClaim {
+  id: number
+  itemId: number
+  requesterId: string
+  message: string
+  status: LostFoundClaimStatus
+  createdAt: string
+  updatedAt: string
+  requester?: {
+    id: string
+    name: string
+    image?: string | null
+    email?: string
+    role?: string
+  }
+  item?: LostFoundItem
+}
+
+export async function getLostFoundItems(filters?: {
+  itemType?: LostFoundItemType
+  category?: LostFoundCategory
+  status?: LostFoundStatus
+  q?: string
+  limit?: number
+  cursor?: string | null
+}): Promise<{
+  success: boolean
+  data?: { items: LostFoundItem[]; nextCursor: string | null; hasMore: boolean }
+  meta?: { total?: number; limit?: number }
+  message?: string
+}> {
+  try {
+    const params = new URLSearchParams()
+    if (filters?.itemType) params.set('itemType', filters.itemType)
+    if (filters?.category) params.set('category', filters.category)
+    if (filters?.status) params.set('status', filters.status)
+    if (filters?.q) params.set('q', filters.q)
+    if (typeof filters?.limit === 'number') params.set('limit', String(filters.limit))
+    if (filters?.cursor) params.set('cursor', filters.cursor)
+    const query = params.toString()
+    const url = query ? `${API_LOST_FOUND}?${query}` : API_LOST_FOUND
+    const res = await fetch(url, { credentials: 'include' })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function getLostFoundItem(
+  id: number,
+): Promise<{ success: boolean; data?: LostFoundItem; message?: string }> {
+  try {
+    const res = await fetch(`${API_LOST_FOUND}/${id}`, { credentials: 'include' })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function createLostFoundItem(payload: {
+  itemType: LostFoundItemType
+  title: string
+  description: string
+  category: LostFoundCategory
+  lostFoundDate: string
+  locationText: string
+  contactNote?: string | null
+  rewardText?: string | null
+}): Promise<{ success: boolean; data?: LostFoundItem; message?: string }> {
+  try {
+    const res = await fetch(API_LOST_FOUND, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function updateLostFoundItem(
+  id: number,
+  payload: Partial<{
+    title: string
+    description: string
+    category: LostFoundCategory
+    lostFoundDate: string
+    locationText: string
+    contactNote: string | null
+    rewardText: string | null
+    status: LostFoundStatus
+  }>,
+): Promise<{ success: boolean; data?: LostFoundItem; message?: string }> {
+  try {
+    const res = await fetch(`${API_LOST_FOUND}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function deleteLostFoundItem(
+  id: number,
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    const res = await fetch(`${API_LOST_FOUND}/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function uploadLostFoundImage(
+  itemId: number,
+  image: File,
+): Promise<{ success: boolean; data?: LostFoundImage; message?: string }> {
+  try {
+    const formData = new FormData()
+    formData.append('image', image)
+    const res = await fetch(`${API_LOST_FOUND}/${itemId}/images`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function deleteLostFoundImage(
+  itemId: number,
+  imageId: number,
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    const res = await fetch(`${API_LOST_FOUND}/${itemId}/images/${imageId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function createLostFoundClaim(
+  itemId: number,
+  message: string,
+): Promise<{ success: boolean; data?: LostFoundClaim; message?: string }> {
+  try {
+    const res = await fetch(`${API_LOST_FOUND}/${itemId}/claims`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ message }),
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function getLostFoundItemClaims(
+  itemId: number,
+): Promise<{ success: boolean; data?: LostFoundClaim[]; message?: string }> {
+  try {
+    const res = await fetch(`${API_LOST_FOUND}/${itemId}/claims`, {
+      credentials: 'include',
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function updateLostFoundClaimStatus(
+  itemId: number,
+  claimId: number,
+  status: 'accepted' | 'rejected' | 'cancelled',
+): Promise<{ success: boolean; data?: LostFoundClaim; message?: string }> {
+  try {
+    const res = await fetch(`${API_LOST_FOUND}/${itemId}/claims/${claimId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ status }),
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function updateLostFoundItemStatus(
+  itemId: number,
+  status: LostFoundStatus,
+): Promise<{ success: boolean; data?: LostFoundItem; message?: string }> {
+  try {
+    const res = await fetch(`${API_LOST_FOUND}/${itemId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ status }),
+    })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function getMyLostFoundItems(): Promise<{
+  success: boolean
+  data?: LostFoundItem[]
+  message?: string
+}> {
+  try {
+    const res = await fetch(`${API_LOST_FOUND}/my/items`, { credentials: 'include' })
+    return await res.json()
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
+export async function getMyLostFoundClaims(): Promise<{
+  success: boolean
+  data?: LostFoundClaim[]
+  message?: string
+}> {
+  try {
+    const res = await fetch(`${API_LOST_FOUND}/my/claims`, { credentials: 'include' })
     return await res.json()
   } catch (error: any) {
     return { success: false, message: error.message }

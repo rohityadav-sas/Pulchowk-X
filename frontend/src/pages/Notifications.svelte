@@ -229,6 +229,7 @@
     const requestId = Number(data.requestId || 0);
     const conversationId = Number(data.conversationId || 0);
     const noticeId = Number(data.noticeId || 0);
+    const lostFoundItemId = Number(data.itemId || 0);
     const noticeCategoryRaw =
       typeof data.category === "string" ? data.category.trim() : "";
     const noticeCategory =
@@ -329,6 +330,17 @@
       if (noticeCategory) params.set("category", noticeCategory);
       const path = noticeCategory ? `/notices/${noticeCategory}` : "/notices";
       return buildHref(path, params);
+    }
+
+    if (lostFoundItemId > 0 || notification.type.startsWith("lost_found_")) {
+      const params = new URLSearchParams();
+      params.set("fromNotification", "1");
+      params.set("notificationId", String(notification.id));
+      params.set("highlight", "item");
+      return buildHref(
+        lostFoundItemId > 0 ? `/lost-found/${lostFoundItemId}` : "/lost-found",
+        params,
+      );
     }
 
     if (
@@ -738,6 +750,7 @@
     ) {
       return "book";
     }
+    if (type.includes("lost_found")) return "lost_found";
     if (type.includes("notice")) return "notice";
     if (type.includes("assignment") || type.includes("grading"))
       return "classroom";
@@ -898,6 +911,17 @@
                         <path d="M22 10v6M2 10v6"></path>
                         <path d="M12 6 2 10l10 4 10-4-10-4z"></path>
                         <path d="M6 12v5c0 2 2.5 3 6 3s6-1 6-3v-5"></path>
+                      </svg>
+                    {:else if getIconKey(notification) === "lost_found"}
+                      <svg
+                        class="w-6 h-6"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <rect x="3" y="7" width="18" height="13" rx="2"></rect>
+                        <path d="M8 7V5a4 4 0 0 1 8 0v2"></path>
                       </svg>
                     {:else}
                       <svg

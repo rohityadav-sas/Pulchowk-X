@@ -18,6 +18,7 @@ import noticeRoutes from './routes/notice.route.js'
 import adminRoutes from './routes/admin.route.js'
 import searchRoutes from './routes/search.route.js'
 import notificationsRoutes from './routes/notifications.route.js'
+import lostFoundRoutes from './routes/lostFound.route.js'
 import { startNotificationReminderJobs } from './services/notification-jobs.service.js'
 
 const app = express()
@@ -39,6 +40,7 @@ app.use("/api/notices", noticeRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/notifications", notificationsRoutes);
+app.use("/api/lost-found", lostFoundRoutes);
 
 app.use(
   express.static(path.join(__dirname, '../../frontend/dist'), {
@@ -129,6 +131,94 @@ async function ensureRuntimeSchema() {
        OR NOT ("notification_preferences" ? 'classroomAlerts')
        OR NOT ("notification_preferences" ? 'chatAlerts')
        OR NOT ("notification_preferences" ? 'adminAlerts')
+  `)
+
+  await db.execute(sql`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'lost_found_item_type') THEN
+        CREATE TYPE lost_found_item_type AS ENUM ('lost', 'found');
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'lost_found_category') THEN
+        CREATE TYPE lost_found_category AS ENUM ('documents', 'electronics', 'accessories', 'ids_cards', 'keys', 'bags', 'other');
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'lost_found_status') THEN
+        CREATE TYPE lost_found_status AS ENUM ('open', 'claimed', 'resolved', 'closed');
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'lost_found_claim_status') THEN
+        CREATE TYPE lost_found_claim_status AS ENUM ('pending', 'accepted', 'rejected', 'cancelled');
+      END IF;
+    END $$;
+  `)
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "lost_found_items" (
+      "id" serial PRIMARY KEY NOT NULL,
+      "owner_id" text NOT NULL REFERENCES "user"("id") ON DELETE cascade,
+      "item_type" lost_found_item_type NOT NULL,
+      "title" varchar(180) NOT NULL,
+      "description" text NOT NULL,
+      "category" lost_found_category NOT NULL,
+      "lost_found_date" timestamp NOT NULL,
+      "location_text" varchar(220) NOT NULL,
+      "contact_note" varchar(220),
+      "status" lost_found_status DEFAULT 'open' NOT NULL,
+      "reward_text" varchar(120),
+      "created_at" timestamp DEFAULT now() NOT NULL,
+      "updated_at" timestamp DEFAULT now() NOT NULL
+    )
+  `)
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "lost_found_images" (
+      "id" serial PRIMARY KEY NOT NULL,
+      "item_id" integer NOT NULL REFERENCES "lost_found_items"("id") ON DELETE cascade,
+      "image_url" text NOT NULL,
+      "cloudinary_public_id" text,
+      "sort_order" integer DEFAULT 0 NOT NULL,
+      "created_at" timestamp DEFAULT now() NOT NULL
+    )
+  `)
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "lost_found_claims" (
+      "id" serial PRIMARY KEY NOT NULL,
+      "item_id" integer NOT NULL REFERENCES "lost_found_items"("id") ON DELETE cascade,
+      "requester_id" text NOT NULL REFERENCES "user"("id") ON DELETE cascade,
+      "message" text NOT NULL,
+      "status" lost_found_claim_status DEFAULT 'pending' NOT NULL,
+      "created_at" timestamp DEFAULT now() NOT NULL,
+      "updated_at" timestamp DEFAULT now() NOT NULL
+    )
+  `)
+
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS "lost_found_claims_item_requester_unique_idx"
+    ON "lost_found_claims" ("item_id", "requester_id")
+  `)
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS "lost_found_items_type_status_created_idx"
+    ON "lost_found_items" ("item_type", "status", "created_at")
+  `)
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS "lost_found_items_category_created_idx"
+    ON "lost_found_items" ("category", "created_at")
+  `)
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS "lost_found_items_owner_created_idx"
+    ON "lost_found_items" ("owner_id", "created_at")
+  `)
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS "lost_found_images_item_sort_idx"
+    ON "lost_found_images" ("item_id", "sort_order")
+  `)
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS "lost_found_claims_item_status_idx"
+    ON "lost_found_claims" ("item_id", "status")
+  `)
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS "lost_found_claims_requester_created_idx"
+    ON "lost_found_claims" ("requester_id", "created_at")
   `)
 }
 

@@ -53,9 +53,10 @@ function inferIconKey(type: string) {
   if (
     lower.includes("book") ||
     lower.includes("purchase") ||
-    lower.includes("request")
+    lower.includes("request") ||
+    lower.includes("lost_found")
   ) {
-    return "book";
+    return lower.includes("lost_found") ? "lost_found" : "book";
   }
   if (lower.includes("notice")) return "notice";
   if (lower.includes("assignment") || lower.includes("grading")) return "classroom";
@@ -342,7 +343,9 @@ function isNotificationTypeAllowedByPreferences(
     lower === "new_book" ||
     lower === "purchase_request" ||
     lower === "request_response" ||
-    iconKey === "book";
+    lower.startsWith("lost_found_") ||
+    iconKey === "book" ||
+    iconKey === "lost_found";
   const isClassroomType =
     lower === "new_assignment" ||
     lower === "grading_update" ||
@@ -380,8 +383,8 @@ function getPreferenceTypeFilter(preferences: NotificationPreferences) {
   if (!preferences.marketplaceAlerts) {
     filters.push(
       sql`not (
-        ${notifications.type} in ('book_listed', 'new_book', 'purchase_request', 'request_response', 'purchase_request_cancelled', 'purchase_request_removed')
-        or coalesce(${notifications.data}->>'iconKey', '') = 'book'
+        ${notifications.type} in ('book_listed', 'new_book', 'purchase_request', 'request_response', 'purchase_request_cancelled', 'purchase_request_removed', 'lost_found_claim_received', 'lost_found_claim_accepted', 'lost_found_claim_rejected', 'lost_found_claim_cancelled', 'lost_found_resolved')
+        or coalesce(${notifications.data}->>'iconKey', '') in ('book', 'lost_found')
       )`,
     );
   }
