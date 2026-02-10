@@ -16,7 +16,7 @@ import {
   lostFoundItems,
   type LostFoundClaim,
 } from "../models/lost-found-schema.js";
-import { createInAppNotificationForUser } from "./inAppNotification.service.js";
+import { sendToUser } from "./notification.service.js";
 
 type ItemType = "lost" | "found";
 type ItemStatus = "open" | "claimed" | "resolved" | "closed";
@@ -453,17 +453,16 @@ export async function createClaimRequest(
     created = inserted;
   }
 
-  await createInAppNotificationForUser({
-    userId: item.ownerId,
-    type: "lost_found_claim_received",
+  await sendToUser(item.ownerId, {
     title: "New claim request",
     body: `Someone requested your ${item.itemType} item: ${item.title}.`,
     data: {
-      itemId: item.id,
-      claimId: created.id,
+      type: "lost_found_claim_received",
+      itemId: item.id.toString(),
+      claimId: created.id.toString(),
       itemType: item.itemType,
       iconKey: "lost_found",
-      thumbnailUrl: item.images[0]?.imageUrl || null,
+      thumbnailUrl: item.images[0]?.imageUrl || "",
     },
   });
 
@@ -553,14 +552,7 @@ export async function setClaimStatus(
 
   if (!updatedClaim) return { success: false, message: "Failed to update claim." };
 
-  await createInAppNotificationForUser({
-    userId: updatedClaim.requesterId,
-    type:
-      nextStatus === "accepted"
-        ? "lost_found_claim_accepted"
-        : nextStatus === "rejected"
-          ? "lost_found_claim_rejected"
-          : "lost_found_claim_cancelled",
+  await sendToUser(updatedClaim.requesterId, {
     title:
       nextStatus === "accepted"
         ? "Claim accepted"
@@ -574,11 +566,17 @@ export async function setClaimStatus(
           ? `Your claim for "${item.title}" was rejected.`
           : `Your claim for "${item.title}" was cancelled.`,
     data: {
-      itemId: item.id,
-      claimId: updatedClaim.id,
+      type:
+        nextStatus === "accepted"
+          ? "lost_found_claim_accepted"
+          : nextStatus === "rejected"
+            ? "lost_found_claim_rejected"
+            : "lost_found_claim_cancelled",
+      itemId: item.id.toString(),
+      claimId: updatedClaim.id.toString(),
       itemType: item.itemType,
       iconKey: "lost_found",
-      thumbnailUrl: item.images[0]?.imageUrl || null,
+      thumbnailUrl: item.images[0]?.imageUrl || "",
     },
   });
 
@@ -621,16 +619,15 @@ export async function markItemStatus(
 
     await Promise.all(
       acceptedClaims.map((claim) =>
-        createInAppNotificationForUser({
-          userId: claim.requesterId,
-          type: "lost_found_resolved",
+        sendToUser(claim.requesterId, {
           title: "Item marked as resolved",
           body: `The owner marked "${item.title}" as resolved.`,
           data: {
-            itemId: item.id,
+            type: "lost_found_resolved",
+            itemId: item.id.toString(),
             itemType: item.itemType,
             iconKey: "lost_found",
-            thumbnailUrl: item.images[0]?.imageUrl || null,
+            thumbnailUrl: item.images[0]?.imageUrl || "",
           },
         }),
       ),
