@@ -1056,6 +1056,7 @@ export interface BookListingsResponse {
 }
 
 export interface BookFilters {
+  sellerId?: string
   search?: string
   author?: string
   isbn?: string
@@ -2243,6 +2244,7 @@ export interface SellerRatingReview {
 export interface SellerReputation {
   averageRating: number
   totalRatings: number
+  soldCount: number
   distribution: Record<number, number>
   recentRatings: SellerRatingReview[]
 }

@@ -81,6 +81,7 @@ export const GetListings = async (req: Request, res: Response) => {
     try {
         const userId = getUserId(req);
         const {
+            sellerId,
             search,
             author,
             isbn,
@@ -96,6 +97,7 @@ export const GetListings = async (req: Request, res: Response) => {
 
         const result = await getBookListings(
             {
+                sellerId: sellerId as string,
                 search: search as string,
                 author: author as string,
                 isbn: isbn as string,

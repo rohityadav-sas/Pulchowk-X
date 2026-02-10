@@ -145,6 +145,11 @@ export async function getSellerReputation(sellerId: string) {
     distribution[row.rating] = row.count;
   }
 
+  const [soldAggregate] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(bookListings)
+    .where(and(eq(bookListings.sellerId, sellerId), eq(bookListings.status, "sold")));
+
   const recentRatings = await db.query.sellerRatings.findMany({
     where: eq(sellerRatings.sellerId, sellerId),
     orderBy: [desc(sellerRatings.createdAt)],
@@ -173,6 +178,7 @@ export async function getSellerReputation(sellerId: string) {
     data: {
       averageRating: Number.isFinite(average) ? Number(average.toFixed(1)) : 0,
       totalRatings: aggregate?.totalRatings ?? 0,
+      soldCount: soldAggregate?.count ?? 0,
       distribution,
       recentRatings,
     },

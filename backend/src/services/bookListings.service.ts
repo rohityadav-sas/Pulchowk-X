@@ -1,6 +1,6 @@
 import { db } from "../lib/db.js";
 import { and, desc, eq, ilike, or, sql, asc, gte, lte, notInArray } from "drizzle-orm";
-import { bookListings, bookImages, bookCategories, savedBooks, listingViews } from "../models/book_buy_sell-schema.js";
+import { bookListings, bookImages, bookCategories, savedBooks, listingViews, bookPurchaseRequests, } from "../models/book_buy_sell-schema.js";
 import { sendToTopic } from "./notification.service.js";
 import { unwrapOne } from "../lib/type-utils.js";
 import { userBlocks } from "../models/trust-schema.js";
@@ -21,6 +21,7 @@ export interface CreateListingData {
 }
 
 export interface ListingFilters {
+    sellerId?: string;
     search?: string;
     author?: string;
     isbn?: string;
@@ -83,7 +84,6 @@ export const createBookListing = async (
             // So if I pass them, it WILL send a notification message.
             // I want to send a data-only message.
             // So I should pass them in `data` and NOT in the top level.
-            
             data: {
                 type: 'new_book',
                 bookId: listing.id.toString(),
@@ -116,6 +116,7 @@ export const getBookListings = async (
 ) => {
     try {
         const {
+            sellerId,
             search,
             author,
             isbn,
@@ -130,6 +131,10 @@ export const getBookListings = async (
         } = filters;
 
         const conditions = [];
+
+        if (sellerId) {
+            conditions.push(eq(bookListings.sellerId, sellerId));
+        }
 
 
         if (status) {
@@ -536,6 +541,19 @@ export const markAsSold = async (id: number, sellerId: string) => {
             .where(eq(bookListings.id, id))
             .returning();
 
+        await db
+            .update(bookPurchaseRequests)
+            .set({
+                status: "completed",
+                updatedAt: new Date(),
+            })
+            .where(
+                and(
+                    eq(bookPurchaseRequests.listingId, id),
+                    eq(bookPurchaseRequests.status, "accepted")
+                )
+            )
+            .catch(console.error);
 
         await db.delete(listingViews).where(eq(listingViews.listingId, id)).catch(console.error);
 

@@ -19,10 +19,14 @@
     getBlockedMarketplaceUsers,
     createPurchaseRequest,
     getPurchaseRequestStatus,
+    getListingPurchaseRequests,
+    respondToPurchaseRequest,
     cancelPurchaseRequest,
     getSellerContactInfo,
+    getBookListings,
     type BookListing,
     type MarketplaceReport,
+    type PurchaseRequest,
   } from "../lib/api";
   import LoadingSpinner from "../components/LoadingSpinner.svelte";
   import { fade, fly } from "svelte/transition";
@@ -52,6 +56,7 @@
   let unblockSubmitting = $state(false);
   let trustFeedback = $state<string | null>(null);
   let trustError = $state<string | null>(null);
+  let toastTimeout: any;
   let highlightListing = $state(routeQuery("highlight") === "listing");
 
   // Modal States
@@ -60,13 +65,75 @@
   let rateModalOpen = $state(false);
   let reportModalOpen = $state(false);
   let blockModalOpen = $state(false);
+  let profileModalOpen = $state(false);
 
   let requestMessage = $state("");
   let requestSubmitting = $state(false);
   let cancellingRequest = $state(false);
+  let respondingToRequest = $state<number | null>(null);
+
+  let showStickyBar = $state(false);
+  let ctaRef: HTMLElement | undefined = $state(undefined);
+  let profileTab = $state<"listings" | "reviews">("listings");
+  let ratingTags = $state<string[]>([]);
+
+  const availableRatingTags = [
+    "Fast Response",
+    "Accurate Description",
+    "Great Condition",
+    "Fair Price",
+    "Professional",
+  ];
+
+  function toggleRatingTag(tag: string) {
+    if (ratingTags.includes(tag)) {
+      ratingTags = ratingTags.filter((t) => t !== tag);
+    } else {
+      ratingTags = [...ratingTags, tag];
+    }
+  }
+
+  function showSuccess(message: string) {
+    if (toastTimeout) clearTimeout(toastTimeout);
+    trustFeedback = message;
+    trustError = null;
+    toastTimeout = setTimeout(() => {
+      trustFeedback = null;
+    }, 2000);
+  }
+
+  function showError(message: string) {
+    if (toastTimeout) clearTimeout(toastTimeout);
+    trustError = message;
+    trustFeedback = null;
+    toastTimeout = setTimeout(() => {
+      trustError = null;
+    }, 2000);
+  }
+
+  async function handleShare() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      showSuccess("Link copied to clipboard!");
+    } catch (error: any) {
+      showError(error.message);
+    }
+  }
 
   onMount(() => {
     window.scrollTo(0, 0);
+  });
+
+  $effect(() => {
+    if (!ctaRef) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        showStickyBar = !entry.isIntersecting;
+      },
+      { threshold: 0 },
+    );
+    observer.observe(ctaRef);
+    return () => observer.disconnect();
   });
 
   $effect(() => {
@@ -106,6 +173,19 @@
     enabled: !!bookQuery.data?.sellerId && !!$session.data?.user,
   }));
 
+  const sellerListingsQuery = createQuery(() => ({
+    queryKey: ["seller-listings", bookQuery.data?.sellerId, bookId],
+    queryFn: async () => {
+      const sellerId = bookQuery.data?.sellerId;
+      if (!sellerId) return null;
+      const result = await getBookListings({ sellerId });
+      return result.success
+        ? (result.data?.listings || []).filter((l) => l.id !== bookId)
+        : [];
+    },
+    enabled: !!bookQuery.data?.sellerId && profileModalOpen,
+  }));
+
   const blockedUsersQuery = createQuery(() => ({
     queryKey: ["blocked-marketplace-users"],
     queryFn: async () => {
@@ -117,15 +197,24 @@
   }));
 
   const purchaseRequestQuery = createQuery(() => ({
-    queryKey: ["purchase-request", bookId],
+    queryKey: ["purchase-request", bookId, bookQuery.data?.isOwner],
     queryFn: async () => {
       if (!bookId || !$session.data?.user) return null;
+      if (bookQuery.data?.isOwner) {
+        const result = await getListingPurchaseRequests(bookId);
+        return result.success ? result.data : [];
+      }
       const result = await getPurchaseRequestStatus(bookId);
-      if (result.success) return result.data;
-      return null;
+      return result.success ? result.data : null;
     },
-    enabled: bookId > 0 && !!$session.data?.user,
+    enabled: bookId > 0 && !!$session.data?.user && !!bookQuery.data,
   }));
+
+  const buyerPurchaseRequest = $derived(
+    !bookQuery.data?.isOwner && !Array.isArray(purchaseRequestQuery.data)
+      ? (purchaseRequestQuery.data as PurchaseRequest | null)
+      : null,
+  );
 
   const sellerContactQuery = createQuery(() => ({
     queryKey: ["seller-contact", bookId],
@@ -138,7 +227,7 @@
     enabled:
       bookId > 0 &&
       !!$session.data?.user &&
-      (purchaseRequestQuery.data?.status === "accepted" ||
+      (buyerPurchaseRequest?.status === "accepted" ||
         bookQuery.data?.isOwner),
   }));
 
@@ -150,6 +239,8 @@
     }
     if (activeImageIndex > total - 1) activeImageIndex = 0;
   });
+
+  const book = $derived(bookQuery.data);
 
   const conditionLabel: Record<BookListing["condition"], string> = {
     new: "New",
@@ -180,6 +271,7 @@
   }
 
   function clearTrustMessages() {
+    if (toastTimeout) clearTimeout(toastTimeout);
     trustFeedback = null;
     trustError = null;
   }
@@ -235,7 +327,10 @@
         await queryClient.invalidateQueries({
           queryKey: ["book-listing", bookId],
         });
-        await bookQuery.refetch();
+        await Promise.all([
+          bookQuery.refetch(),
+          purchaseRequestQuery.refetch(),
+        ]);
       } else {
         alert(result.message || "Could not mark as sold.");
       }
@@ -249,32 +344,39 @@
   async function handleRateSeller(book: BookListing) {
     if (!book.sellerId || ratingSubmitting) return;
     if (ratingValue < 1 || ratingValue > 5) {
-      trustError = "Please choose a rating between 1 and 5.";
+      showError("Please choose a rating between 1 and 5.");
       return;
     }
 
     clearTrustMessages();
     ratingSubmitting = true;
     try {
+      const combinedReview = [
+        ratingTags.length > 0 ? `${ratingTags.join(", ")}` : "",
+        ratingReview.trim(),
+      ]
+        .filter(Boolean)
+        .join(" - ");
+
       const result = await rateSeller(book.sellerId, {
         listingId: book.id,
         rating: ratingValue,
-        review: ratingReview.trim() || undefined,
+        review: combinedReview || undefined,
       });
       if (!result.success) {
-        trustError = result.message || "Could not submit rating.";
+        showError(result.message || "Could not submit rating.");
         return;
       }
 
       ratingReview = "";
-      trustFeedback = "Rating submitted.";
+      showSuccess("Rating submitted.");
       await queryClient.invalidateQueries({
         queryKey: ["seller-reputation", book.sellerId],
       });
       await sellerReputationQuery.refetch();
     } catch (error) {
       console.error("Failed to rate seller:", error);
-      trustError = "Could not submit rating.";
+      showError("Could not submit rating.");
     } finally {
       ratingSubmitting = false;
     }
@@ -283,7 +385,7 @@
   async function handleReportSeller(book: BookListing) {
     if (!book.sellerId || reportSubmitting) return;
     if (!reportDescription.trim()) {
-      trustError = "Please add a short description for the report.";
+      showError("Please add a short description for the report.");
       return;
     }
 
@@ -297,16 +399,16 @@
         description: reportDescription.trim(),
       });
       if (!result.success) {
-        trustError = result.message || "Could not submit report.";
+        showError(result.message || "Could not submit report.");
         return;
       }
 
       reportDescription = "";
       reportCategory = "other";
-      trustFeedback = "Report submitted. Admins will review it.";
+      showSuccess("Report submitted. Admins will review it.");
     } catch (error) {
       console.error("Failed to report seller:", error);
-      trustError = "Could not submit report.";
+      showError("Could not submit report.");
     } finally {
       reportSubmitting = false;
     }
@@ -329,16 +431,16 @@
         blockReason.trim() || undefined,
       );
       if (!result.success) {
-        trustError = result.message || "Could not block seller.";
+        showError(result.message || "Could not block seller.");
         return;
       }
 
       blockReason = "";
-      trustFeedback = "Seller blocked.";
+      showSuccess("Seller blocked.");
       await blockedUsersQuery.refetch();
     } catch (error) {
       console.error("Failed to block seller:", error);
-      trustError = "Could not block seller.";
+      showError("Could not block seller.");
     } finally {
       blockSubmitting = false;
     }
@@ -357,19 +459,20 @@
         requestMessage = "";
         await purchaseRequestQuery.refetch();
       } else {
-        trustError = result.message || "Failed to send request.";
+        showError(result.message || "Failed to send request.");
       }
     } catch (error) {
       console.error("Failed to send purchase request:", error);
-      trustError = "An error occurred while sending the request.";
+      showError("An error occurred while sending the request.");
     } finally {
       requestSubmitting = false;
     }
   }
 
   async function handleCancelRequest() {
-    const request = purchaseRequestQuery.data;
-    if (!request || cancellingRequest) return;
+    const data = purchaseRequestQuery.data;
+    if (!data || Array.isArray(data) || cancellingRequest) return;
+    const request = data;
     if (!confirm("Cancel your request to buy this book?")) return;
 
     cancellingRequest = true;
@@ -378,13 +481,32 @@
       if (result.success) {
         await purchaseRequestQuery.refetch();
       } else {
-        trustError = result.message || "Failed to cancel request.";
+        showError(result.message || "Failed to cancel request.");
       }
     } catch (error) {
       console.error("Failed to cancel purchase request:", error);
-      trustError = "An error occurred while cancelling the request.";
+      showError("An error occurred while cancelling the request.");
     } finally {
       cancellingRequest = false;
+    }
+  }
+
+  async function handleRespondToRequest(requestId: number, accept: boolean) {
+    if (respondingToRequest) return;
+    respondingToRequest = requestId;
+    try {
+      const result = await respondToPurchaseRequest(requestId, accept);
+      if (result.success) {
+        await purchaseRequestQuery.refetch();
+        showSuccess(accept ? "Request accepted!" : "Request declined.");
+      } else {
+        showError(result.message || "Failed to respond to request.");
+      }
+    } catch (err) {
+      console.error("Failed to respond to request:", err);
+      showError("An error occurred.");
+    } finally {
+      respondingToRequest = null;
     }
   }
 
@@ -428,15 +550,15 @@
     try {
       const result = await unblockMarketplaceUser(book.sellerId);
       if (!result.success) {
-        trustError = result.message || "Could not unblock seller.";
+        showError(result.message || "Could not unblock seller.");
         return;
       }
 
-      trustFeedback = "Seller unblocked.";
+      showSuccess("Seller unblocked.");
       await blockedUsersQuery.refetch();
     } catch (error) {
       console.error("Failed to unblock seller:", error);
-      trustError = "Could not unblock seller.";
+      showError("Could not unblock seller.");
     } finally {
       unblockSubmitting = false;
     }
@@ -499,8 +621,7 @@
         <h2 class="text-lg font-bold text-gray-900">Book not found</h2>
         <p class="text-sm text-gray-500 mt-1">{bookQuery.error.message}</p>
       </div>
-    {:else if bookQuery.data}
-      {@const book = bookQuery.data}
+    {:else if book}
       {@const hasImages = !!book.images && book.images.length > 0}
       {@const activeImage = hasImages ? book.images![activeImageIndex] : null}
 
@@ -513,8 +634,16 @@
             class="bg-slate-50/50 p-4 sm:p-6 border-b lg:border-b-0 lg:border-r border-slate-100"
           >
             <div
-              class="group relative h-80 sm:h-96 lg:h-128 w-full bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex items-center justify-center transition-all hover:shadow-md"
+              class="group relative h-80 sm:h-96 lg:h-[32rem] w-full bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex items-center justify-center transition-all hover:shadow-md"
             >
+              {#if book.edition}
+                <span
+                  class="absolute top-4 right-4 z-10 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200"
+                >
+                  {book.edition} Edition
+                </span>
+              {/if}
+
               {#if activeImage}
                 <img
                   src={activeImage.imageUrl}
@@ -552,7 +681,7 @@
                     />
                   </svg>
                   <p class="text-xs mt-3 font-medium tracking-wide">
-                    NO IMAGES AVAILABLE
+                    Book Image
                   </p>
                 </div>
               {/if}
@@ -578,143 +707,119 @@
                 {/each}
               </div>
             {/if}
+
+            <!-- Compact Seller Card -->
+            {#if book.seller && !book.isOwner}
+              <div
+                class="mt-4 flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-100"
+              >
+                {#if book.seller.image}
+                  <img
+                    src={book.seller.image}
+                    alt=""
+                    class="w-10 h-10 rounded-full object-cover"
+                  />
+                {:else}
+                  <div
+                    class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm"
+                  >
+                    {book.seller.name.charAt(0).toUpperCase()}{book.seller.name
+                      .split(" ")[1]
+                      ?.charAt(0)
+                      .toUpperCase() || ""}
+                  </div>
+                {/if}
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 truncate">
+                    {book.seller.name}
+                  </p>
+                  {#if book.seller.isVerifiedSeller}
+                    <p class="text-xs text-gray-500">Verified Seller</p>
+                  {/if}
+                </div>
+                <button
+                  onclick={() => {
+                    profileModalOpen = true;
+                    profileTab = "listings";
+                  }}
+                  class="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors whitespace-nowrap"
+                >
+                  View Profile →
+                </button>
+                <button
+                  onclick={() => (reportModalOpen = true)}
+                  class="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-400"
+                  aria-label="More options"
+                >
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"
+                    ><path
+                      d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
+                    /></svg
+                  >
+                </button>
+              </div>
+            {/if}
           </div>
 
-          <div class="p-5 sm:p-6">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <span
-                  class="inline-flex items-center px-2.5 py-1 rounded-full border text-xs font-semibold {conditionTone[
-                    book.condition
-                  ]}"
-                >
-                  {conditionLabel[book.condition]}
-                </span>
-                <h1
-                  class="mt-2 text-2xl font-extrabold text-gray-900 leading-tight"
-                >
-                  {book.title}
-                </h1>
-                <p class="mt-1 text-sm text-gray-600">by {book.author}</p>
-              </div>
+          <div class="p-5 sm:p-6 lg:p-8">
+            <!-- Title -->
+            <h1
+              class="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight"
+            >
+              {book.title}
+            </h1>
 
+            <!-- Price -->
+            <div class="mt-3 flex items-baseline gap-3">
+              <span class="text-3xl font-black text-emerald-600"
+                >₹{parseFloat(book.price).toLocaleString()}</span
+              >
+              {#if book.price && parseFloat(book.price) > parseFloat(book.price)}
+                <span class="text-lg text-gray-400 line-through"
+                  >₹{parseFloat(book.price).toLocaleString()}</span
+                >
+              {/if}
               {#if book.status === "sold"}
                 <span
                   class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200"
+                  >Sold</span
                 >
-                  Sold
+              {/if}
+            </div>
+
+            <!-- Author -->
+            <p class="mt-2 text-sm text-gray-500">by {book.author}</p>
+
+            <!-- Metadata Grid -->
+            <div class="mt-5 grid grid-cols-2 gap-3">
+              <div
+                class="p-4 rounded-2xl bg-slate-50 border border-slate-100 transition-all hover:bg-white hover:shadow-sm"
+              >
+                <span
+                  class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
+                >
+                  <svg
+                    class="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2.5"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    /></svg
+                  >
+                  Condition
                 </span>
-              {/if}
-            </div>
+                <p class="mt-1 font-black text-slate-900">
+                  {conditionLabel[book.condition]}
+                </p>
+              </div>
 
-            <div class="mt-4 text-2xl font-black text-blue-700">
-              {formatPrice(book.price)}
-            </div>
-
-            <div class="mt-6 grid grid-cols-2 gap-4">
-              {#if book.condition}
-                <div
-                  class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
-                >
-                  <span
-                    class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
-                  >
-                    <svg
-                      class="w-3 h-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2.5"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      /></svg
-                    >
-                    Condition
-                  </span>
-                  <p class="mt-1 font-black text-slate-900">
-                    {conditionLabel[book.condition]}
-                  </p>
-                </div>
-              {/if}
-              {#if book.edition}
-                <div
-                  class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
-                >
-                  <span
-                    class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
-                  >
-                    <svg
-                      class="w-3 h-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2.5"
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                      /></svg
-                    >
-                    Edition
-                  </span>
-                  <p class="mt-1 font-black text-slate-900">{book.edition}</p>
-                </div>
-              {/if}
-              {#if book.publisher}
-                <div
-                  class="col-span-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
-                >
-                  <span
-                    class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
-                  >
-                    <svg
-                      class="w-3 h-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2.5"
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                      /></svg
-                    >
-                    Publisher
-                  </span>
-                  <p class="mt-1 font-black text-slate-900">{book.publisher}</p>
-                </div>
-              {/if}
-              {#if book.publicationYear}
-                <div
-                  class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
-                >
-                  <span
-                    class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
-                  >
-                    <svg
-                      class="w-3 h-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2.5"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      /></svg
-                    >
-                    Year
-                  </span>
-                  <p class="mt-1 font-black text-slate-900">
-                    {book.publicationYear}
-                  </p>
-                </div>
-              {/if}
               {#if book.category}
                 <div
-                  class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
+                  class="p-4 rounded-2xl bg-slate-50 border border-slate-100 transition-all hover:bg-white hover:shadow-sm"
                 >
                   <span
                     class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
@@ -733,40 +838,15 @@
                     >
                     Category
                   </span>
-                  <p class="mt-1 font-black text-slate-900 text-sm truncate">
+                  <p class="mt-1 font-black text-slate-900 truncate">
                     {book.category.name}
                   </p>
                 </div>
               {/if}
-              {#if book.isbn}
-                <div
-                  class="col-span-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
-                >
-                  <span
-                    class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
-                  >
-                    <svg
-                      class="w-3 h-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2.5"
-                        d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
-                      /></svg
-                    >
-                    ISBN
-                  </span>
-                  <p class="mt-1 font-black text-slate-900 break-all">
-                    {book.isbn}
-                  </p>
-                </div>
-              {/if}
+
               {#if book.courseCode}
                 <div
-                  class="col-span-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm"
+                  class="p-4 rounded-2xl bg-slate-50 border border-slate-100 transition-all hover:bg-white hover:shadow-sm"
                 >
                   <span
                     class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
@@ -790,355 +870,687 @@
                   </p>
                 </div>
               {/if}
+
+              <div
+                class="p-4 rounded-2xl bg-slate-50 border border-slate-100 transition-all hover:bg-white hover:shadow-sm"
+              >
+                <span
+                  class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
+                >
+                  <svg
+                    class="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2.5"
+                      d="M5 13l4 4L19 7"
+                    /></svg
+                  >
+                  Availability
+                </span>
+                <p
+                  class="mt-1 font-black {book.status === 'available'
+                    ? 'text-emerald-600'
+                    : 'text-rose-600'}"
+                >
+                  {#if book.status === "available"}Available{:else if book.status === "sold"}Sold
+                    Out{:else}{book.status}{/if}
+                </p>
+              </div>
             </div>
 
+            {#if book.isOwner && Array.isArray(purchaseRequestQuery.data) && purchaseRequestQuery.data.length > 0}
+              <div class="mt-8 pt-8 border-t border-slate-100">
+                <div class="flex items-center justify-between mb-6">
+                  <h2 class="text-xl font-black text-gray-900">
+                    Purchase Requests
+                  </h2>
+                  <span
+                    class="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold border border-indigo-100"
+                  >
+                    {purchaseRequestQuery.data.filter(
+                      (r) => r.status === "requested",
+                    ).length} Pending
+                  </span>
+                </div>
+
+                <div class="space-y-4">
+                  {#each purchaseRequestQuery.data as request}
+                    <div
+                      class="p-5 rounded-2xl border {request.status ===
+                      'requested'
+                        ? 'border-indigo-100 bg-indigo-50/30'
+                        : 'border-slate-100 bg-slate-50/30'} flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:bg-white hover:shadow-md"
+                    >
+                      <div class="flex items-center gap-4">
+                        <div class="relative">
+                          {#if request.buyer?.image}
+                            <img
+                              src={request.buyer.image}
+                              alt=""
+                              class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                            />
+                          {:else}
+                            <div
+                              class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-black text-indigo-600 border-2 border-white shadow-sm"
+                            >
+                              {request.buyer?.name?.charAt(0) || "U"}
+                            </div>
+                          {/if}
+                          <div
+                            class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm"
+                          >
+                            <div
+                              class="w-3 h-3 rounded-full {request.status ===
+                              'requested'
+                                ? 'bg-amber-400 animate-pulse'
+                                : request.status === 'accepted'
+                                  ? 'bg-emerald-500'
+                                  : 'bg-rose-500'}"
+                            ></div>
+                          </div>
+                        </div>
+                        <div>
+                          <p class="font-bold text-gray-900">
+                            {request.buyer?.name}
+                          </p>
+                          <p class="text-xs text-gray-500 font-medium">
+                            {formatDate(request.createdAt)}
+                          </p>
+                          {#if request.message}
+                            <p
+                              class="mt-1 text-sm text-gray-600 italic line-clamp-1"
+                            >
+                              "{request.message}"
+                            </p>
+                          {/if}
+                        </div>
+                      </div>
+
+                      <div class="flex items-center gap-2">
+                        {#if request.status === "requested"}
+                          <button
+                            onclick={() =>
+                              handleRespondToRequest(request.id, true)}
+                            disabled={respondingToRequest === request.id}
+                            class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50"
+                          >
+                            {respondingToRequest === request.id
+                              ? "..."
+                              : "Accept"}
+                          </button>
+                          <button
+                            onclick={() =>
+                              handleRespondToRequest(request.id, false)}
+                            disabled={respondingToRequest === request.id}
+                            class="px-4 py-2 rounded-xl bg-white border border-rose-200 text-rose-600 text-xs font-bold hover:bg-rose-50 transition-all active:scale-95 disabled:opacity-50"
+                          >
+                            Decline
+                          </button>
+                        {:else}
+                          <span
+                            class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider border {request.status ===
+                            'accepted'
+                              ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                              : request.status === 'completed'
+                                ? 'bg-blue-50 border-blue-100 text-blue-600'
+                                : 'bg-rose-50 border-rose-100 text-rose-600'}"
+                          >
+                            {request.status}
+                          </span>
+                        {/if}
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+              </div>
+            {/if}
+
+            <!-- Description -->
             {#if book.description}
-              <div class="mt-5">
+              <div
+                class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-100"
+              >
                 <h2
-                  class="text-xs font-bold uppercase tracking-wide text-gray-500"
+                  class="flex items-center gap-2 text-sm font-bold text-gray-700"
                 >
+                  <svg
+                    class="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    /></svg
+                  >
                   Description
                 </h2>
-                <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">
+                <p class="mt-2 text-sm text-gray-600 whitespace-pre-line">
                   {book.description}
                 </p>
               </div>
             {/if}
 
-            {#if book.seller}
-              <div
-                class="mt-5 rounded-xl border border-gray-100 bg-slate-50 p-3.5"
-              >
-                <p
-                  class="text-xs font-bold uppercase tracking-wide text-gray-500"
-                >
-                  Seller
-                </p>
-                <div class="mt-2 flex items-center gap-3">
-                  {#if book.seller.image}
-                    <img
-                      src={book.seller.image}
-                      alt=""
-                      class="w-10 h-10 rounded-full"
-                    />
-                  {:else}
-                    <div
-                      class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center"
+            <!-- BUYER-SIDE ACTIONS -->
+            {#if !book.isOwner && $session.data?.user}
+              {@const reqStatus = buyerPurchaseRequest?.status}
+
+              {#if !buyerPurchaseRequest}
+                <div bind:this={ctaRef}>
+                  <button
+                    onclick={() => (requestToBuyModalOpen = true)}
+                    class="mt-6 w-full py-3.5 rounded-xl text-white font-bold text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-indigo-200"
+                    style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
+                    disabled={book.status !== "available"}
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"
+                      /></svg
                     >
-                      {book.seller.name.charAt(0).toUpperCase()}
-                    </div>
-                  {/if}
-                  <div class="min-w-0">
-                    <p class="text-sm font-semibold text-gray-900 truncate">
-                      {book.seller.name}
-                    </p>
-                    {#if book.seller.email}
-                      <a
-                        href="mailto:{book.seller.email}"
-                        class="text-xs text-blue-700 hover:underline break-all"
+                    Request to Buy
+                  </button>
+                </div>
+                <div class="mt-3 grid grid-cols-2 gap-3">
+                  <button
+                    onclick={handleSaveToggle}
+                    disabled={saving}
+                    class="py-2.5 rounded-xl border text-sm font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2 {savedState
+                      ? 'border-rose-200 bg-rose-50 text-rose-600'
+                      : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'}"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill={savedState ? "currentColor" : "none"}
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      /></svg
+                    >
+                    {saving ? "Saving..." : savedState ? "Saved" : "Save"}
+                  </button>
+                  <button
+                    onclick={handleShare}
+                    class="py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                      /></svg
+                    >
+                    Share
+                  </button>
+                </div>
+                <div
+                  class="mt-4 p-4 rounded-xl bg-blue-50 border border-blue-100"
+                >
+                  <p
+                    class="flex items-center gap-2 text-sm font-bold text-blue-700"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      /></svg
+                    >
+                    How it works
+                  </p>
+                  <p class="mt-1 text-sm text-blue-600">
+                    Send a request to the seller. If accepted, you can message
+                    them to arrange payment and pickup.
+                  </p>
+                </div>
+              {:else if reqStatus === "requested"}
+                <div
+                  class="mt-6 p-5 rounded-xl border-2 border-amber-100 bg-amber-50/50"
+                >
+                  <div class="flex items-start justify-between">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center"
                       >
-                        {book.seller.email}
-                      </a>
+                        <svg
+                          class="w-5 h-5 text-amber-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          ><path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          /></svg
+                        >
+                      </div>
+                      <div>
+                        <h3 class="font-bold text-gray-900">Request Sent</h3>
+                        <p class="text-sm text-gray-500">
+                          Waiting for seller's response
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold border border-amber-200"
+                      >● Pending</span
+                    >
+                  </div>
+                  <p class="mt-4 text-sm text-gray-500">
+                    Sellers usually respond within 2-4 hours. You'll be notified
+                    when they accept or decline.
+                  </p>
+                </div>
+                <button
+                  bind:this={ctaRef}
+                  onclick={handleCancelRequest}
+                  disabled={cancellingRequest}
+                  class="mt-3 w-full py-3 rounded-xl border-2 border-rose-200 text-rose-600 font-bold text-sm hover:bg-rose-50 transition-colors disabled:opacity-50"
+                  >{cancellingRequest
+                    ? "Cancelling..."
+                    : "Cancel Request"}</button
+                >
+                <div class="mt-3 grid grid-cols-2 gap-3">
+                  <button
+                    onclick={handleSaveToggle}
+                    disabled={saving}
+                    class="py-2.5 rounded-xl border text-sm font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2 {savedState
+                      ? 'border-rose-200 bg-rose-50 text-rose-600'
+                      : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'}"
+                    ><svg
+                      class="w-4 h-4"
+                      fill={savedState ? "currentColor" : "none"}
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      /></svg
+                    >{saving
+                      ? "Saving..."
+                      : savedState
+                        ? "Saved"
+                        : "Save"}</button
+                  >
+                  <button
+                    onclick={handleShare}
+                    class="py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                    ><svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                      /></svg
+                    >Share</button
+                  >
+                </div>
+              {:else if reqStatus === "accepted"}
+                <div
+                  class="mt-6 p-5 rounded-xl border-2 border-emerald-100 bg-emerald-50/50"
+                >
+                  <div class="flex items-start justify-between">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center"
+                      >
+                        <svg
+                          class="w-5 h-5 text-emerald-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          ><path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          /></svg
+                        >
+                      </div>
+                      <div>
+                        <h3 class="font-bold text-gray-900">
+                          {book.status === "sold"
+                            ? "Transaction Completed! 🎉"
+                            : "Request Accepted! 🎉"}
+                        </h3>
+                        <p class="text-sm text-gray-500">
+                          {book.status === "sold"
+                            ? `You purchased this book on ${formatDate(new Date().toISOString())}`
+                            : `${book.seller?.name} has accepted your request. You can now message them to arrange pickup and payment.`}
+                        </p>
+                      </div>
+                    </div>
+                    {#if book.status !== "sold"}
+                      <span
+                        class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 whitespace-nowrap"
+                        >Active</span
+                      >
                     {/if}
                   </div>
-                  {#if book.seller.isVerifiedSeller}
-                    <span
-                      class="ml-auto shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200"
+                  {#if book.status === "sold"}
+                    <div class="mt-3">
+                      <p class="text-sm font-bold text-gray-900">
+                        How was your experience?
+                      </p>
+                      <p class="text-xs text-emerald-600 mt-0.5">
+                        Your review helps other students make informed decisions
+                      </p>
+                    </div>
+                  {:else}
+                    <div
+                      class="mt-4 p-3 rounded-lg bg-white border border-emerald-100"
                     >
-                      Verified
-                    </span>
+                      <p class="text-sm font-bold text-gray-900 mb-2">
+                        Next Steps:
+                      </p>
+                      <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                          <span
+                            class="w-5 h-5 rounded-md bg-blue-100 text-blue-700 text-xs font-bold flex items-center justify-center"
+                            >1</span
+                          ><span class="text-sm text-gray-600"
+                            >Message the seller to arrange meetup location</span
+                          >
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <span
+                            class="w-5 h-5 rounded-md bg-blue-100 text-blue-700 text-xs font-bold flex items-center justify-center"
+                            >2</span
+                          ><span class="text-sm text-gray-600"
+                            >Inspect the book before payment</span
+                          >
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <span
+                            class="w-5 h-5 rounded-md bg-blue-100 text-blue-700 text-xs font-bold flex items-center justify-center"
+                            >3</span
+                          ><span class="text-sm text-gray-600"
+                            >Rate your experience once done</span
+                          >
+                        </div>
+                      </div>
+                    </div>
                   {/if}
                 </div>
-              </div>
-            {/if}
 
-            {#if book.seller && !book.isOwner && $session.data?.user}
-              {@const sellerBlocked = !!blockedUsersQuery.data?.some(
-                (entry) => entry.blockedUserId === book.sellerId,
-              )}
-              <div
-                class="mt-8 relative group overflow-hidden rounded-4xl bg-slate-900 p-8 shadow-2xl transition-all hover:scale-[1.01]"
-              >
-                <!-- Background decorative elements -->
-                <div
-                  class="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-blue-500/10 blur-3xl"
-                ></div>
-                <div
-                  class="absolute -left-8 -bottom-8 h-32 w-32 rounded-full bg-cyan-500/10 blur-3xl"
-                ></div>
-
-                <div
-                  class="relative flex flex-col sm:flex-row items-start sm:items-center gap-6"
-                >
-                  <div class="flex-1">
-                    <span
-                      class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] font-black text-blue-300 uppercase tracking-[0.2em] mb-4"
-                    >
-                      Seller Reputation
-                    </span>
-                    <h3 class="text-2xl font-black text-white tracking-tight">
-                      Trust Profile
-                    </h3>
-                    <p class="mt-1 text-slate-400 text-sm font-medium">
-                      Verified marketplace participant
-                    </p>
-                  </div>
-
-                  <div
-                    class="flex items-center gap-4 bg-white/5 backdrop-blur-md rounded-3xl p-4 border border-white/10 shadow-inner"
-                  >
-                    <div
-                      class="text-center px-4 border-r border-white/10 group/stat"
-                    >
-                      <p
-                        class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1"
-                      >
-                        Rating
-                      </p>
-                      <button
-                        onclick={() => (reviewsModalOpen = true)}
-                        class="flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
-                      >
-                        <span
-                          class="text-2xl font-black text-white group-hover/stat:text-blue-400 transition-colors"
-                        >
-                          {sellerReputationQuery.data?.averageRating.toFixed(
-                            1,
-                          ) || "0.0"}
-                        </span>
-                        <svg
-                          class="w-5 h-5 text-amber-400 group-hover/stat:drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] transition-all"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                    <div class="text-center px-4 group/stat">
-                      <p
-                        class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1"
-                      >
-                        Reviews
-                      </p>
-                      <button
-                        onclick={() => (reviewsModalOpen = true)}
-                        class="text-2xl font-black text-white hover:text-blue-400 transition-all hover:scale-105 active:scale-95"
-                      >
-                        {sellerReputationQuery.data?.totalRatings || 0}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="mt-8 grid grid-cols-3 gap-3">
+                {#if book.status === "sold"}
                   <button
+                    bind:this={ctaRef}
                     onclick={() => (rateModalOpen = true)}
-                    class="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 transition-all hover:bg-white/10 hover:border-white/20 active:scale-95"
+                    class="mt-3 w-full py-3.5 rounded-xl text-white font-bold text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-indigo-200"
+                    style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
                   >
-                    <div
-                      class="p-3 rounded-xl bg-blue-500/20 text-blue-400 group-hover/btn:scale-110 transition-transform"
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                      /></svg
+                    >
+                    Rate Your Experience
+                  </button>
+                  <div class="mt-3 flex gap-3">
+                    <a
+                      href="/messages?listing={book.id}"
+                      class="flex-1 py-3 rounded-xl border border-slate-200 text-slate-700 font-bold text-sm bg-white hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
                     >
                       <svg
-                        class="w-5 h-5"
+                        class="w-4 h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                         ><path
                           stroke-linecap="round"
                           stroke-linejoin="round"
-                          stroke-width="2.5"
-                          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                          stroke-width="2"
+                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                         /></svg
                       >
-                    </div>
-                    <span
-                      class="text-[11px] font-black text-slate-300 uppercase tracking-widest"
-                      >Rate</span
-                    >
-                  </button>
-
-                  <button
-                    onclick={() => (reportModalOpen = true)}
-                    class="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 transition-all hover:bg-rose-500/20 hover:border-rose-500/30 active:scale-95"
-                  >
-                    <div
-                      class="p-3 rounded-xl bg-rose-500/20 text-rose-400 group-hover/btn:scale-110 transition-transform"
+                      Message Seller
+                    </a>
+                    <button
+                      onclick={() => (reportModalOpen = true)}
+                      class="flex-1 py-3 rounded-xl border border-rose-100 text-rose-600 font-bold text-sm bg-rose-50/30 hover:bg-rose-50 transition-colors flex items-center justify-center gap-2"
                     >
                       <svg
-                        class="w-5 h-5"
+                        class="w-4 h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                         ><path
                           stroke-linecap="round"
                           stroke-linejoin="round"
-                          stroke-width="2.5"
+                          stroke-width="2"
                           d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                         /></svg
                       >
-                    </div>
-                    <span
-                      class="text-[11px] font-black text-slate-300 uppercase tracking-widest"
-                      >Report</span
-                    >
-                  </button>
-
-                  <button
-                    onclick={() => (blockModalOpen = true)}
-                    class="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 transition-all hover:bg-slate-500/20 hover:border-slate-500/30 active:scale-95"
+                      Report Issue
+                    </button>
+                  </div>
+                {:else}
+                  <a
+                    bind:this={ctaRef}
+                    href="/messages?listing={book.id}"
+                    class="mt-3 w-full py-3.5 rounded-xl text-white font-bold text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-indigo-200"
+                    style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
                   >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                      /></svg
+                    >
+                    Message Seller
+                  </a>
+                {/if}
+              {:else if reqStatus === "completed"}
+                <div
+                  class="mt-6 p-5 rounded-xl border-2 border-emerald-100 bg-emerald-50/50"
+                >
+                  <div class="flex items-center gap-3">
                     <div
-                      class="p-3 rounded-xl bg-slate-500/20 text-slate-400 group-hover/btn:scale-110 transition-transform"
+                      class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center"
                     >
-                      {#if sellerBlocked}
-                        <svg
-                          class="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          ><path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2.5"
-                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                          /></svg
-                        >
-                      {:else}
-                        <svg
-                          class="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          ><path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2.5"
-                            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-                          /></svg
-                        >
-                      {/if}
+                      <svg
+                        class="w-6 h-6 text-emerald-600"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                        ><path
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        /></svg
+                      >
                     </div>
-                    <span
-                      class="text-[11px] font-black text-slate-300 uppercase tracking-widest text-center"
-                    >
-                      {sellerBlocked ? "Unblock" : "Block"}
-                    </span>
-                  </button>
+                    <div>
+                      <h3 class="font-bold text-gray-900">
+                        Transaction Completed! 🎉
+                      </h3>
+                      <p class="text-sm text-gray-500">
+                        You purchased this book on {formatDate(
+                          new Date().toISOString(),
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="mt-3">
+                    <p class="text-sm font-bold text-gray-900">
+                      How was your experience?
+                    </p>
+                    <p class="text-xs text-emerald-600 mt-0.5">
+                      Your review helps other students make informed decisions
+                    </p>
+                  </div>
                 </div>
-
-                {#if trustFeedback}
-                  <div
-                    class="mt-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold text-center"
-                    in:fade
+                <button
+                  bind:this={ctaRef}
+                  onclick={() => (rateModalOpen = true)}
+                  class="mt-3 w-full py-3.5 rounded-xl text-white font-bold text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-indigo-200"
+                  style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                    /></svg
                   >
-                    {trustFeedback}
-                  </div>
-                {/if}
-                {#if trustError}
-                  <div
-                    class="mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold text-center"
-                    in:fade
+                  Rate Your Experience
+                </button>
+                <div class="mt-2 grid grid-cols-2 gap-3">
+                  <a
+                    href="/messages?listing={book.id}"
+                    class="py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                    ><svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                      /></svg
+                    >Message Seller</a
                   >
-                    {trustError}
+                  <button
+                    onclick={() => (reportModalOpen = true)}
+                    class="py-2.5 rounded-xl border border-rose-200 text-rose-600 text-sm font-semibold hover:bg-rose-50 transition-colors flex items-center justify-center gap-2"
+                    ><svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      /></svg
+                    >Report Issue</button
+                  >
+                </div>
+              {:else if reqStatus === "rejected"}
+                <div
+                  bind:this={ctaRef}
+                  class="mt-6 p-5 rounded-xl border-2 border-rose-100 bg-rose-50/50"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center"
+                    >
+                      <svg
+                        class="w-5 h-5 text-rose-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        ><path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        /></svg
+                      >
+                    </div>
+                    <div>
+                      <h3 class="font-bold text-gray-900">Request Declined</h3>
+                      <p class="text-sm text-gray-500">
+                        The seller has declined your request.
+                      </p>
+                    </div>
                   </div>
-                {/if}
-              </div>
-            {/if}
-
-            <div class="mt-5 flex flex-wrap gap-2.5">
-              {#if book.isOwner}
+                </div>
+                <a
+                  href="/books"
+                  use:routeAction
+                  class="mt-3 w-full py-3.5 rounded-xl text-white font-bold text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-indigo-200"
+                  style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
+                  >Browse Similar Books</a
+                >
+              {/if}
+            {:else if book.isOwner}
+              <div class="mt-5 flex flex-wrap gap-2.5">
                 {#if book.status === "available"}
                   <a
                     href="/books/sell?edit={book.id}"
                     use:routeAction
                     class="px-4 py-2 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors"
+                    >Edit Listing</a
                   >
-                    Edit Listing
-                  </a>
                   <button
                     onclick={handleMarkSold}
                     disabled={markingSold}
                     class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                    >{markingSold ? "Marking..." : "Mark as Sold"}</button
                   >
-                    {markingSold ? "Marking..." : "Mark as Sold"}
-                  </button>
                 {/if}
                 <button
                   onclick={handleDelete}
                   disabled={deleting}
                   class="px-4 py-2 rounded-xl border border-rose-200 text-rose-700 text-sm font-semibold hover:bg-rose-50 transition-colors disabled:opacity-50"
+                  >{deleting ? "Deleting..." : "Delete"}</button
                 >
-                  {deleting ? "Deleting..." : "Delete"}
-                </button>
-              {:else if $session.data?.user && book.status === "available"}
-                <button
-                  onclick={handleSaveToggle}
-                  disabled={saving}
-                  class="px-4 py-2 rounded-xl border text-sm font-semibold transition-colors disabled:opacity-50 {savedState
-                    ? 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'
-                    : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'}"
-                >
-                  {saving ? "Updating..." : savedState ? "Saved" : "Save"}
-                </button>
+              </div>
+            {:else if !$session.data?.user && book.status === "available"}
+              <a
+                href="/register"
+                use:routeAction
+                class="mt-6 w-full inline-block text-center py-3.5 rounded-xl text-white font-bold text-base transition-all"
+                style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
+                >Sign in to interact</a
+              >
+            {/if}
 
-                {#if purchaseRequestQuery.data}
-                  <div class="flex items-center gap-2">
-                    <span
-                      class="px-3 py-2 rounded-xl border text-sm font-bold {getStatusColorClass(
-                        purchaseRequestQuery.data.status,
-                      )}"
-                    >
-                      Request {getStatusLabel(purchaseRequestQuery.data.status)}
-                    </span>
-
-                    {#if purchaseRequestQuery.data.status === "requested"}
-                      <button
-                        onclick={handleCancelRequest}
-                        disabled={cancellingRequest}
-                        class="px-4 py-2 rounded-xl border border-rose-200 text-rose-700 text-sm font-semibold hover:bg-rose-50 transition-colors disabled:opacity-50"
-                      >
-                        {cancellingRequest ? "Cancelling..." : "Cancel"}
-                      </button>
-                    {:else if purchaseRequestQuery.data.status === "accepted"}
-                      <a
-                        href="/messages?listing={book.id}"
-                        class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
-                      >
-                        Chat with Seller
-                      </a>
-                      {#if sellerContactQuery.data?.email}
-                        <a
-                          href="mailto:{sellerContactQuery.data.email}"
-                          class="px-4 py-2 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 text-sm font-semibold hover:bg-blue-100 transition-colors"
-                        >
-                          Email Seller
-                        </a>
-                      {/if}
-                    {/if}
-                  </div>
-                {:else}
-                  <button
-                    onclick={() => (requestToBuyModalOpen = true)}
-                    class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
-                  >
-                    Request to Buy
-                  </button>
-                {/if}
-              {:else if !$session.data?.user && book.status === "available"}
-                <a
-                  href="/register"
-                  use:routeAction
-                  class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
-                >
-                  Sign in to interact
-                </a>
-              {/if}
-            </div>
-
-            <div class="mt-5 text-xs text-gray-500 flex items-center gap-2">
+            <div class="mt-5 text-xs text-gray-400 flex items-center gap-2">
               <span>Posted {formatDate(book.createdAt)}</span>
               <span>•</span>
               <span>{book.viewCount} views</span>
@@ -1409,71 +1821,103 @@
       aria-label="Close rating modal"
     ></div>
     <div
-      class="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200"
+      class="relative w-full max-w-lg bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200"
       transition:fly={{ y: 20, duration: 400 }}
     >
-      <div class="p-8 sm:p-10">
-        <div class="text-center mb-8">
-          <div
-            class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-200"
+      <div class="px-8 pt-8 pb-10">
+        <div class="flex items-center justify-between mb-8">
+          <h3 class="text-2xl font-black text-[#1e293b] tracking-tight">
+            Rate Your Experience
+          </h3>
+          <button
+            onclick={() => (rateModalOpen = false)}
+            class="p-2 hover:bg-slate-100 rounded-full transition-colors"
           >
             <svg
-              class="w-8 h-8 text-blue-600"
+              class="w-6 h-6 text-slate-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-              ><path
+            >
+              <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                stroke-width="2.5"
-                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-              /></svg
-            >
-          </div>
-          <h3 class="text-2xl font-black text-slate-900 tracking-tight">
-            Rate Seller
-          </h3>
-          <p class="text-slate-500 text-sm font-medium mt-1">
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <div class="mb-8">
+          <p class="text-[#64748b] text-base font-medium mb-6">
             How was your experience with {bookQuery.data.seller?.name}?
           </p>
-        </div>
 
-        <div class="flex justify-center gap-2 mb-8">
-          {#each Array(5) as _, i}
-            {@const starVal = i + 1}
-            <!-- svelte-ignore a11y_consider_explicit_label -->
-            <button
-              onclick={() => (ratingValue = starVal)}
-              class="p-2 transition-transform hover:scale-110 active:scale-90"
-            >
-              <svg
-                class="w-10 h-10 {starVal <= ratingValue
-                  ? 'text-amber-400'
-                  : 'text-slate-200'}"
-                fill="currentColor"
-                viewBox="0 0 24 24"
+          <div class="flex justify-center gap-3 mb-8">
+            {#each Array(5) as _, i}
+              {@const starVal = i + 1}
+              <!-- svelte-ignore a11y_consider_explicit_label -->
+              <button
+                onclick={() => (ratingValue = starVal)}
+                class="transition-transform hover:scale-110 active:scale-95"
               >
-                <path
-                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                />
-              </svg>
-            </button>
-          {/each}
+                <svg
+                  class="w-10 h-10 {starVal <= ratingValue
+                    ? 'text-amber-400 fill-current'
+                    : 'text-slate-200 fill-current'}"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                  />
+                </svg>
+              </button>
+            {/each}
+          </div>
+
+          <div class="mb-6">
+            <label class="block text-sm font-bold text-[#1e293b] mb-3">
+              Share your experience (optional)
+            </label>
+            <textarea
+              bind:value={ratingReview}
+              rows="4"
+              placeholder="Tell others about your experience with this seller..."
+              class="w-full px-5 py-4 rounded-2xl bg-white border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all text-sm font-medium resize-none placeholder:text-slate-400"
+            ></textarea>
+            <p class="mt-2 text-xs text-slate-400">
+              Your review will help other buyers make informed decisions
+            </p>
+          </div>
+
+          <div class="mt-8">
+            <label class="block text-sm font-bold text-[#1e293b] mb-4">
+              What stood out? (optional)
+            </label>
+            <div class="flex flex-wrap gap-2.5">
+              {#each availableRatingTags as tag}
+                <button
+                  onclick={() => toggleRatingTag(tag)}
+                  class="px-5 py-2.5 rounded-full text-xs font-bold border transition-all {ratingTags.includes(
+                    tag,
+                  )
+                    ? 'bg-white border-indigo-600 text-indigo-600'
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'}"
+                >
+                  {tag}
+                </button>
+              {/each}
+            </div>
+          </div>
         </div>
 
-        <textarea
-          bind:value={ratingReview}
-          rows="4"
-          placeholder="Share more details about the transaction... (optional)"
-          class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-medium resize-none shadow-inner"
-        ></textarea>
-
-        <div class="mt-8 flex gap-4">
+        <div class="flex gap-4">
           <button
             onclick={() => (rateModalOpen = false)}
-            class="flex-1 py-4 bg-slate-100 text-slate-600 font-black text-sm rounded-2xl hover:bg-slate-200 transition-all active:scale-95"
+            class="flex-1 py-4 bg-white border border-slate-200 text-slate-600 font-bold text-sm rounded-2xl hover:bg-slate-50 transition-all active:scale-95"
           >
-            CANCEL
+            Cancel
           </button>
           <button
             onclick={async () => {
@@ -1481,9 +1925,10 @@
               if (!trustError) rateModalOpen = false;
             }}
             disabled={ratingSubmitting}
-            class="flex-1 py-4 bg-blue-600 text-white font-black text-sm rounded-2xl hover:bg-blue-700 disabled:opacity-50 transition-all shadow-xl shadow-blue-200 active:scale-95"
+            class="flex-1 py-4 bg-indigo-600 text-white font-bold text-sm rounded-2xl hover:bg-indigo-700 disabled:opacity-50 transition-all active:scale-95"
+            style="background: #6366f1;"
           >
-            {ratingSubmitting ? "SUBMITTING..." : "SUBMIT RATING"}
+            {ratingSubmitting ? "Submitting..." : "Submit Review"}
           </button>
         </div>
       </div>
@@ -1663,5 +2108,466 @@
         </div>
       </div>
     </div>
+  </div>
+{/if}
+
+{#if profileModalOpen && book?.seller}
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+    transition:fade={{ duration: 200 }}
+  >
+    <div
+      class="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+      onclick={() => (profileModalOpen = false)}
+      role="button"
+      tabindex="-1"
+    ></div>
+    <div
+      class="relative w-full max-w-2xl bg-white rounded-3xl overflow-hidden shadow-2xl"
+      in:fly={{ y: 20, duration: 400 }}
+    >
+      <!-- Header -->
+      <div
+        class="relative h-32 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500"
+      >
+        <button
+          onclick={() => (profileModalOpen = false)}
+          class="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            /></svg
+          >
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="relative px-6 pb-8">
+        <!-- Avatar -->
+        <div class="absolute -top-12 left-6">
+          <div class="p-1.5 bg-white rounded-full shadow-xl">
+            {#if book?.seller?.image}
+              <img
+                src={book.seller.image}
+                alt=""
+                class="w-24 h-24 rounded-full object-cover"
+              />
+            {:else}
+              <div
+                class="w-24 h-24 rounded-full bg-indigo-100 text-indigo-700 text-3xl font-black flex items-center justify-center"
+              >
+                {book?.seller?.name?.charAt(0) || "U"}
+              </div>
+            {/if}
+          </div>
+        </div>
+
+        <div
+          class="pt-16 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        >
+          <div>
+            <h2 class="text-2xl font-black text-gray-900">
+              {book?.seller?.name || "Anonymous"}
+            </h2>
+            <p class="text-sm text-gray-500">{book?.seller?.email || ""}</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              {#if book?.seller?.isVerifiedSeller}
+                <span
+                  class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100 uppercase tracking-wider"
+                  >Verified Seller</span
+                >
+              {/if}
+              <span
+                class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200 uppercase tracking-wider"
+                >Active Member</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div
+            class="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center"
+          >
+            <p
+              class="text-xs font-bold text-gray-400 uppercase tracking-widest"
+            >
+              Listed
+            </p>
+            <p class="mt-1 text-xl font-black text-gray-900">
+              {sellerListingsQuery.data?.length || 0}
+            </p>
+          </div>
+          <div
+            class="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center"
+          >
+            <p
+              class="text-xs font-bold text-gray-400 uppercase tracking-widest"
+            >
+              Sold
+            </p>
+            <p class="mt-1 text-xl font-black text-emerald-600">
+              {sellerReputationQuery.data?.soldCount || 0}
+            </p>
+          </div>
+          <div
+            class="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center"
+          >
+            <p
+              class="text-xs font-bold text-gray-400 uppercase tracking-widest"
+            >
+              Rating
+            </p>
+            <div class="mt-1 flex items-center justify-center gap-1">
+              <span class="text-xl font-black text-amber-500"
+                >{sellerReputationQuery.data?.averageRating?.toFixed(1) ||
+                  "0.0"}</span
+              >
+              <svg
+                class="w-4 h-4 text-amber-500 fill-current"
+                viewBox="0 0 20 20"
+                ><path
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                /></svg
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="mt-8">
+          <div class="flex border-b border-slate-100 px-2">
+            {#each ["listings", "reviews"] as tab}
+              <button
+                onclick={() => (profileTab = tab as any)}
+                class="px-6 py-3 text-sm font-bold capitalize transition-all relative {profileTab ===
+                tab
+                  ? 'text-indigo-600'
+                  : 'text-gray-400 hover:text-gray-600'}"
+              >
+                {tab}
+                {#if profileTab === tab}
+                  <div
+                    class="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-t-full"
+                    in:fade
+                  ></div>
+                {/if}
+              </button>
+            {/each}
+          </div>
+
+          <div class="mt-6">
+            {#if profileTab === "listings"}
+              {#if sellerListingsQuery.data && sellerListingsQuery.data.length > 0}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {#each sellerListingsQuery.data as item}
+                    <a
+                      href="/books/{item.id}"
+                      class="group bg-slate-50/50 p-3 rounded-2xl border border-slate-100 hover:border-indigo-200 transition-all"
+                    >
+                      <div class="flex gap-3">
+                        <div
+                          class="w-20 h-20 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0"
+                        >
+                          {#if item.images?.[0]}
+                            <img
+                              src={item.images[0].imageUrl}
+                              alt={item.title}
+                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          {:else}
+                            <div
+                              class="w-full h-full flex items-center justify-center text-slate-300"
+                            >
+                              <svg
+                                class="w-8 h-8"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="1.5"
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                /></svg
+                              >
+                            </div>
+                          {/if}
+                        </div>
+                        <div class="min-w-0 flex flex-col justify-center">
+                          <p class="text-sm font-bold text-gray-900 truncate">
+                            {item.title}
+                          </p>
+                          <p class="text-[10px] text-gray-500 truncate">
+                            {item.author}
+                          </p>
+                          <div class="mt-1 flex items-center gap-2">
+                            <span class="text-xs font-black text-indigo-600"
+                              >₹{parseFloat(
+                                item.price || "0",
+                              ).toLocaleString()}</span
+                            >
+                            <span
+                              class="text-[9px] px-1.5 py-0.5 rounded-full bg-white border border-slate-100 text-slate-500 font-bold uppercase tracking-tighter"
+                              >{item.status}</span
+                            >
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  {/each}
+                </div>
+              {:else}
+                <div class="text-center py-12">
+                  <p class="text-sm text-gray-500">No other listings found</p>
+                </div>
+              {/if}
+            {:else if profileTab === "reviews"}
+              {#if sellerReputationQuery.data?.recentRatings && sellerReputationQuery.data.recentRatings.length > 0}
+                <div class="space-y-4">
+                  {#each sellerReputationQuery.data.recentRatings as review}
+                    <div
+                      class="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 hover:bg-white transition-colors"
+                    >
+                      <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                          {#if review.rater?.image}
+                            <img
+                              src={review.rater.image}
+                              alt=""
+                              class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                            />
+                          {:else}
+                            <div
+                              class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs border-2 border-white shadow-sm"
+                            >
+                              {review.rater?.name?.charAt(0) || "U"}
+                            </div>
+                          {/if}
+                          <div>
+                            <p class="text-sm font-bold text-gray-900">
+                              {review.rater?.name || "Anonymous"}
+                            </p>
+                            <p class="text-[10px] text-gray-400 font-medium">
+                              {new Date(review.createdAt).toLocaleDateString(
+                                undefined,
+                                {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                },
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="flex items-center gap-1 px-2 py-1 bg-amber-50 rounded-lg border border-amber-100"
+                        >
+                          <span class="text-xs font-black text-amber-600"
+                            >{review.rating}</span
+                          >
+                          <svg
+                            class="w-3 h-3 text-amber-500 fill-current"
+                            viewBox="0 0 20 20"
+                            ><path
+                              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                            /></svg
+                          >
+                        </div>
+                      </div>
+                      {#if review.review}
+                        <div class="mt-3 pl-13">
+                          <p
+                            class="text-sm text-gray-600 leading-relaxed italic"
+                          >
+                            "{review.review}"
+                          </p>
+                        </div>
+                      {/if}
+                    </div>
+                  {/each}
+                </div>
+              {:else}
+                <div class="text-center py-12 px-4">
+                  <div
+                    class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4"
+                  >
+                    <svg
+                      class="w-8 h-8 text-slate-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                      /></svg
+                    >
+                  </div>
+                  <p class="text-sm font-bold text-gray-900">No reviews yet</p>
+                  <p class="text-xs text-gray-400 mt-1 max-w-[200px] mx-auto">
+                    Be the first to rate this seller after a successful
+                    transaction!
+                  </p>
+                </div>
+              {/if}
+            {/if}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{/if}
+
+{#if showStickyBar && bookQuery.data}
+  <div
+    class="fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-slate-200 p-4 shadow-2xl transition-all duration-500 transform {showStickyBar
+      ? 'translate-y-0'
+      : 'translate-y-full'}"
+    transition:fly={{ y: 100, duration: 500 }}
+  >
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3 min-w-0">
+        {#if book?.images?.[0]}
+          <img
+            src={book?.images[0].imageUrl}
+            alt=""
+            class="w-12 h-12 rounded-lg object-cover border border-slate-100"
+          />
+        {/if}
+        <div class="min-w-0">
+          <p class="text-sm font-bold text-gray-900 truncate">{book?.title}</p>
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-600 font-bold text-sm"
+              >₹{parseFloat(book?.price || "0").toLocaleString()}</span
+            >
+            <span
+              class="px-1.5 py-0.5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-tight"
+              >{book?.status}</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        {#if !book?.isOwner && $session.data?.user}
+          {@const reqStatus = buyerPurchaseRequest?.status}
+          {#if !purchaseRequestQuery.data}
+            <button
+              onclick={() => (requestToBuyModalOpen = true)}
+              class="px-6 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg shadow-indigo-100 whitespace-nowrap"
+              style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
+            >
+              Request to Buy
+            </button>
+          {:else if reqStatus === "requested"}
+            <button
+              onclick={handleCancelRequest}
+              class="px-6 py-2.5 rounded-xl border border-rose-200 text-rose-600 text-sm font-bold"
+              >Cancel</button
+            >
+          {:else if reqStatus === "accepted"}
+            <a
+              href="/messages?listing={book?.id}"
+              class="px-6 py-2.5 rounded-xl text-white text-sm font-bold"
+              style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
+              >Message</a
+            >
+          {:else if reqStatus === "completed"}
+            <button
+              onclick={() => (rateModalOpen = true)}
+              class="px-6 py-2.5 rounded-xl text-white text-sm font-bold"
+              style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
+              >Rate</button
+            >
+          {/if}
+        {/if}
+      </div>
+    </div>
+  </div>
+{/if}
+
+{#if trustFeedback}
+  <div
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] px-6 py-3 rounded-full bg-slate-900 text-white font-bold text-sm shadow-2xl flex items-center gap-3"
+    transition:fly={{ y: 20, duration: 300 }}
+  >
+    <svg
+      class="w-5 h-5 text-emerald-400"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M5 13l4 4L19 7"
+      />
+    </svg>
+    {trustFeedback}
+    <button
+      onclick={() => (trustFeedback = null)}
+      class="ml-2 p-1 hover:bg-slate-700 rounded-full transition-colors"
+    >
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
+  </div>
+{/if}
+
+{#if trustError}
+  <div
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] px-6 py-3 rounded-full bg-white border border-rose-100 text-rose-600 font-bold text-sm shadow-2xl flex items-center gap-3"
+    transition:fly={{ y: 20, duration: 300 }}
+  >
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M12 8v4m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+      />
+    </svg>
+    {trustError}
+    <button
+      onclick={() => (trustError = null)}
+      class="ml-2 p-1 hover:bg-rose-50 rounded-full transition-colors"
+    >
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
   </div>
 {/if}
