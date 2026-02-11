@@ -2889,67 +2889,109 @@
 
 {#if showStickyBar && bookQuery.data}
   <div
-    class="fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-slate-200 p-4 shadow-2xl transition-all duration-500 transform {showStickyBar
+    class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-2xl border-t border-slate-100 py-3.5 sm:py-5 px-4 sm:px-10 shadow-[0_-12px_40px_-15px_rgba(0,0,0,0.12)] transition-all duration-500 transform {showStickyBar
       ? 'translate-y-0'
       : 'translate-y-full'}"
     transition:fly={{ y: 100, duration: 500 }}
   >
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3 min-w-0">
-        {#if book?.images?.[0]}
-          <img
-            src={book?.images[0].imageUrl}
-            alt=""
-            class="w-12 h-12 rounded-lg object-cover border border-slate-100"
-          />
-        {/if}
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-6">
+      <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+        <div class="shrink-0">
+          {#if book?.images?.[0]}
+            <img
+              src={book?.images[0].imageUrl}
+              alt=""
+              class="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover border border-slate-100 shadow-sm transition-transform hover:scale-105"
+            />
+          {:else}
+            <div
+              class="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400"
+            >
+              <svg
+                class="w-6 h-6 sm:w-8 sm:h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+          {/if}
+        </div>
         <div class="min-w-0">
-          <p class="text-sm font-bold text-gray-900 truncate">{book?.title}</p>
-          <div class="flex items-center gap-2">
-            <span class="text-emerald-600 font-bold text-sm"
+          <p
+            class="text-sm sm:text-lg font-black text-slate-900 truncate leading-tight mb-0.5 sm:mb-1"
+          >
+            {book?.title}
+          </p>
+          <div class="flex items-center gap-2 sm:gap-3">
+            <span class="text-emerald-600 font-black text-xs sm:text-base"
               >Rs. {parseFloat(book?.price || "0").toLocaleString()}</span
             >
             <span
-              class="px-1.5 py-0.5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-tight"
+              class="px-1.5 py-0.5 rounded-full bg-slate-100 text-[8px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest border border-slate-200/50"
               >{book?.status}</span
             >
           </div>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 sm:gap-3">
         {#if !book?.isOwner && $session.data?.user}
           {@const reqStatus = buyerPurchaseRequest?.status}
+
           {#if !purchaseRequestQuery.data}
-            <button
-              onclick={() => (requestToBuyModalOpen = true)}
-              class="px-6 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg shadow-indigo-100 whitespace-nowrap"
-              style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
-            >
-              Request to Buy
-            </button>
+            <div class="flex items-center gap-2 sm:gap-3">
+              <button
+                onclick={() => (requestToBuyModalOpen = true)}
+                class="px-4 sm:px-12 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-white text-xs sm:text-base font-black shadow-xl shadow-indigo-100/50 whitespace-nowrap active:scale-[0.98] transition-all hover:brightness-110"
+                style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
+              >
+                Request to Buy
+              </button>
+
+              <button
+                onclick={handleSaveToggle}
+                disabled={saving}
+                class="flex w-10 h-10 sm:w-12 sm:h-12 items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200 bg-white text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all active:scale-90 shadow-sm group"
+                aria-label="Toggle wishlist"
+              >
+                <svg
+                  class="w-4 h-4 sm:w-5 h-5 transition-all {savedState
+                    ? 'fill-rose-500 text-rose-500 scale-110'
+                    : 'group-hover:scale-110'}"
+                  fill={savedState ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2.5"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+              </button>
+            </div>
           {:else if reqStatus === "requested"}
             <button
               onclick={handleCancelRequest}
-              class="px-6 py-2.5 rounded-xl border border-rose-200 text-rose-600 text-sm font-bold"
-              >Cancel</button
+              class="px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl border-2 border-rose-100 bg-rose-50 text-rose-600 text-xs sm:text-base font-black hover:bg-rose-100 active:scale-95 transition-all"
             >
+              Cancel Request
+            </button>
           {:else if reqStatus === "accepted"}
             <div
-              class="px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-black uppercase tracking-wider border border-emerald-100 flex items-center gap-1.5"
+              class="hidden sm:flex px-4 py-2 rounded-2xl bg-emerald-50 text-emerald-600 text-[11px] font-black uppercase tracking-widest border border-emerald-100 items-center gap-2"
             >
-              <svg
-                class="w-3.5 h-3.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="3"
-                  d="M5 13l4 4L19 7"
-                /></svg
-              >
+              <div
+                class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+              ></div>
               Accepted
             </div>
             {#if hasSellerContactInfo}
@@ -2958,51 +3000,54 @@
                   const el = document.getElementById("contact-info-block");
                   if (el) el.scrollIntoView({ behavior: "smooth" });
                 }}
-                class="px-5 py-2.5 rounded-xl text-white text-sm font-black flex items-center gap-2 active:scale-95 transition-all shadow-lg shadow-indigo-100"
+                class="px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-white text-xs font-black flex items-center gap-2 active:scale-95 transition-all shadow-xl shadow-indigo-100/50"
                 style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
               >
                 <svg
-                  class="w-4 h-4"
+                  class="w-4 h-4 sm:w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
-                  ><path
+                >
+                  <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    stroke-width="2"
+                    stroke-width="2.5"
                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                  /></svg
-                >
-                View Contact Info
+                  />
+                </svg>
+                Contact
               </button>
             {:else}
               <a
                 href="/messages?listing={book?.id}"
-                class="px-6 py-2.5 rounded-xl text-white text-sm font-black flex items-center gap-2 active:scale-95 transition-all shadow-lg shadow-indigo-100"
+                class="px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-white text-xs font-black flex items-center gap-2 active:scale-95 transition-all shadow-xl shadow-indigo-100/50 hover:brightness-110"
                 style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
               >
                 <svg
-                  class="w-4 h-4"
+                  class="w-4 h-4 sm:w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
-                  ><path
+                >
+                  <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    stroke-width="2"
+                    stroke-width="2.5"
                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                  /></svg
-                >
+                  />
+                </svg>
                 Message
               </a>
             {/if}
           {:else if reqStatus === "completed"}
             <button
               onclick={() => (rateModalOpen = true)}
-              class="px-6 py-2.5 rounded-xl text-white text-sm font-bold"
+              class="px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-white text-xs sm:text-base font-black shadow-xl shadow-indigo-100/50 active:scale-95 transition-all hover:brightness-110"
               style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);"
-              >Rate</button
             >
+              Rate Seller
+            </button>
           {/if}
         {/if}
       </div>
