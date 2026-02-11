@@ -244,6 +244,30 @@ export async function getNotices(req: Request, res: Response) {
   }
 }
 
+// Get a single notice
+export async function getNotice(req: Request, res: Response) {
+  try {
+    const noticeId = Number(req.params.id)
+    if (!noticeId || Number.isNaN(noticeId)) {
+      return res.status(400).json({ success: false, message: 'Invalid notice ID' })
+    }
+
+    const [found] = await db.select().from(notice).where(eq(notice.id, noticeId))
+
+    if (!found) {
+      return res.status(404).json({ success: false, message: 'Notice not found' })
+    }
+
+    return res.json({ success: true, data: found })
+  } catch (error: any) {
+    console.error('Error fetching notice:', error)
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch notice',
+    })
+  }
+}
+
 // Get notice stats
 export async function getNoticeStats(_req: Request, res: Response) {
   try {

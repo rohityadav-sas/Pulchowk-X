@@ -8,6 +8,7 @@ import {
   syncIoeExamNotices,
   uploadNoticeAttachment,
   updateNotice,
+  getNotice,
 } from '../controllers/notice.controller.js'
 import { requireAuth } from '../middleware/auth.middleware.js'
 
@@ -18,6 +19,7 @@ const upload = multer({ storage: multer.memoryStorage() })
 router.get('/', getNotices)
 router.get('/stats', getNoticeStats)
 router.get('/sync/ioe', syncIoeExamNotices)
+router.get('/:id', getNotice)
 
 // Protected routes - require authentication
 router.post(
