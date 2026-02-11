@@ -531,6 +531,10 @@ function buildVisibilityFilter(
         where n.id = (${notifications.data}->>'noticeId')::int
       )
     )`,
+    sql`not (
+      ${notifications.type} = 'lost_found_published'
+      and coalesce(${notifications.data}->>'publisherId', '') = ${userId}
+    )`,
   ];
 
   // Notice removal notifications are admin-only regardless of stored audience.
