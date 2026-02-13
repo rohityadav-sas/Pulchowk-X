@@ -3,8 +3,8 @@ import { auth } from "../lib/auth.js";
 import { Request, Response, NextFunction } from "express";
 import admin from "firebase-admin";
 import { db } from "../lib/db.js";
-import { user } from "../models/auth-schema.js";
-import { eq } from "drizzle-orm";
+import { user, account } from "../models/auth-schema.js";
+import { eq, and } from "drizzle-orm";
 import ENV from "../config/ENV.js";
 
 const getAuthToken = (req: Request): string | null => {
@@ -82,15 +82,35 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
                     where: eq(user.id, decoded.uid),
                 });
 
+                if (!dbUser) {
+                    // If not found by ID, check if there's a linked account
+                    const linkedAccount = await db.query.account.findFirst({
+                        where: and(
+                            eq(account.providerId, "firebase"),
+                            eq(account.accountId, decoded.uid)
+                        )
+                    });
+
+                    if (linkedAccount) {
+                        dbUser = await db.query.user.findFirst({
+                            where: eq(user.id, linkedAccount.userId),
+                        });
+                    }
+                }
+
                 if (!dbUser && decoded.email) {
                     dbUser = await db.query.user.findFirst({
                         where: eq(user.email, decoded.email),
                     });
+                    
+                    if (dbUser) {
+                        console.warn(`[Auth] User ${dbUser.id} identified by email fallback. Missing Firebase account link for UID: ${decoded.uid}`);
+                    }
                 }
 
                 if (dbUser) {
                     (req as any).user = dbUser;
-                    (req as any).session = { userId: dbUser.id, authType: "firebase" };
+                    (req as any).session = { userId: dbUser.id, authType: "firebase", firebaseUid: decoded.uid };
                     return next();
                 }
             }
@@ -122,6 +142,21 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
                         where: eq(user.id, decoded.uid),
                     });
 
+                    if (!dbUser) {
+                        const linkedAccount = await db.query.account.findFirst({
+                            where: and(
+                                eq(account.providerId, "firebase"),
+                                eq(account.accountId, decoded.uid)
+                            )
+                        });
+
+                        if (linkedAccount) {
+                            dbUser = await db.query.user.findFirst({
+                                where: eq(user.id, linkedAccount.userId),
+                            });
+                        }
+                    }
+
                     if (!dbUser && decoded.email) {
                         dbUser = await db.query.user.findFirst({
                             where: eq(user.email, decoded.email),
@@ -130,7 +165,7 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
 
                     if (dbUser) {
                         (req as any).user = dbUser;
-                        (req as any).session = { userId: dbUser.id, authType: "firebase" };
+                        (req as any).session = { userId: dbUser.id, authType: "firebase", firebaseUid: decoded.uid };
                     }
                 }
             } catch (error) {
@@ -159,28 +194,69 @@ export const requireFirebaseAuth = async (req: Request, res: Response, next: Nex
 
 export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
     // Ensure requireAuth is run first
-    const user = (req as any).user;
+    let userFromReq = (req as any).user;
 
-    if (!user) {
-        return res.status(401).json({ message: "Unauthorized" });
+    if (!userFromReq) {
+        return res.status(401).json({ success: false, message: "Authentication required." });
     }
 
-    if (user.role !== "admin") {
-        return res.status(403).json({ message: "Forbidden: Only authorized personnel can create clubs" });
+    // If session role is not admin, perform a fresh DB check to avoid staleness
+    if (userFromReq.role !== "admin") {
+        try {
+            const freshUser = await db.query.user.findFirst({
+                where: eq(user.id, userFromReq.id),
+                columns: { role: true },
+            });
+
+            if (freshUser?.role === "admin") {
+                // Update the request user object with the fresh role
+                userFromReq.role = "admin";
+            }
+        } catch (error) {
+            console.error("Error performing fresh admin role check:", error);
+        }
+    }
+
+    if (userFromReq.role !== "admin") {
+        console.warn(`Admin access denied for user ${userFromReq.id} (${userFromReq.email}). Role: ${userFromReq.role}`);
+        return res.status(403).json({ 
+            success: false, 
+            message: "Access forbidden: Administrator privileges required." 
+        });
     }
 
     next();
 };
 
 export const requireTeacher = async (req: Request, res: Response, next: NextFunction) => {
-    const user = (req as any).user;
+    let userFromReq = (req as any).user;
 
-    if (!user) {
-        return res.status(401).json({ message: "Unauthorized" });
+    if (!userFromReq) {
+        return res.status(401).json({ success: false, message: "Authentication required." });
     }
 
-    if (user.role !== "teacher") {
-        return res.status(403).json({ message: "Forbidden: Teacher access required" });
+    // If session role is not teacher, perform a fresh DB check to avoid staleness
+    if (userFromReq.role !== "teacher") {
+        try {
+            const freshUser = await db.query.user.findFirst({
+                where: eq(user.id, userFromReq.id),
+                columns: { role: true },
+            });
+
+            if (freshUser?.role === "teacher") {
+                userFromReq.role = "teacher";
+            }
+        } catch (error) {
+            console.error("Error performing fresh teacher role check:", error);
+        }
+    }
+
+    if (userFromReq.role !== "teacher") {
+        console.warn(`Teacher access denied for user ${userFromReq.id} (${userFromReq.email}). Role: ${userFromReq.role}`);
+        return res.status(403).json({ 
+            success: false, 
+            message: "Access forbidden: Teacher privileges required." 
+        });
     }
 
     next();
