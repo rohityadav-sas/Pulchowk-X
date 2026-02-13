@@ -1,46 +1,48 @@
-﻿import { and, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
-import { db } from "../lib/db.js";
-import { user } from "../models/auth-schema.js";
-import { bookListings } from "../models/book_buy_sell-schema.js";
+﻿import { and, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm'
+import { db } from '../lib/db.js'
+import { user } from '../models/auth-schema.js'
+import { bookListings } from '../models/book_buy_sell-schema.js'
 import {
   marketplaceReports,
   sellerRatings,
   userBlocks,
-} from "../models/trust-schema.js";
+} from '../models/trust-schema.js'
 import {
   listModerationReports,
   reviewMarketplaceReport,
   type ReportStatus,
-} from "./trust.service.js";
-import { sendToUser } from "./notification.service.js";
-import { createInAppNotificationForAudience } from "./inAppNotification.service.js";
+} from './trust.service.js'
+import { sendToUser } from './notification.service.js'
+import { createInAppNotificationForAudience } from './inAppNotification.service.js'
 
 const ALLOWED_ROLES = [
-  "student",
-  "teacher",
-  "admin",
-  "notice_manager",
-  "guest",
-] as const;
+  'student',
+  'teacher',
+  'admin',
+  'notice_manager',
+  'guest',
+] as const
 
-export type AllowedRole = (typeof ALLOWED_ROLES)[number];
+export type AllowedRole = (typeof ALLOWED_ROLES)[number]
 
 export async function listUsersForAdmin(filters: {
-  search?: string;
-  role?: string;
-  limit?: number;
+  search?: string
+  role?: string
+  limit?: number
 }) {
-  const { search, role, limit = 150 } = filters;
+  const { search, role, limit = 150 } = filters
 
-  const conditions = [];
+  const conditions = []
 
   if (search?.trim()) {
-    const searchTerm = `%${search.trim()}%`;
-    conditions.push(or(ilike(user.name, searchTerm), ilike(user.email, searchTerm)));
+    const searchTerm = `%${search.trim()}%`
+    conditions.push(
+      or(ilike(user.name, searchTerm), ilike(user.email, searchTerm)),
+    )
   }
 
   if (role?.trim()) {
-    conditions.push(eq(user.role, role.trim()));
+    conditions.push(eq(user.role, role.trim()))
   }
 
   const users = await db.query.user.findMany({
@@ -57,9 +59,9 @@ export async function listUsersForAdmin(filters: {
       createdAt: true,
       updatedAt: true,
     },
-  });
+  })
 
-  const userIds = users.map((u) => u.id);
+  const userIds = users.map((u) => u.id)
 
   const ratings = userIds.length
     ? await db
@@ -71,11 +73,14 @@ export async function listUsersForAdmin(filters: {
         .from(sellerRatings)
         .where(inArray(sellerRatings.sellerId, userIds))
         .groupBy(sellerRatings.sellerId)
-    : [];
+    : []
 
   const ratingsMap = new Map(
-    ratings.map((r) => [r.sellerId, { averageRating: Number(r.averageRating), totalRatings: r.totalRatings }]),
-  );
+    ratings.map((r) => [
+      r.sellerId,
+      { averageRating: Number(r.averageRating), totalRatings: r.totalRatings },
+    ]),
+  )
 
   return {
     success: true,
@@ -83,39 +88,39 @@ export async function listUsersForAdmin(filters: {
       ...u,
       reputation: ratingsMap.get(u.id) ?? { averageRating: 0, totalRatings: 0 },
     })),
-  };
+  }
 }
 
 export async function updateUserRoleByAdmin(input: {
-  targetUserId: string;
-  role: AllowedRole;
+  targetUserId: string
+  role: AllowedRole
 }) {
-  const { targetUserId, role } = input;
+  const { targetUserId, role } = input
 
   if (!ALLOWED_ROLES.includes(role)) {
-    return { success: false, message: "Invalid role." };
+    return { success: false, message: 'Invalid role.' }
   }
 
   const targetUser = await db.query.user.findFirst({
     where: eq(user.id, targetUserId),
     columns: { id: true, role: true },
-  });
+  })
 
   if (!targetUser) {
-    return { success: false, message: "User not found." };
+    return { success: false, message: 'User not found.' }
   }
 
-  if (targetUser.role === "admin" && role !== "admin") {
+  if (targetUser.role === 'admin' && role !== 'admin') {
     const [adminCount] = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(user)
-      .where(eq(user.role, "admin"));
+      .where(eq(user.role, 'admin'))
 
     if ((adminCount?.count ?? 0) <= 1) {
       return {
         success: false,
-        message: "You cannot remove the last admin account.",
-      };
+        message: 'You cannot remove the last admin account.',
+      }
     }
   }
 
@@ -129,35 +134,33 @@ export async function updateUserRoleByAdmin(input: {
       email: user.email,
       role: user.role,
       isVerifiedSeller: user.isVerifiedSeller,
-    });
+    })
 
   if (updated && targetUser.role !== role) {
-    sendToUser(updated.id, {
-      title: "Role updated",
+    await sendToUser(updated.id, {
+      title: 'Role updated',
       body: `Your account role is now ${role}.`,
       data: {
-        type: "role_changed",
+        type: 'role_changed',
         previousRole: targetUser.role,
         nextRole: role,
-        iconKey: "general",
+        iconKey: 'general',
       },
-    }).catch((error) =>
-      console.error("Failed to send role change notification:", error),
-    );
+    })
   }
 
   return {
     success: true,
     data: updated,
-    message: "User role updated.",
-  };
+    message: 'User role updated.',
+  }
 }
 
 export async function setSellerVerificationByAdmin(input: {
-  targetUserId: string;
-  verified: boolean;
+  targetUserId: string
+  verified: boolean
 }) {
-  const { targetUserId, verified } = input;
+  const { targetUserId, verified } = input
 
   const [updated] = await db
     .update(user)
@@ -169,51 +172,53 @@ export async function setSellerVerificationByAdmin(input: {
       email: user.email,
       role: user.role,
       isVerifiedSeller: user.isVerifiedSeller,
-    });
+    })
 
   if (!updated) {
-    return { success: false, message: "User not found." };
+    return { success: false, message: 'User not found.' }
   }
 
   return {
     success: true,
     data: updated,
-    message: verified ? "Seller verified." : "Seller verification removed.",
-  };
+    message: verified ? 'Seller verified.' : 'Seller verification removed.',
+  }
 }
 
 export async function getAdminDashboardStats() {
-  const [usersCount] = await db.select({ count: sql<number>`count(*)::int` }).from(user);
+  const [usersCount] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(user)
   const [adminCount] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(user)
-    .where(eq(user.role, "admin"));
+    .where(eq(user.role, 'admin'))
 
   const [teacherCount] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(user)
-    .where(eq(user.role, "teacher"));
+    .where(eq(user.role, 'teacher'))
 
   const [availableListings] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(bookListings)
-    .where(eq(bookListings.status, "available"));
+    .where(eq(bookListings.status, 'available'))
 
   const [openReports] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(marketplaceReports)
-    .where(inArray(marketplaceReports.status, ["open", "in_review"]));
+    .where(inArray(marketplaceReports.status, ['open', 'in_review']))
 
   const [totalBlocks] = await db
     .select({ count: sql<number>`count(*)::int` })
-    .from(userBlocks);
+    .from(userBlocks)
 
   const [ratingSummary] = await db
     .select({
       count: sql<number>`count(*)::int`,
       avg: sql<number>`coalesce(avg(${sellerRatings.rating})::numeric, 0)`,
     })
-    .from(sellerRatings);
+    .from(sellerRatings)
 
   return {
     success: true,
@@ -227,22 +232,21 @@ export async function getAdminDashboardStats() {
       ratingsCount: ratingSummary?.count ?? 0,
       averageSellerRating: Number(Number(ratingSummary?.avg ?? 0).toFixed(1)),
     },
-  };
+  }
 }
 
 export async function getModerationReports(status?: ReportStatus) {
-  return listModerationReports(status);
+  return listModerationReports(status)
 }
 
 export async function updateModerationReport(input: {
-  reportId: number;
-  reviewerId: string;
-  status: ReportStatus;
-  resolutionNotes?: string;
+  reportId: number
+  reviewerId: string
+  status: ReportStatus
+  resolutionNotes?: string
 }) {
-  return reviewMarketplaceReport(input);
+  return reviewMarketplaceReport(input)
 }
-
 
 export async function listAllRatingsForAdmin() {
   const ratings = await db.query.sellerRatings.findMany({
@@ -263,9 +267,9 @@ export async function listAllRatingsForAdmin() {
         },
       },
     },
-  });
+  })
 
-  const sellerIds = [...new Set(ratings.map((r) => r.sellerId))];
+  const sellerIds = [...new Set(ratings.map((r) => r.sellerId))]
   const sellers = sellerIds.length
     ? await db.query.user.findMany({
         where: inArray(user.id, sellerIds),
@@ -276,9 +280,9 @@ export async function listAllRatingsForAdmin() {
           image: true,
         },
       })
-    : [];
+    : []
 
-  const sellersMap = new Map(sellers.map((s) => [s.id, s]));
+  const sellersMap = new Map(sellers.map((s) => [s.id, s]))
 
   return {
     success: true,
@@ -286,7 +290,7 @@ export async function listAllRatingsForAdmin() {
       ...r,
       seller: sellersMap.get(r.sellerId) || null,
     })),
-  };
+  }
 }
 
 export async function listAllBlocksForAdmin() {
@@ -302,9 +306,9 @@ export async function listAllBlocksForAdmin() {
         },
       },
     },
-  });
+  })
 
-  const blockerIds = [...new Set(blocks.map((b) => b.blockerId))];
+  const blockerIds = [...new Set(blocks.map((b) => b.blockerId))]
   const blockers = blockerIds.length
     ? await db.query.user.findMany({
         where: inArray(user.id, blockerIds),
@@ -315,9 +319,9 @@ export async function listAllBlocksForAdmin() {
           image: true,
         },
       })
-    : [];
+    : []
 
-  const blockersMap = new Map(blockers.map((b) => [b.id, b]));
+  const blockersMap = new Map(blockers.map((b) => [b.id, b]))
 
   return {
     success: true,
@@ -325,54 +329,54 @@ export async function listAllBlocksForAdmin() {
       ...b,
       blocker: blockersMap.get(b.blockerId) || null,
     })),
-  };
+  }
 }
 
 export async function unblockUserByAdmin(blockId: number) {
   const [deleted] = await db
     .delete(userBlocks)
     .where(eq(userBlocks.id, blockId))
-    .returning();
+    .returning()
 
   if (!deleted) {
-    return { success: false, message: "Block record not found." };
+    return { success: false, message: 'Block record not found.' }
   }
 
   return {
     success: true,
-    message: "User unblocked successfully by admin.",
+    message: 'User unblocked successfully by admin.',
     data: deleted,
-  };
+  }
 }
 
 export async function publishSystemAnnouncement(input: {
-  title: string;
-  body: string;
-  audience?: "all" | "students" | "teachers" | "admins";
-  actorId: string;
+  title: string
+  body: string
+  audience?: 'all' | 'students' | 'teachers' | 'admins'
+  actorId: string
 }) {
-  const audience = input.audience ?? "all";
-  const title = input.title.trim();
-  const body = input.body.trim();
+  const audience = input.audience ?? 'all'
+  const title = input.title.trim()
+  const body = input.body.trim()
 
   if (!title || !body) {
-    return { success: false, message: "Title and body are required." };
+    return { success: false, message: 'Title and body are required.' }
   }
 
   await createInAppNotificationForAudience({
     audience,
-    type: "system_announcement",
+    type: 'system_announcement',
     title,
     body,
     data: {
-      type: "system_announcement",
+      type: 'system_announcement',
       actorId: input.actorId,
-      iconKey: "general",
+      iconKey: 'general',
     },
-  });
+  })
 
   return {
     success: true,
-    message: "Announcement published.",
-  };
+    message: 'Announcement published.',
+  }
 }

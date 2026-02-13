@@ -1,6 +1,6 @@
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
-import fs from "fs";
-import { db } from "../lib/db.js";
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
+import fs from 'fs'
+import { db } from '../lib/db.js'
 import {
   assignments,
   faculties,
@@ -8,62 +8,62 @@ import {
   submissions,
   subjects,
   teacherSubjects,
-} from "../models/classroom-schema.js";
-import {
-  UPLOAD_CONSTANTS,
-  generatePublicId,
-} from "../config/cloudinary.js";
+} from '../models/classroom-schema.js'
+import { UPLOAD_CONSTANTS, generatePublicId } from '../config/cloudinary.js'
 import {
   deleteFileFromCloudinary,
   uploadAssignmentFileToCloudinary,
-} from "./cloudinary.service.js";
-import { sendToTopic, sendToUser } from "./notification.service.js";
-import { createInAppNotificationsForUsers } from "./inAppNotification.service.js";
-import { unwrapOne } from "../lib/type-utils.js";
-import { calculateCurrentSemester, getSemesterEndDate } from "../lib/bikram-sambat.js";
-import type { ParsedStudentEmail } from "../lib/student-email-parser.js";
+} from './cloudinary.service.js'
+import { sendToTopic, sendToUser } from './notification.service.js'
+import { createInAppNotificationsForUsers } from './inAppNotification.service.js'
+import { unwrapOne } from '../lib/type-utils.js'
+import {
+  calculateCurrentSemester,
+  getSemesterEndDate,
+} from '../lib/bikram-sambat.js'
+import type { ParsedStudentEmail } from '../lib/student-email-parser.js'
 
-const { ASSIGNMENT_FILES, FOLDERS } = UPLOAD_CONSTANTS;
+const { ASSIGNMENT_FILES, FOLDERS } = UPLOAD_CONSTANTS
 
 type SyllabusSubject = {
-  semesterNumber: number;
-  code?: string | null;
-  title: string;
-  isElective: boolean;
-  electiveGroup?: string | null;
-};
+  semesterNumber: number
+  code?: string | null
+  title: string
+  isElective: boolean
+  electiveGroup?: string | null
+}
 
 type SyllabusFaculty = {
-  name: string;
-  slug: string;
-  semestersCount?: number;
-  semesterDurationMonths?: number;
-  subjects: SyllabusSubject[];
-};
+  name: string
+  slug: string
+  semestersCount?: number
+  semesterDurationMonths?: number
+  subjects: SyllabusSubject[]
+}
 
 type SyllabusData = {
-  faculties: SyllabusFaculty[];
-};
+  faculties: SyllabusFaculty[]
+}
 
-let cachedSyllabus: SyllabusData | null = null;
+let cachedSyllabus: SyllabusData | null = null
 
 function getSyllabusData(): SyllabusData {
-  if (cachedSyllabus) return cachedSyllabus;
+  if (cachedSyllabus) return cachedSyllabus
   const raw = fs.readFileSync(
-    new URL("../data/syllabus.json", import.meta.url),
-    "utf-8"
-  );
-  cachedSyllabus = JSON.parse(raw) as SyllabusData;
-  return cachedSyllabus;
+    new URL('../data/syllabus.json', import.meta.url),
+    'utf-8',
+  )
+  cachedSyllabus = JSON.parse(raw) as SyllabusData
+  return cachedSyllabus
 }
 
 async function ensureSyllabusSeeded() {
   const [row] = await db
     .select({ count: sql<number>`count(*)` })
-    .from(faculties);
-  if (Number(row?.count || 0) > 0) return;
+    .from(faculties)
+  if (Number(row?.count || 0) > 0) return
 
-  const data = getSyllabusData();
+  const data = getSyllabusData()
   for (const facultyData of data.faculties) {
     const [createdFaculty] = await db
       .insert(faculties)
@@ -73,7 +73,7 @@ async function ensureSyllabusSeeded() {
         semestersCount: facultyData.semestersCount || 8,
         semesterDurationMonths: facultyData.semesterDurationMonths || 6,
       })
-      .returning();
+      .returning()
 
     if (facultyData.subjects.length > 0) {
       await db.insert(subjects).values(
@@ -84,42 +84,42 @@ async function ensureSyllabusSeeded() {
           title: subject.title,
           isElective: subject.isElective,
           electiveGroup: subject.electiveGroup ?? null,
-        }))
-      );
+        })),
+      )
     }
   }
 }
 
 function addMonths(date: Date, months: number) {
-  const copy = new Date(date);
-  copy.setMonth(copy.getMonth() + months);
-  return copy;
+  const copy = new Date(date)
+  copy.setMonth(copy.getMonth() + months)
+  return copy
 }
 
 export async function listFaculties() {
-  await ensureSyllabusSeeded();
+  await ensureSyllabusSeeded()
   const result = await db.query.faculties.findMany({
     orderBy: [asc(faculties.name)],
-  });
-  return { success: true, faculties: result };
+  })
+  return { success: true, faculties: result }
 }
 
 export async function listSubjectsByFaculty(
   facultyId: number,
-  semesterNumber?: number
+  semesterNumber?: number,
 ) {
-  await ensureSyllabusSeeded();
-  const filters = [eq(subjects.facultyId, facultyId)];
+  await ensureSyllabusSeeded()
+  const filters = [eq(subjects.facultyId, facultyId)]
   if (semesterNumber) {
-    filters.push(eq(subjects.semesterNumber, semesterNumber));
+    filters.push(eq(subjects.semesterNumber, semesterNumber))
   }
 
   const result = await db.query.subjects.findMany({
     where: and(...filters),
     orderBy: [asc(subjects.semesterNumber), asc(subjects.title)],
-  });
+  })
 
-  return { success: true, subjects: result };
+  return { success: true, subjects: result }
 }
 
 export async function getStudentProfile(userId: string) {
@@ -128,33 +128,33 @@ export async function getStudentProfile(userId: string) {
     with: {
       faculty: true,
     },
-  });
+  })
 
   if (!profile) {
-    return null;
+    return null
   }
 
-  const now = new Date();
-  const faculty = unwrapOne(profile.faculty);
-  const durationMonths = faculty?.semesterDurationMonths || 6;
-  const maxSemesters = faculty?.semestersCount || 8;
+  const now = new Date()
+  const faculty = unwrapOne(profile.faculty)
+  const durationMonths = faculty?.semesterDurationMonths || 6
+  const maxSemesters = faculty?.semestersCount || 8
 
-  let currentSemester = profile.currentSemester;
-  let semesterStartDate = profile.semesterStartDate;
-  let semesterEndDate = profile.semesterEndDate;
-  let shouldUpdate = false;
+  let currentSemester = profile.currentSemester
+  let semesterStartDate = profile.semesterStartDate
+  let semesterEndDate = profile.semesterEndDate
+  let shouldUpdate = false
 
   if (!semesterEndDate) {
-    semesterEndDate = addMonths(semesterStartDate, durationMonths);
-    shouldUpdate = true;
+    semesterEndDate = addMonths(semesterStartDate, durationMonths)
+    shouldUpdate = true
   }
 
   if (profile.autoAdvance && semesterEndDate) {
     while (semesterEndDate < now && currentSemester < maxSemesters) {
-      currentSemester += 1;
-      semesterStartDate = semesterEndDate;
-      semesterEndDate = addMonths(semesterStartDate, durationMonths);
-      shouldUpdate = true;
+      currentSemester += 1
+      semesterStartDate = semesterEndDate
+      semesterEndDate = addMonths(semesterStartDate, durationMonths)
+      shouldUpdate = true
     }
   }
 
@@ -167,53 +167,53 @@ export async function getStudentProfile(userId: string) {
         semesterEndDate,
         updatedAt: now,
       })
-      .where(eq(studentProfiles.userId, userId));
+      .where(eq(studentProfiles.userId, userId))
 
     return {
       ...profile,
       currentSemester,
       semesterStartDate,
       semesterEndDate,
-    };
+    }
   }
 
-  return profile;
+  return profile
 }
 
 export async function upsertStudentProfile(
   userId: string,
   data: {
-    facultyId: number;
-    currentSemester?: number;
-    semesterStartDate?: string;
-    autoAdvance?: boolean;
-  }
+    facultyId: number
+    currentSemester?: number
+    semesterStartDate?: string
+    autoAdvance?: boolean
+  },
 ) {
-  await ensureSyllabusSeeded();
+  await ensureSyllabusSeeded()
   const faculty = await db.query.faculties.findFirst({
     where: eq(faculties.id, data.facultyId),
-  });
+  })
 
   if (!faculty) {
-    throw new Error("Faculty not found");
+    throw new Error('Faculty not found')
   }
 
-  const now = new Date();
+  const now = new Date()
   const existing = await db.query.studentProfiles.findFirst({
     where: eq(studentProfiles.userId, userId),
-  });
+  })
 
   const currentSemester = Math.min(
     Math.max(data.currentSemester ?? existing?.currentSemester ?? 1, 1),
-    faculty.semestersCount
-  );
+    faculty.semestersCount,
+  )
   const semesterStartDate = data.semesterStartDate
     ? new Date(data.semesterStartDate)
-    : existing?.semesterStartDate ?? now;
+    : (existing?.semesterStartDate ?? now)
   const semesterEndDate = addMonths(
     semesterStartDate,
-    faculty.semesterDurationMonths
-  );
+    faculty.semesterDurationMonths,
+  )
 
   if (existing) {
     await db
@@ -226,7 +226,7 @@ export async function upsertStudentProfile(
         autoAdvance: data.autoAdvance ?? existing.autoAdvance ?? true,
         updatedAt: now,
       })
-      .where(eq(studentProfiles.userId, userId));
+      .where(eq(studentProfiles.userId, userId))
   } else {
     await db.insert(studentProfiles).values({
       userId,
@@ -236,84 +236,84 @@ export async function upsertStudentProfile(
       semesterEndDate,
       autoAdvance: data.autoAdvance ?? true,
       updatedAt: now,
-    });
+    })
   }
 
   const profile = await db.query.studentProfiles.findFirst({
     where: eq(studentProfiles.userId, userId),
     with: { faculty: true },
-  });
+  })
 
-  return { success: true, profile };
+  return { success: true, profile }
 }
 
 export async function getStudentSubjects(userId: string) {
-  await ensureSyllabusSeeded();
-  const profile = await getStudentProfile(userId);
+  await ensureSyllabusSeeded()
+  const profile = await getStudentProfile(userId)
 
   if (!profile) {
     return {
       success: false,
-      message: "Student profile not found",
-    };
+      message: 'Student profile not found',
+    }
   }
 
   const subjectList = await db.query.subjects.findMany({
     where: and(
       eq(subjects.facultyId, profile.facultyId),
-      eq(subjects.semesterNumber, profile.currentSemester)
+      eq(subjects.semesterNumber, profile.currentSemester),
     ),
     orderBy: [asc(subjects.title)],
-  });
+  })
 
-  const subjectIds = subjectList.map((subject) => subject.id);
+  const subjectIds = subjectList.map((subject) => subject.id)
   const assignmentList =
     subjectIds.length === 0
       ? []
       : await db.query.assignments.findMany({
-        where: inArray(assignments.subjectId, subjectIds),
-        orderBy: [desc(assignments.createdAt)],
-      });
+          where: inArray(assignments.subjectId, subjectIds),
+          orderBy: [desc(assignments.createdAt)],
+        })
 
-  const assignmentIds = assignmentList.map((assignment) => assignment.id);
+  const assignmentIds = assignmentList.map((assignment) => assignment.id)
   const submissionList =
     assignmentIds.length === 0
       ? []
       : await db.query.submissions.findMany({
-        where: and(
-          inArray(submissions.assignmentId, assignmentIds),
-          eq(submissions.studentId, userId)
-        ),
-      });
+          where: and(
+            inArray(submissions.assignmentId, assignmentIds),
+            eq(submissions.studentId, userId),
+          ),
+        })
 
   const submissionsByAssignment = new Map(
-    submissionList.map((submission) => [submission.assignmentId, submission])
-  );
+    submissionList.map((submission) => [submission.assignmentId, submission]),
+  )
 
-  const assignmentsBySubject = new Map<number, any[]>();
+  const assignmentsBySubject = new Map<number, any[]>()
   assignmentList.forEach((assignment) => {
-    const bucket = assignmentsBySubject.get(assignment.subjectId) || [];
+    const bucket = assignmentsBySubject.get(assignment.subjectId) || []
     bucket.push({
       ...assignment,
       submission: submissionsByAssignment.get(assignment.id) || null,
-    });
-    assignmentsBySubject.set(assignment.subjectId, bucket);
-  });
+    })
+    assignmentsBySubject.set(assignment.subjectId, bucket)
+  })
 
   const subjectsWithAssignments = subjectList.map((subject) => ({
     ...subject,
     assignments: assignmentsBySubject.get(subject.id) || [],
-  }));
+  }))
 
   return {
     success: true,
     profile,
     subjects: subjectsWithAssignments,
-  };
+  }
 }
 
 export async function listTeacherSubjects(teacherId: string) {
-  await ensureSyllabusSeeded();
+  await ensureSyllabusSeeded()
   const teacherRows = await db.query.teacherSubjects.findMany({
     where: eq(teacherSubjects.teacherId, teacherId),
     with: {
@@ -323,93 +323,90 @@ export async function listTeacherSubjects(teacherId: string) {
         },
       },
     },
-  });
+  })
 
-  const subjectIds = teacherRows.map((row) => row.subjectId);
+  const subjectIds = teacherRows.map((row) => row.subjectId)
   const assignmentList =
     subjectIds.length === 0
       ? []
       : await db.query.assignments.findMany({
-        where: inArray(assignments.subjectId, subjectIds),
-        orderBy: [desc(assignments.createdAt)],
-      });
+          where: inArray(assignments.subjectId, subjectIds),
+          orderBy: [desc(assignments.createdAt)],
+        })
 
-  const assignmentsBySubject = new Map<number, any[]>();
+  const assignmentsBySubject = new Map<number, any[]>()
   assignmentList.forEach((assignment) => {
-    const bucket = assignmentsBySubject.get(assignment.subjectId) || [];
-    bucket.push(assignment);
-    assignmentsBySubject.set(assignment.subjectId, bucket);
-  });
+    const bucket = assignmentsBySubject.get(assignment.subjectId) || []
+    bucket.push(assignment)
+    assignmentsBySubject.set(assignment.subjectId, bucket)
+  })
 
   const subjectsWithAssignments = teacherRows.map((row) => ({
     ...row.subject,
     assignments: assignmentsBySubject.get(row.subjectId) || [],
-  }));
+  }))
 
-  return { success: true, subjects: subjectsWithAssignments };
+  return { success: true, subjects: subjectsWithAssignments }
 }
 
-export async function addTeacherSubject(
-  teacherId: string,
-  subjectId: number
-) {
-  await ensureSyllabusSeeded();
+export async function addTeacherSubject(teacherId: string, subjectId: number) {
+  await ensureSyllabusSeeded()
   const subject = await db.query.subjects.findFirst({
     where: eq(subjects.id, subjectId),
-  });
+  })
 
   if (!subject) {
-    throw new Error("Subject not found");
+    throw new Error('Subject not found')
   }
 
   const existing = await db.query.teacherSubjects.findFirst({
     where: and(
       eq(teacherSubjects.teacherId, teacherId),
-      eq(teacherSubjects.subjectId, subjectId)
+      eq(teacherSubjects.subjectId, subjectId),
     ),
-  });
+  })
 
   if (existing) {
-    return { success: true };
+    return { success: true }
   }
 
   await db.insert(teacherSubjects).values({
     teacherId,
     subjectId,
-  });
+  })
 
-  return { success: true };
+  return { success: true }
 }
 
 export async function createAssignmentForSubject(
   teacherId: string,
   subjectId: number,
   data: {
-    title: string;
-    description?: string;
-    type?: "classwork" | "homework";
-    dueAt?: string;
+    title: string
+    description?: string
+    type?: 'classwork' | 'homework'
+    dueAt?: string
   },
-  allowUnassigned = false
+  allowUnassigned = false,
 ) {
   const subject = await db.query.subjects.findFirst({
     where: eq(subjects.id, subjectId),
-  });
+  })
 
   if (!subject) {
-    throw new Error("Subject not found");
+    throw new Error('Subject not found')
   }
 
   if (!allowUnassigned) {
     const assignment = await db.query.teacherSubjects.findFirst({
       where: and(
         eq(teacherSubjects.teacherId, teacherId),
-        eq(teacherSubjects.subjectId, subjectId)
+        eq(teacherSubjects.subjectId, subjectId),
       ),
-    });
+    })
 
     if (!assignment) {
-      throw new Error("You are not assigned to this subject");
+      throw new Error('You are not assigned to this subject')
     }
   }
 
@@ -420,32 +417,32 @@ export async function createAssignmentForSubject(
       teacherId,
       title: data.title,
       description: data.description,
-      type: data.type || "classwork",
+      type: data.type || 'classwork',
       dueAt: data.dueAt ? new Date(data.dueAt) : null,
     })
-    .returning();
+    .returning()
 
-  // Notify students in the faculty (non-blocking)
+  // Notify students in the faculty (non-blocking but awaited)
   // We use the faculty ID to target students: 'faculty_1', 'faculty_2', etc.
-  sendToTopic(`faculty_${subject.facultyId}`, {
+  await sendToTopic(`faculty_${subject.facultyId}`, {
     title: 'New Assignment!',
     body: `A new ${data.type || 'classwork'} was posted for ${subject.title}: ${created.title}`,
     data: {
       type: 'new_assignment',
       assignmentId: created.id.toString(),
       subjectId: subjectId.toString(),
-    }
-  }).catch(err => console.error('Failed to send assignment notification:', err));
+    },
+  })
 
   const studentsInFaculty = await db.query.studentProfiles.findMany({
     where: eq(studentProfiles.facultyId, subject.facultyId),
     columns: { userId: true },
-  });
+  })
 
-  createInAppNotificationsForUsers({
+  await createInAppNotificationsForUsers({
     userIds: studentsInFaculty.map((row) => row.userId),
-    type: "new_assignment",
-    title: "New Assignment Posted",
+    type: 'new_assignment',
+    title: 'New Assignment Posted',
     body: `${subject.title}: ${created.title}`,
     data: {
       assignmentId: created.id,
@@ -454,31 +451,29 @@ export async function createAssignmentForSubject(
       teacherId,
       assignmentTitle: created.title,
       subjectTitle: subject.title,
-      iconKey: "classroom",
+      iconKey: 'classroom',
     },
-  }).catch((err) =>
-    console.error("Failed to create in-app assignment notifications:", err),
-  );
+  })
 
-  return { success: true, assignment: created };
+  return { success: true, assignment: created }
 }
 
 export async function submitAssignmentWork(
   assignmentId: number,
   studentId: string,
   file: Express.Multer.File,
-  comment?: string
+  comment?: string,
 ) {
   if (!file) {
-    throw new Error("Submission file is required");
+    throw new Error('Submission file is required')
   }
 
   if (!ASSIGNMENT_FILES.ALLOWED_TYPES.includes(file.mimetype as any)) {
-    throw new Error("Only images or PDF files are allowed");
+    throw new Error('Only images or PDF files are allowed')
   }
 
   if (file.size > ASSIGNMENT_FILES.MAX_FILE_SIZE) {
-    throw new Error("File too large. Maximum size is 10MB");
+    throw new Error('File too large. Maximum size is 10MB')
   }
 
   const assignment = await db.query.assignments.findFirst({
@@ -486,63 +481,63 @@ export async function submitAssignmentWork(
     with: {
       subject: true,
     },
-  });
+  })
 
   if (!assignment) {
-    throw new Error("Assignment not found");
+    throw new Error('Assignment not found')
   }
 
-  const profile = await getStudentProfile(studentId);
+  const profile = await getStudentProfile(studentId)
 
   if (!profile) {
-    throw new Error("Student profile not found");
+    throw new Error('Student profile not found')
   }
 
-  const assignmentSubject = unwrapOne(assignment.subject);
+  const assignmentSubject = unwrapOne(assignment.subject)
   if (!assignmentSubject) {
-    throw new Error("Assignment subject not found");
+    throw new Error('Assignment subject not found')
   }
 
   if (assignmentSubject.facultyId !== profile.facultyId) {
-    throw new Error("You are not enrolled in this faculty");
+    throw new Error('You are not enrolled in this faculty')
   }
 
   if (assignmentSubject.semesterNumber !== profile.currentSemester) {
-    throw new Error("This assignment is not in your current semester");
+    throw new Error('This assignment is not in your current semester')
   }
 
   const existingSubmission = await db.query.submissions.findFirst({
     where: and(
       eq(submissions.assignmentId, assignmentId),
-      eq(submissions.studentId, studentId)
+      eq(submissions.studentId, studentId),
     ),
-  });
+  })
 
   if (existingSubmission?.filePublicId) {
     await deleteFileFromCloudinary(
       existingSubmission.filePublicId,
-      existingSubmission.fileResourceType
-    );
+      existingSubmission.fileResourceType,
+    )
   }
 
-  const base64 = file.buffer.toString("base64");
-  const dataUri = `data:${file.mimetype};base64,${base64}`;
+  const base64 = file.buffer.toString('base64')
+  const dataUri = `data:${file.mimetype};base64,${base64}`
   const publicId = generatePublicId(
-    "submission",
-    `${assignmentId}_${studentId}`
-  );
+    'submission',
+    `${assignmentId}_${studentId}`,
+  )
 
   const uploadResult = await uploadAssignmentFileToCloudinary(
     dataUri,
     FOLDERS.ASSIGNMENT_SUBMISSIONS,
-    publicId
-  );
+    publicId,
+  )
 
   if (!uploadResult.success || !uploadResult.data) {
-    throw new Error(uploadResult.message || "Upload failed");
+    throw new Error(uploadResult.message || 'Upload failed')
   }
 
-  const now = new Date();
+  const now = new Date()
 
   if (existingSubmission) {
     const [updated] = await db
@@ -559,9 +554,9 @@ export async function submitAssignmentWork(
         updatedAt: now,
       })
       .where(eq(submissions.id, existingSubmission.id))
-      .returning();
+      .returning()
 
-    return { success: true, submission: updated };
+    return { success: true, submission: updated }
   }
 
   const [created] = await db
@@ -576,38 +571,38 @@ export async function submitAssignmentWork(
       fileMimeType: file.mimetype,
       fileName: file.originalname,
       fileSize: file.size,
-      status: "submitted",
+      status: 'submitted',
       submittedAt: now,
       updatedAt: now,
     })
-    .returning();
+    .returning()
 
-  return { success: true, submission: created };
+  return { success: true, submission: created }
 }
 
 export async function listSubmissionsForAssignment(
   assignmentId: number,
   teacherId: string,
-  allowUnassigned = false
+  allowUnassigned = false,
 ) {
   const assignment = await db.query.assignments.findFirst({
     where: eq(assignments.id, assignmentId),
-  });
+  })
 
   if (!assignment) {
-    throw new Error("Assignment not found");
+    throw new Error('Assignment not found')
   }
 
   if (!allowUnassigned) {
     const teacherAccess = await db.query.teacherSubjects.findFirst({
       where: and(
         eq(teacherSubjects.teacherId, teacherId),
-        eq(teacherSubjects.subjectId, assignment.subjectId)
+        eq(teacherSubjects.subjectId, assignment.subjectId),
       ),
-    });
+    })
 
     if (!teacherAccess) {
-      throw new Error("You are not assigned to this subject");
+      throw new Error('You are not assigned to this subject')
     }
   }
 
@@ -624,15 +619,15 @@ export async function listSubmissionsForAssignment(
       },
     },
     orderBy: [desc(submissions.submittedAt)],
-  });
+  })
 
-  return { success: true, submissions: results };
+  return { success: true, submissions: results }
 }
 
 export async function gradeSubmission(
   submissionId: number,
   teacherId: string,
-  gradeData: { status: "graded" | "returned"; feedback?: string }
+  gradeData: { status: 'graded' | 'returned'; feedback?: string },
 ) {
   const submission = await db.query.submissions.findFirst({
     where: eq(submissions.id, submissionId),
@@ -643,32 +638,32 @@ export async function gradeSubmission(
         },
       },
     },
-  });
+  })
 
   if (!submission) {
-    throw new Error("Submission not found");
+    throw new Error('Submission not found')
   }
 
   // Verify teacher has access
-  const submissionAssignment = unwrapOne(submission.assignment);
+  const submissionAssignment = unwrapOne(submission.assignment)
   if (!submissionAssignment) {
-    throw new Error("Assignment not found");
+    throw new Error('Assignment not found')
   }
 
-  const submissionSubject = unwrapOne(submissionAssignment.subject);
+  const submissionSubject = unwrapOne(submissionAssignment.subject)
   if (!submissionSubject) {
-    throw new Error("Subject not found");
+    throw new Error('Subject not found')
   }
 
   const teacherAccess = await db.query.teacherSubjects.findFirst({
     where: and(
       eq(teacherSubjects.teacherId, teacherId),
-      eq(teacherSubjects.subjectId, submissionAssignment.subjectId)
+      eq(teacherSubjects.subjectId, submissionAssignment.subjectId),
     ),
-  });
+  })
 
   if (!teacherAccess) {
-    throw new Error("You are not authorized to grade this submission");
+    throw new Error('You are not authorized to grade this submission')
   }
 
   const [updated] = await db
@@ -678,11 +673,14 @@ export async function gradeSubmission(
       updatedAt: new Date(),
     })
     .where(eq(submissions.id, submissionId))
-    .returning();
+    .returning()
 
-  // Notify student (non-blocking)
-  sendToUser(submission.studentId, {
-    title: gradeData.status === 'graded' ? 'Assignment Graded!' : 'Assignment Returned',
+  // Notify student (non-blocking but awaited)
+  await sendToUser(submission.studentId, {
+    title:
+      gradeData.status === 'graded'
+        ? 'Assignment Graded!'
+        : 'Assignment Returned',
     body: `Your submission for "${submissionAssignment.title}" has been ${gradeData.status}.`,
     data: {
       type: 'grading_update',
@@ -691,42 +689,42 @@ export async function gradeSubmission(
       assignmentTitle: submissionAssignment.title,
       status: gradeData.status,
       iconKey: 'classroom',
-    }
-  }).catch(err => console.error('Failed to notify student of grading update:', err));
+    },
+  })
 
-  return { success: true, submission: updated };
+  return { success: true, submission: updated }
 }
 
 export async function getSubmissionsForExport(
   assignmentId: number,
-  teacherId: string
+  teacherId: string,
 ) {
   const assignment = await db.query.assignments.findFirst({
     where: eq(assignments.id, assignmentId),
     with: {
       subject: true,
-    }
-  });
+    },
+  })
 
   if (!assignment) {
-    throw new Error("Assignment not found");
+    throw new Error('Assignment not found')
   }
 
   // Verify teacher access
-  const exportSubject = unwrapOne(assignment.subject);
+  const exportSubject = unwrapOne(assignment.subject)
   if (!exportSubject) {
-    throw new Error("Subject not found");
+    throw new Error('Subject not found')
   }
 
   const teacherAccess = await db.query.teacherSubjects.findFirst({
     where: and(
       eq(teacherSubjects.teacherId, teacherId),
-      eq(teacherSubjects.subjectId, assignment.subjectId)
+      eq(teacherSubjects.subjectId, assignment.subjectId),
     ),
-  });
+  })
 
   if (!teacherAccess) {
-    throw new Error("You are not authorized to access these submissions");
+    throw new Error('You are not authorized to access these submissions')
   }
 
   const results = await db.query.submissions.findMany({
@@ -740,23 +738,25 @@ export async function getSubmissionsForExport(
       },
     },
     orderBy: [asc(submissions.submittedAt)],
-  });
+  })
 
   return {
     assignmentTitle: assignment.title,
     subjectTitle: exportSubject.title,
-    data: results.map(sub => {
-      const student = unwrapOne(sub.student);
+    data: results.map((sub) => {
+      const student = unwrapOne(sub.student)
       return {
-        Student: student?.name || "",
-        Email: student?.email || "",
+        Student: student?.name || '',
+        Email: student?.email || '',
         Status: sub.status,
-        SubmittedAt: sub.submittedAt ? new Date(sub.submittedAt).toLocaleString() : 'N/A',
+        SubmittedAt: sub.submittedAt
+          ? new Date(sub.submittedAt).toLocaleString()
+          : 'N/A',
         FileUrl: sub.fileUrl || 'N/A',
-        Comment: sub.comment || ''
-      };
-    })
-  };
+        Comment: sub.comment || '',
+      }
+    }),
+  }
 }
 
 /**
@@ -765,49 +765,53 @@ export async function getSubmissionsForExport(
  */
 export async function createStudentProfileFromEmail(
   userId: string,
-  parsedEmail: ParsedStudentEmail
+  parsedEmail: ParsedStudentEmail,
 ) {
-  if (!parsedEmail.isValid || !parsedEmail.facultySlug || !parsedEmail.fullBatchYear) {
-    throw new Error("Invalid parsed email data");
+  if (
+    !parsedEmail.isValid ||
+    !parsedEmail.facultySlug ||
+    !parsedEmail.fullBatchYear
+  ) {
+    throw new Error('Invalid parsed email data')
   }
 
-  await ensureSyllabusSeeded();
+  await ensureSyllabusSeeded()
 
   // Check if profile already exists
   const existing = await db.query.studentProfiles.findFirst({
     where: eq(studentProfiles.userId, userId),
-  });
+  })
 
   if (existing) {
     // Profile already exists, don't overwrite
-    return { success: true, profile: existing, created: false };
+    return { success: true, profile: existing, created: false }
   }
 
   // Find faculty by slug
   const faculty = await db.query.faculties.findFirst({
     where: eq(faculties.slug, parsedEmail.facultySlug),
-  });
+  })
 
   if (!faculty) {
-    throw new Error(`Faculty not found for slug: ${parsedEmail.facultySlug}`);
+    throw new Error(`Faculty not found for slug: ${parsedEmail.facultySlug}`)
   }
 
   // Calculate current semester based on batch year and current date
-  const totalSemesters = parsedEmail.semestersCount || faculty.semestersCount;
+  const totalSemesters = parsedEmail.semestersCount || faculty.semestersCount
   const semesterInfo = calculateCurrentSemester(
     parsedEmail.fullBatchYear,
     totalSemesters,
-    new Date()
-  );
+    new Date(),
+  )
 
   // Calculate semester end date
   const semesterEndDate = getSemesterEndDate(
     parsedEmail.fullBatchYear,
-    semesterInfo.semester
-  );
+    semesterInfo.semester,
+  )
 
   // Create student profile
-  const now = new Date();
+  const now = new Date()
   await db.insert(studentProfiles).values({
     userId,
     facultyId: faculty.id,
@@ -816,12 +820,12 @@ export async function createStudentProfileFromEmail(
     semesterEndDate,
     autoAdvance: true,
     updatedAt: now,
-  });
+  })
 
   const profile = await db.query.studentProfiles.findFirst({
     where: eq(studentProfiles.userId, userId),
     with: { faculty: true },
-  });
+  })
 
-  return { success: true, profile, created: true };
+  return { success: true, profile, created: true }
 }

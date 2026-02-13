@@ -13,7 +13,11 @@ import { syncExamNotices } from '../services/notice-sync.service.js'
 
 type AuthedRequest = Request & { user?: { id: string; role?: string | null } }
 
-type NoticeCategory = 'results' | 'application_forms' | 'exam_centers' | 'general'
+type NoticeCategory =
+  | 'results'
+  | 'application_forms'
+  | 'exam_centers'
+  | 'general'
 
 const VALID_CATEGORIES: NoticeCategory[] = [
   'results',
@@ -38,7 +42,10 @@ function mapLegacySectionToCategory(section: string): NoticeCategory | null {
   return null
 }
 
-function normalizeCategoryInput(rawCategory?: string | null, rawSection?: string | null): NoticeCategory | null {
+function normalizeCategoryInput(
+  rawCategory?: string | null,
+  rawSection?: string | null,
+): NoticeCategory | null {
   const category = (rawCategory ?? '').trim().toLowerCase()
   if (category && VALID_CATEGORIES.includes(category as NoticeCategory)) {
     return category as NoticeCategory
@@ -60,7 +67,8 @@ function makeLegacySubsection(category: NoticeCategory): string {
 }
 
 function toLegacySection(category: string): string {
-  if (category === 'results' || category === 'application_forms') return 'results'
+  if (category === 'results' || category === 'application_forms')
+    return 'results'
   return 'routines'
 }
 
@@ -149,7 +157,10 @@ export async function getNotices(req: Request, res: Response) {
     const cursorWhere = cursor
       ? or(
           sql`${sortTimestamp} < ${cursor.sortAt}`,
-          and(sql`${sortTimestamp} = ${cursor.sortAt}`, lt(notice.id, cursor.id)),
+          and(
+            sql`${sortTimestamp} = ${cursor.sortAt}`,
+            lt(notice.id, cursor.id),
+          ),
         )
       : undefined
 
@@ -166,8 +177,7 @@ export async function getNotices(req: Request, res: Response) {
 
     const [newRow] = await db
       .select({
-        count:
-          sql<number>`count(*)::int`,
+        count: sql<number>`count(*)::int`,
       })
       .from(notice)
       .where(
@@ -214,7 +224,8 @@ export async function getNotices(req: Request, res: Response) {
                 const raw = lastItem.publishedDate?.trim()
                 if (raw) {
                   const parsed = new Date(raw)
-                  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString()
+                  if (!Number.isNaN(parsed.getTime()))
+                    return parsed.toISOString()
                 }
                 return lastItem.createdAt
               })(),
@@ -249,13 +260,20 @@ export async function getNotice(req: Request, res: Response) {
   try {
     const noticeId = Number(req.params.id)
     if (!noticeId || Number.isNaN(noticeId)) {
-      return res.status(400).json({ success: false, message: 'Invalid notice ID' })
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid notice ID' })
     }
 
-    const [found] = await db.select().from(notice).where(eq(notice.id, noticeId))
+    const [found] = await db
+      .select()
+      .from(notice)
+      .where(eq(notice.id, noticeId))
 
     if (!found) {
-      return res.status(404).json({ success: false, message: 'Notice not found' })
+      return res
+        .status(404)
+        .json({ success: false, message: 'Notice not found' })
     }
 
     return res.json({ success: true, data: found })
@@ -276,22 +294,15 @@ export async function getNoticeStats(_req: Request, res: Response) {
         // Keep stats aligned with legacy UI filters:
         // section=results => categories(results, application_forms)
         // section=routines => categories(exam_centers, general)
-        beResults:
-          sql<number>`count(*) filter (where ${notice.category} in ('results', 'application_forms') and coalesce(${notice.level}, 'be') = 'be')::int`,
-        mscResults:
-          sql<number>`count(*) filter (where ${notice.category} in ('results', 'application_forms') and coalesce(${notice.level}, 'be') = 'msc')::int`,
-        beRoutines:
-          sql<number>`count(*) filter (where ${notice.category} in ('exam_centers', 'general') and coalesce(${notice.level}, 'be') = 'be')::int`,
-        mscRoutines:
-          sql<number>`count(*) filter (where ${notice.category} in ('exam_centers', 'general') and coalesce(${notice.level}, 'be') = 'msc')::int`,
+        beResults: sql<number>`count(*) filter (where ${notice.category} in ('results', 'application_forms') and coalesce(${notice.level}, 'be') = 'be')::int`,
+        mscResults: sql<number>`count(*) filter (where ${notice.category} in ('results', 'application_forms') and coalesce(${notice.level}, 'be') = 'msc')::int`,
+        beRoutines: sql<number>`count(*) filter (where ${notice.category} in ('exam_centers', 'general') and coalesce(${notice.level}, 'be') = 'be')::int`,
+        mscRoutines: sql<number>`count(*) filter (where ${notice.category} in ('exam_centers', 'general') and coalesce(${notice.level}, 'be') = 'msc')::int`,
         results: sql<number>`count(*) filter (where ${notice.category} = 'results')::int`,
-        applicationForms:
-          sql<number>`count(*) filter (where ${notice.category} = 'application_forms')::int`,
-        examCenters:
-          sql<number>`count(*) filter (where ${notice.category} = 'exam_centers')::int`,
+        applicationForms: sql<number>`count(*) filter (where ${notice.category} = 'application_forms')::int`,
+        examCenters: sql<number>`count(*) filter (where ${notice.category} = 'exam_centers')::int`,
         general: sql<number>`count(*) filter (where ${notice.category} = 'general')::int`,
-        newCount:
-          sql<number>`count(*) filter (where ${notice.createdAt} >= now() - interval '7 days')::int`,
+        newCount: sql<number>`count(*) filter (where ${notice.createdAt} >= now() - interval '7 days')::int`,
         total: sql<number>`count(*)::int`,
       })
       .from(notice)
@@ -368,42 +379,46 @@ export async function createNotice(req: AuthedRequest, res: Response) {
 
     const [created] = await db.insert(notice).values(newNotice).returning()
 
-    createInAppNotificationForAudience({
-      audience: 'all',
-      type: 'notice_created',
-      title: 'New Notice Published',
-      body: title,
-      data: {
-        noticeId: created.id,
-        noticeTitle: created.title,
-        category,
-        section: toLegacySection(category),
-        level: normalizedLevel,
-        subsection: normalizedLevel,
-        publisherId: req.user.id,
-        iconKey: 'notice',
-        ...(isImageUrl(created.attachmentUrl)
-          ? { thumbnailUrl: created.attachmentUrl as string }
-          : {}),
-      },
-    }).catch((error) =>
-      console.error('Failed to create notice in-app notification:', error),
-    )
-
-    sendToTopic('announcements', {
-      title: 'New Notice Published',
-      body: title,
-      data: {
-        noticeId: created.id.toString(),
+    await Promise.allSettled([
+      createInAppNotificationForAudience({
+        audience: 'all',
         type: 'notice_created',
-        category,
-        section: toLegacySection(category),
-        level: normalizedLevel,
-        subsection: normalizedLevel,
-        publisherId: req.user.id,
-        iconKey: 'notice',
-      },
-    }).catch((error) => console.error('Failed to send notice FCM topic notification:', error))
+        title: 'New Notice Published',
+        body: title,
+        data: {
+          noticeId: created.id,
+          noticeTitle: created.title,
+          category,
+          section: toLegacySection(category),
+          level: normalizedLevel,
+          subsection: normalizedLevel,
+          publisherId: req.user.id,
+          iconKey: 'notice',
+          ...(isImageUrl(created.attachmentUrl)
+            ? { thumbnailUrl: created.attachmentUrl as string }
+            : {}),
+        },
+      }).catch((error) =>
+        console.error('Failed to create notice in-app notification:', error),
+      ),
+
+      sendToTopic('announcements', {
+        title: 'New Notice Published',
+        body: title,
+        data: {
+          noticeId: created.id.toString(),
+          type: 'notice_created',
+          category,
+          section: toLegacySection(category),
+          level: normalizedLevel,
+          subsection: normalizedLevel,
+          publisherId: req.user.id,
+          iconKey: 'notice',
+        },
+      }).catch((error) =>
+        console.error('Failed to send notice FCM topic notification:', error),
+      ),
+    ])
 
     return res.json({
       success: true,
@@ -480,44 +495,52 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
     }
 
     const effectiveCategory = (updated.category as NoticeCategory) || 'general'
-    const effectiveLevel = updated.level || makeLegacySubsection(effectiveCategory)
+    const effectiveLevel =
+      updated.level || makeLegacySubsection(effectiveCategory)
 
-    createInAppNotificationForAudience({
-      audience: 'all',
-      type: 'notice_updated',
-      title: 'Notice Updated',
-      body: updated.title,
-      data: {
-        noticeId: updated.id,
-        noticeTitle: updated.title,
-        category: effectiveCategory,
-        section: toLegacySection(effectiveCategory),
-        level: effectiveLevel,
-        subsection: effectiveLevel,
-        publisherId: req.user.id,
-        iconKey: 'notice',
-        ...(isImageUrl(updated.attachmentUrl)
-          ? { thumbnailUrl: updated.attachmentUrl as string }
-          : {}),
-      },
-    }).catch((error) =>
-      console.error('Failed to create notice update notification:', error),
-    )
-
-    sendToTopic('announcements', {
-      title: 'Notice Updated',
-      body: updated.title,
-      data: {
-        noticeId: updated.id.toString(),
+    await Promise.allSettled([
+      createInAppNotificationForAudience({
+        audience: 'all',
         type: 'notice_updated',
-        category: effectiveCategory,
-        section: toLegacySection(effectiveCategory),
-        level: effectiveLevel,
-        subsection: effectiveLevel,
-        publisherId: req.user.id,
-        iconKey: 'notice',
-      },
-    }).catch((error) => console.error('Failed to send notice update FCM topic notification:', error))
+        title: 'Notice Updated',
+        body: updated.title,
+        data: {
+          noticeId: updated.id,
+          noticeTitle: updated.title,
+          category: effectiveCategory,
+          section: toLegacySection(effectiveCategory),
+          level: effectiveLevel,
+          subsection: effectiveLevel,
+          publisherId: req.user.id,
+          iconKey: 'notice',
+          ...(isImageUrl(updated.attachmentUrl)
+            ? { thumbnailUrl: updated.attachmentUrl as string }
+            : {}),
+        },
+      }).catch((error) =>
+        console.error('Failed to create notice update notification:', error),
+      ),
+
+      sendToTopic('announcements', {
+        title: 'Notice Updated',
+        body: updated.title,
+        data: {
+          noticeId: updated.id.toString(),
+          type: 'notice_updated',
+          category: effectiveCategory,
+          section: toLegacySection(effectiveCategory),
+          level: effectiveLevel,
+          subsection: effectiveLevel,
+          publisherId: req.user.id,
+          iconKey: 'notice',
+        },
+      }).catch((error) =>
+        console.error(
+          'Failed to send notice update FCM topic notification:',
+          error,
+        ),
+      ),
+    ])
 
     return res.json({
       success: true,
@@ -638,9 +661,10 @@ export async function deleteNotice(req: AuthedRequest, res: Response) {
     })
 
     const effectiveCategory = (deleted.category as NoticeCategory) || 'general'
-    const effectiveLevel = deleted.level || makeLegacySubsection(effectiveCategory)
+    const effectiveLevel =
+      deleted.level || makeLegacySubsection(effectiveCategory)
 
-    createInAppNotificationForAudience({
+    await createInAppNotificationForAudience({
       audience: 'admins',
       type: 'notice_deleted',
       title: 'Notice Removed',

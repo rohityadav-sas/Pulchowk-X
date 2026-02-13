@@ -1,66 +1,56 @@
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  ilike,
-  inArray,
-  ne,
-  or,
-  sql,
-} from "drizzle-orm";
-import { db } from "../lib/db.js";
+import { and, asc, desc, eq, ilike, inArray, ne, or, sql } from 'drizzle-orm'
+import { db } from '../lib/db.js'
 import {
   lostFoundClaims,
   lostFoundImages,
   lostFoundItems,
   type LostFoundClaim,
-} from "../models/lost-found-schema.js";
-import { user } from "../models/auth-schema.js";
-import { createInAppNotificationForUser } from "./inAppNotification.service.js";
-import { sendToUser } from "./notification.service.js";
+} from '../models/lost-found-schema.js'
+import { user } from '../models/auth-schema.js'
+import { createInAppNotificationForUser } from './inAppNotification.service.js'
+import { sendToUser } from './notification.service.js'
 
-type ItemType = "lost" | "found";
-type ItemStatus = "open" | "claimed" | "resolved" | "closed";
+type ItemType = 'lost' | 'found'
+type ItemStatus = 'open' | 'claimed' | 'resolved' | 'closed'
 type ItemCategory =
-  | "documents"
-  | "electronics"
-  | "accessories"
-  | "ids_cards"
-  | "keys"
-  | "bags"
-  | "other";
-type ClaimStatus = "pending" | "accepted" | "rejected" | "cancelled";
+  | 'documents'
+  | 'electronics'
+  | 'accessories'
+  | 'ids_cards'
+  | 'keys'
+  | 'bags'
+  | 'other'
+type ClaimStatus = 'pending' | 'accepted' | 'rejected' | 'cancelled'
 
 interface CursorPayload {
-  createdAt: string;
-  id: number;
+  createdAt: string
+  id: number
 }
 
 function encodeCursor(payload: CursorPayload) {
-  return Buffer.from(JSON.stringify(payload)).toString("base64url");
+  return Buffer.from(JSON.stringify(payload)).toString('base64url')
 }
 
 function decodeCursor(cursor?: string | null): CursorPayload | null {
-  if (!cursor) return null;
+  if (!cursor) return null
   try {
-    const parsed = JSON.parse(Buffer.from(cursor, "base64url").toString("utf8"));
+    const parsed = JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8'))
     if (
-      typeof parsed?.createdAt === "string" &&
+      typeof parsed?.createdAt === 'string' &&
       Number.isInteger(parsed?.id) &&
       parsed.id > 0
     ) {
-      return { createdAt: parsed.createdAt, id: parsed.id };
+      return { createdAt: parsed.createdAt, id: parsed.id }
     }
   } catch (_error) {
-    return null;
+    return null
   }
-  return null;
+  return null
 }
 
 function isNonGuestRole(role?: string) {
-  if (!role) return false;
-  return role !== "guest";
+  if (!role) return false
+  return role !== 'guest'
 }
 
 async function safeCreateNotification(
@@ -68,64 +58,75 @@ async function safeCreateNotification(
   run: () => Promise<unknown>,
 ) {
   try {
-    await run();
+    await run()
   } catch (error) {
-    console.error(`LostFound notification error (${context}):`, error);
+    console.error(`LostFound notification error (${context}):`, error)
   }
 }
 
 function normalizeLimit(limit?: number) {
-  const parsed = Number(limit ?? 10);
-  if (!Number.isFinite(parsed)) return 10;
-  return Math.min(30, Math.max(1, Math.floor(parsed)));
+  const parsed = Number(limit ?? 10)
+  if (!Number.isFinite(parsed)) return 10
+  return Math.min(30, Math.max(1, Math.floor(parsed)))
 }
 
 function buildCursorFilter(cursor?: string | null) {
-  const parsed = decodeCursor(cursor);
-  if (!parsed) return null;
-  const cursorDate = new Date(parsed.createdAt);
-  if (Number.isNaN(cursorDate.getTime())) return null;
+  const parsed = decodeCursor(cursor)
+  if (!parsed) return null
+  const cursorDate = new Date(parsed.createdAt)
+  if (Number.isNaN(cursorDate.getTime())) return null
   return or(
     sql`${lostFoundItems.createdAt} < ${cursorDate}`,
-    and(eq(lostFoundItems.createdAt, cursorDate), sql`${lostFoundItems.id} < ${parsed.id}`),
-  );
+    and(
+      eq(lostFoundItems.createdAt, cursorDate),
+      sql`${lostFoundItems.id} < ${parsed.id}`,
+    ),
+  )
 }
 
 function mapItem(item: any) {
   return {
     ...item,
-    images: (item.images || []).sort((a: any, b: any) => a.sortOrder - b.sortOrder),
-  };
+    images: (item.images || []).sort(
+      (a: any, b: any) => a.sortOrder - b.sortOrder,
+    ),
+  }
 }
 
 export async function createLostFoundItem(
   userId: string,
   role: string | undefined,
   payload: {
-    itemType: ItemType;
-    title: string;
-    description: string;
-    category: ItemCategory;
-    lostFoundDate: string;
-    locationText: string;
-    contactNote?: string | null;
-    rewardText?: string | null;
+    itemType: ItemType
+    title: string
+    description: string
+    category: ItemCategory
+    lostFoundDate: string
+    locationText: string
+    contactNote?: string | null
+    rewardText?: string | null
   },
 ) {
   if (!isNonGuestRole(role)) {
-    return { success: false, message: "Guest users cannot create lost/found posts." };
+    return {
+      success: false,
+      message: 'Guest users cannot create lost/found posts.',
+    }
   }
 
-  const title = payload.title?.trim();
-  const description = payload.description?.trim();
-  const locationText = payload.locationText?.trim();
+  const title = payload.title?.trim()
+  const description = payload.description?.trim()
+  const locationText = payload.locationText?.trim()
   if (!title || !description || !locationText) {
-    return { success: false, message: "Title, description, and location are required." };
+    return {
+      success: false,
+      message: 'Title, description, and location are required.',
+    }
   }
 
-  const dateValue = new Date(payload.lostFoundDate);
+  const dateValue = new Date(payload.lostFoundDate)
   if (Number.isNaN(dateValue.getTime())) {
-    return { success: false, message: "Invalid lost/found date." };
+    return { success: false, message: 'Invalid lost/found date.' }
   }
 
   const [created] = await db
@@ -140,11 +141,15 @@ export async function createLostFoundItem(
       locationText,
       contactNote: payload.contactNote?.trim() || null,
       rewardText: payload.rewardText?.trim() || null,
-      status: "open",
+      status: 'open',
     })
-    .returning();
+    .returning()
 
-  return { success: true, data: created, message: "Lost/found post created successfully." };
+  return {
+    success: true,
+    data: created,
+    message: 'Lost/found post created successfully.',
+  }
 }
 
 export async function updateLostFoundItem(
@@ -152,101 +157,133 @@ export async function updateLostFoundItem(
   userId: string,
   role: string | undefined,
   payload: Partial<{
-    title: string;
-    description: string;
-    category: ItemCategory;
-    lostFoundDate: string;
-    locationText: string;
-    contactNote: string | null;
-    rewardText: string | null;
-    status: ItemStatus;
+    title: string
+    description: string
+    category: ItemCategory
+    lostFoundDate: string
+    locationText: string
+    contactNote: string | null
+    rewardText: string | null
+    status: ItemStatus
   }>,
 ) {
   if (!isNonGuestRole(role)) {
-    return { success: false, message: "Guest users cannot update lost/found posts." };
+    return {
+      success: false,
+      message: 'Guest users cannot update lost/found posts.',
+    }
   }
 
   const existing = await db.query.lostFoundItems.findFirst({
     where: eq(lostFoundItems.id, itemId),
-  });
-  if (!existing) return { success: false, message: "Lost/found item not found." };
+  })
+  if (!existing)
+    return { success: false, message: 'Lost/found item not found.' }
   if (existing.ownerId !== userId) {
-    return { success: false, message: "You are not authorized to update this item." };
+    return {
+      success: false,
+      message: 'You are not authorized to update this item.',
+    }
   }
 
-  const patch: Record<string, unknown> = {};
-  if (typeof payload.title === "string") patch.title = payload.title.trim();
-  if (typeof payload.description === "string") patch.description = payload.description.trim();
-  if (typeof payload.category === "string") patch.category = payload.category;
-  if (typeof payload.locationText === "string") patch.locationText = payload.locationText.trim();
-  if (payload.contactNote !== undefined) patch.contactNote = payload.contactNote?.trim() || null;
-  if (payload.rewardText !== undefined) patch.rewardText = payload.rewardText?.trim() || null;
-  if (typeof payload.status === "string") patch.status = payload.status;
-  if (typeof payload.lostFoundDate === "string") {
-    const dateValue = new Date(payload.lostFoundDate);
+  const patch: Record<string, unknown> = {}
+  if (typeof payload.title === 'string') patch.title = payload.title.trim()
+  if (typeof payload.description === 'string')
+    patch.description = payload.description.trim()
+  if (typeof payload.category === 'string') patch.category = payload.category
+  if (typeof payload.locationText === 'string')
+    patch.locationText = payload.locationText.trim()
+  if (payload.contactNote !== undefined)
+    patch.contactNote = payload.contactNote?.trim() || null
+  if (payload.rewardText !== undefined)
+    patch.rewardText = payload.rewardText?.trim() || null
+  if (typeof payload.status === 'string') patch.status = payload.status
+  if (typeof payload.lostFoundDate === 'string') {
+    const dateValue = new Date(payload.lostFoundDate)
     if (Number.isNaN(dateValue.getTime())) {
-      return { success: false, message: "Invalid lost/found date." };
+      return { success: false, message: 'Invalid lost/found date.' }
     }
-    patch.lostFoundDate = dateValue;
+    patch.lostFoundDate = dateValue
   }
-  patch.updatedAt = new Date();
+  patch.updatedAt = new Date()
 
   const [updated] = await db
     .update(lostFoundItems)
     .set(patch)
     .where(eq(lostFoundItems.id, itemId))
-    .returning();
+    .returning()
 
-  return { success: true, data: updated, message: "Lost/found item updated successfully." };
+  return {
+    success: true,
+    data: updated,
+    message: 'Lost/found item updated successfully.',
+  }
 }
 
-export async function deleteLostFoundItem(itemId: number, userId: string, role?: string) {
+export async function deleteLostFoundItem(
+  itemId: number,
+  userId: string,
+  role?: string,
+) {
   if (!isNonGuestRole(role)) {
-    return { success: false, message: "Guest users cannot delete lost/found posts." };
+    return {
+      success: false,
+      message: 'Guest users cannot delete lost/found posts.',
+    }
   }
   const existing = await db.query.lostFoundItems.findFirst({
     where: eq(lostFoundItems.id, itemId),
     columns: { id: true, ownerId: true },
-  });
-  if (!existing) return { success: false, message: "Lost/found item not found." };
+  })
+  if (!existing)
+    return { success: false, message: 'Lost/found item not found.' }
   if (existing.ownerId !== userId) {
-    return { success: false, message: "You are not authorized to delete this item." };
+    return {
+      success: false,
+      message: 'You are not authorized to delete this item.',
+    }
   }
 
-  await db.delete(lostFoundItems).where(eq(lostFoundItems.id, itemId));
-  return { success: true, message: "Lost/found item deleted successfully." };
+  await db.delete(lostFoundItems).where(eq(lostFoundItems.id, itemId))
+  return { success: true, message: 'Lost/found item deleted successfully.' }
 }
 
 export async function listLostFoundItems(filters: {
-  itemType?: ItemType;
-  category?: ItemCategory;
-  status?: ItemStatus;
-  q?: string;
-  limit?: number;
-  cursor?: string | null;
+  itemType?: ItemType
+  category?: ItemCategory
+  status?: ItemStatus
+  q?: string
+  limit?: number
+  cursor?: string | null
 }) {
-  const limit = normalizeLimit(filters.limit);
-  const baseFilters: any[] = [];
+  const limit = normalizeLimit(filters.limit)
+  const baseFilters: any[] = []
 
-  if (filters.itemType) baseFilters.push(eq(lostFoundItems.itemType, filters.itemType));
-  if (filters.category) baseFilters.push(eq(lostFoundItems.category, filters.category));
-  if (filters.status) baseFilters.push(eq(lostFoundItems.status, filters.status));
-  else baseFilters.push(inArray(lostFoundItems.status, ["open", "claimed"]));
+  if (filters.itemType)
+    baseFilters.push(eq(lostFoundItems.itemType, filters.itemType))
+  if (filters.category)
+    baseFilters.push(eq(lostFoundItems.category, filters.category))
+  if (filters.status)
+    baseFilters.push(eq(lostFoundItems.status, filters.status))
+  else baseFilters.push(inArray(lostFoundItems.status, ['open', 'claimed']))
   if (filters.q?.trim()) {
-    const term = `%${filters.q.trim()}%`;
+    const term = `%${filters.q.trim()}%`
     baseFilters.push(
       or(
         ilike(lostFoundItems.title, term),
         ilike(lostFoundItems.description, term),
         ilike(lostFoundItems.locationText, term),
       ),
-    );
+    )
   }
 
-  const cursorFilter = buildCursorFilter(filters.cursor);
-  const pageFilters = cursorFilter ? [...baseFilters, cursorFilter] : [...baseFilters];
+  const cursorFilter = buildCursorFilter(filters.cursor)
+  const pageFilters = cursorFilter
+    ? [...baseFilters, cursorFilter]
+    : [...baseFilters]
 
-  const whereClause = pageFilters.length > 1 ? and(...pageFilters) : pageFilters[0];
+  const whereClause =
+    pageFilters.length > 1 ? and(...pageFilters) : pageFilters[0]
   const rows = await db.query.lostFoundItems.findMany({
     where: whereClause,
     orderBy: [desc(lostFoundItems.createdAt), desc(lostFoundItems.id)],
@@ -257,7 +294,7 @@ export async function listLostFoundItems(filters: {
       },
       images: true,
     },
-  });
+  })
 
   const [countRow] = await db
     .select({ count: sql<number>`count(*)::int` })
@@ -268,27 +305,30 @@ export async function listLostFoundItems(filters: {
           ? and(...baseFilters)
           : baseFilters[0]
         : undefined,
-    );
+    )
 
-  const hasMore = rows.length > limit;
-  const items = rows.slice(0, limit).map(mapItem);
-  const last = items[items.length - 1];
+  const hasMore = rows.length > limit
+  const items = rows.slice(0, limit).map(mapItem)
+  const last = items[items.length - 1]
   const nextCursor =
     hasMore && last
       ? encodeCursor({
           createdAt: new Date(last.createdAt).toISOString(),
           id: Number(last.id),
         })
-      : null;
+      : null
 
   return {
     success: true,
     data: { items, nextCursor, hasMore },
     meta: { total: countRow?.count ?? items.length, limit },
-  };
+  }
 }
 
-export async function getLostFoundItemById(itemId: number, viewerUserId?: string) {
+export async function getLostFoundItemById(
+  itemId: number,
+  viewerUserId?: string,
+) {
   const item = await db.query.lostFoundItems.findFirst({
     where: eq(lostFoundItems.id, itemId),
     with: {
@@ -306,14 +346,14 @@ export async function getLostFoundItemById(itemId: number, viewerUserId?: string
         },
       },
     },
-  });
+  })
 
-  if (!item) return { success: false, message: "Lost/found item not found." };
+  if (!item) return { success: false, message: 'Lost/found item not found.' }
 
   const viewerClaim =
     viewerUserId && viewerUserId !== item.ownerId
       ? item.claims.find((claim) => claim.requesterId === viewerUserId) || null
-      : null;
+      : null
 
   return {
     success: true,
@@ -322,13 +362,15 @@ export async function getLostFoundItemById(itemId: number, viewerUserId?: string
       claims: undefined,
       claimSummary: {
         total: item.claims.length,
-        pending: item.claims.filter((claim) => claim.status === "pending").length,
-        accepted: item.claims.filter((claim) => claim.status === "accepted").length,
+        pending: item.claims.filter((claim) => claim.status === 'pending')
+          .length,
+        accepted: item.claims.filter((claim) => claim.status === 'accepted')
+          .length,
       },
       viewerClaim,
       isOwner: !!viewerUserId && viewerUserId === item.ownerId,
     },
-  };
+  }
 }
 
 export async function addLostFoundImage(
@@ -339,22 +381,27 @@ export async function addLostFoundImage(
   cloudinaryPublicId?: string | null,
 ) {
   if (!isNonGuestRole(role)) {
-    return { success: false, message: "Guest users cannot add images." };
+    return { success: false, message: 'Guest users cannot add images.' }
   }
   const item = await db.query.lostFoundItems.findFirst({
     where: eq(lostFoundItems.id, itemId),
     columns: { id: true, ownerId: true },
-  });
-  if (!item) return { success: false, message: "Lost/found item not found." };
+  })
+  if (!item) return { success: false, message: 'Lost/found item not found.' }
   if (item.ownerId !== userId) {
-    return { success: false, message: "You are not authorized to update this item." };
+    return {
+      success: false,
+      message: 'You are not authorized to update this item.',
+    }
   }
 
   const [orderRow] = await db
-    .select({ maxOrder: sql<number>`coalesce(max(${lostFoundImages.sortOrder}), -1)` })
+    .select({
+      maxOrder: sql<number>`coalesce(max(${lostFoundImages.sortOrder}), -1)`,
+    })
     .from(lostFoundImages)
-    .where(eq(lostFoundImages.itemId, itemId));
-  const nextOrder = (orderRow?.maxOrder ?? -1) + 1;
+    .where(eq(lostFoundImages.itemId, itemId))
+  const nextOrder = (orderRow?.maxOrder ?? -1) + 1
 
   const [created] = await db
     .insert(lostFoundImages)
@@ -364,9 +411,9 @@ export async function addLostFoundImage(
       cloudinaryPublicId: cloudinaryPublicId || null,
       sortOrder: nextOrder,
     })
-    .returning();
+    .returning()
 
-  return { success: true, data: created };
+  return { success: true, data: created }
 }
 
 export async function deleteLostFoundImage(
@@ -376,23 +423,28 @@ export async function deleteLostFoundImage(
   role: string | undefined,
 ) {
   if (!isNonGuestRole(role)) {
-    return { success: false, message: "Guest users cannot delete images." };
+    return { success: false, message: 'Guest users cannot delete images.' }
   }
   const item = await db.query.lostFoundItems.findFirst({
     where: eq(lostFoundItems.id, itemId),
     columns: { ownerId: true },
-  });
-  if (!item) return { success: false, message: "Lost/found item not found." };
+  })
+  if (!item) return { success: false, message: 'Lost/found item not found.' }
   if (item.ownerId !== userId) {
-    return { success: false, message: "You are not authorized to update this item." };
+    return {
+      success: false,
+      message: 'You are not authorized to update this item.',
+    }
   }
 
   const [deleted] = await db
     .delete(lostFoundImages)
-    .where(and(eq(lostFoundImages.id, imageId), eq(lostFoundImages.itemId, itemId)))
-    .returning();
-  if (!deleted) return { success: false, message: "Image not found." };
-  return { success: true, data: deleted };
+    .where(
+      and(eq(lostFoundImages.id, imageId), eq(lostFoundImages.itemId, itemId)),
+    )
+    .returning()
+  if (!deleted) return { success: false, message: 'Image not found.' }
+  return { success: true, data: deleted }
 }
 
 export async function createClaimRequest(
@@ -402,11 +454,15 @@ export async function createClaimRequest(
   message: string,
 ) {
   if (!isNonGuestRole(role)) {
-    return { success: false, message: "Guest users cannot submit claim requests." };
+    return {
+      success: false,
+      message: 'Guest users cannot submit claim requests.',
+    }
   }
 
-  const trimmedMessage = message?.trim();
-  if (!trimmedMessage) return { success: false, message: "Claim message is required." };
+  const trimmedMessage = message?.trim()
+  if (!trimmedMessage)
+    return { success: false, message: 'Claim message is required.' }
 
   const item = await db.query.lostFoundItems.findFirst({
     where: eq(lostFoundItems.id, itemId),
@@ -419,19 +475,22 @@ export async function createClaimRequest(
         limit: 1,
       },
     },
-  });
-  if (!item) return { success: false, message: "Lost/found item not found." };
+  })
+  if (!item) return { success: false, message: 'Lost/found item not found.' }
   if (item.ownerId === requesterId) {
-    return { success: false, message: "You cannot claim your own item." };
+    return { success: false, message: 'You cannot claim your own item.' }
   }
-  if (item.itemType !== "found") {
+  if (item.itemType !== 'found') {
     return {
       success: false,
-      message: "Claim requests are only available for found items.",
-    };
+      message: 'Claim requests are only available for found items.',
+    }
   }
-  if (item.status === "resolved" || item.status === "closed") {
-    return { success: false, message: "This item is no longer accepting claims." };
+  if (item.status === 'resolved' || item.status === 'closed') {
+    return {
+      success: false,
+      message: 'This item is no longer accepting claims.',
+    }
   }
 
   const existing = await db.query.lostFoundClaims.findFirst({
@@ -439,26 +498,26 @@ export async function createClaimRequest(
       eq(lostFoundClaims.itemId, itemId),
       eq(lostFoundClaims.requesterId, requesterId),
     ),
-  });
+  })
 
-  let created: LostFoundClaim;
+  let created: LostFoundClaim
   if (existing) {
-    if (existing.status === "pending" || existing.status === "accepted") {
+    if (existing.status === 'pending' || existing.status === 'accepted') {
       return {
         success: false,
-        message: "You already have an active claim request for this item.",
-      };
+        message: 'You already have an active claim request for this item.',
+      }
     }
     const [reopened] = await db
       .update(lostFoundClaims)
       .set({
-        status: "pending",
+        status: 'pending',
         message: trimmedMessage,
         updatedAt: new Date(),
       })
       .where(eq(lostFoundClaims.id, existing.id))
-      .returning();
-    created = reopened;
+      .returning()
+    created = reopened
   } else {
     const [inserted] = await db
       .insert(lostFoundClaims)
@@ -466,40 +525,40 @@ export async function createClaimRequest(
         itemId,
         requesterId,
         message: trimmedMessage,
-        status: "pending",
+        status: 'pending',
       })
-      .returning();
-    created = inserted;
+      .returning()
+    created = inserted
   }
 
   const requester = await db.query.user.findFirst({
     where: eq(user.id, requesterId),
     columns: { id: true, name: true, image: true },
-  });
+  })
 
   await sendToUser(item.ownerId, {
-    title: "New claim request",
+    title: 'New claim request',
     body: `Someone requested your ${item.itemType} item: ${item.title}.`,
     data: {
-      type: "lost_found_claim_received",
+      type: 'lost_found_claim_received',
       itemId: item.id.toString(),
       claimId: created.id.toString(),
       itemType: item.itemType,
-      iconKey: "lost_found",
-      thumbnailUrl: item.images[0]?.imageUrl || "",
+      iconKey: 'lost_found',
+      thumbnailUrl: item.images[0]?.imageUrl || '',
     },
-  });
-  const requesterName = requester?.name?.trim() || "Someone";
+  })
+  const requesterName = requester?.name?.trim() || 'Someone'
   const actionText =
-    item.itemType === "found"
-      ? "claimed your found item"
-      : "has a comment on your lost item";
+    item.itemType === 'found'
+      ? 'claimed your found item'
+      : 'has a comment on your lost item'
 
-  await safeCreateNotification("claim_received", () =>
+  await safeCreateNotification('claim_received', () =>
     createInAppNotificationForUser({
       userId: item.ownerId,
-      type: "lost_found_claim_received",
-      title: "New claim request",
+      type: 'lost_found_claim_received',
+      title: 'New claim request',
       body: `${requesterName} ${actionText}: ${item.title}.`,
       data: {
         itemId: item.id,
@@ -509,13 +568,13 @@ export async function createClaimRequest(
         actorId: requester?.id || requesterId,
         actorName: requesterName,
         actorAvatarUrl: requester?.image || null,
-        iconKey: "lost_found",
+        iconKey: 'lost_found',
         thumbnailUrl: item.images[0]?.imageUrl || null,
       },
     }),
-  );
+  )
 
-  return { success: true, data: created, message: "Claim request sent." };
+  return { success: true, data: created, message: 'Claim request sent.' }
 }
 
 export async function listClaimsForOwnerItem(
@@ -523,13 +582,13 @@ export async function listClaimsForOwnerItem(
   ownerId: string,
   role?: string,
 ) {
-  if (!isNonGuestRole(role)) return { success: false, message: "Unauthorized." };
+  if (!isNonGuestRole(role)) return { success: false, message: 'Unauthorized.' }
   const item = await db.query.lostFoundItems.findFirst({
     where: eq(lostFoundItems.id, itemId),
     columns: { id: true, ownerId: true },
-  });
-  if (!item) return { success: false, message: "Lost/found item not found." };
-  if (item.ownerId !== ownerId) return { success: false, message: "Forbidden." };
+  })
+  if (!item) return { success: false, message: 'Lost/found item not found.' }
+  if (item.ownerId !== ownerId) return { success: false, message: 'Forbidden.' }
 
   const claims = await db.query.lostFoundClaims.findMany({
     where: eq(lostFoundClaims.itemId, itemId),
@@ -539,9 +598,9 @@ export async function listClaimsForOwnerItem(
         columns: { id: true, name: true, image: true, email: true, role: true },
       },
     },
-  });
+  })
 
-  return { success: true, data: claims };
+  return { success: true, data: claims }
 }
 
 export async function setClaimStatus(
@@ -549,9 +608,9 @@ export async function setClaimStatus(
   claimId: number,
   ownerId: string,
   role: string | undefined,
-  nextStatus: Extract<ClaimStatus, "accepted" | "rejected" | "cancelled">,
+  nextStatus: Extract<ClaimStatus, 'accepted' | 'rejected' | 'cancelled'>,
 ) {
-  if (!isNonGuestRole(role)) return { success: false, message: "Unauthorized." };
+  if (!isNonGuestRole(role)) return { success: false, message: 'Unauthorized.' }
   const item = await db.query.lostFoundItems.findFirst({
     where: eq(lostFoundItems.id, itemId),
     with: {
@@ -560,16 +619,19 @@ export async function setClaimStatus(
         limit: 1,
       },
     },
-  });
-  if (!item) return { success: false, message: "Lost/found item not found." };
-  if (item.ownerId !== ownerId) return { success: false, message: "Forbidden." };
+  })
+  if (!item) return { success: false, message: 'Lost/found item not found.' }
+  if (item.ownerId !== ownerId) return { success: false, message: 'Forbidden.' }
 
   const claim = await db.query.lostFoundClaims.findFirst({
-    where: and(eq(lostFoundClaims.id, claimId), eq(lostFoundClaims.itemId, itemId)),
-  });
-  if (!claim) return { success: false, message: "Claim request not found." };
-  if (claim.status !== "pending") {
-    return { success: false, message: "Only pending claims can be updated." };
+    where: and(
+      eq(lostFoundClaims.id, claimId),
+      eq(lostFoundClaims.itemId, itemId),
+    ),
+  })
+  if (!claim) return { success: false, message: 'Claim request not found.' }
+  if (claim.status !== 'pending') {
+    return { success: false, message: 'Only pending claims can be updated.' }
   }
 
   const [updatedClaim] = await db
@@ -579,77 +641,78 @@ export async function setClaimStatus(
       and(
         eq(lostFoundClaims.id, claimId),
         eq(lostFoundClaims.itemId, itemId),
-        eq(lostFoundClaims.status, "pending"),
+        eq(lostFoundClaims.status, 'pending'),
       ),
     )
-    .returning();
+    .returning()
 
-  if (!updatedClaim) return { success: false, message: "Failed to update claim." };
+  if (!updatedClaim)
+    return { success: false, message: 'Failed to update claim.' }
 
-  if (nextStatus === "accepted") {
+  if (nextStatus === 'accepted') {
     await db
       .update(lostFoundClaims)
-      .set({ status: "rejected", updatedAt: new Date() })
+      .set({ status: 'rejected', updatedAt: new Date() })
       .where(
         and(
           eq(lostFoundClaims.itemId, itemId),
           ne(lostFoundClaims.id, claimId),
-          eq(lostFoundClaims.status, "pending"),
+          eq(lostFoundClaims.status, 'pending'),
         ),
-      );
+      )
     await db
       .update(lostFoundItems)
-      .set({ status: "resolved", updatedAt: new Date() })
-      .where(eq(lostFoundItems.id, itemId));
+      .set({ status: 'resolved', updatedAt: new Date() })
+      .where(eq(lostFoundItems.id, itemId))
   }
 
   await sendToUser(updatedClaim.requesterId, {
     title:
-      nextStatus === "accepted"
-        ? "Claim accepted"
-        : nextStatus === "rejected"
-          ? "Claim rejected"
-          : "Claim cancelled",
+      nextStatus === 'accepted'
+        ? 'Claim accepted'
+        : nextStatus === 'rejected'
+          ? 'Claim rejected'
+          : 'Claim cancelled',
     body:
-      nextStatus === "accepted"
+      nextStatus === 'accepted'
         ? `Your claim for "${item.title}" was accepted.`
-        : nextStatus === "rejected"
+        : nextStatus === 'rejected'
           ? `Your claim for "${item.title}" was rejected.`
           : `Your claim for "${item.title}" was cancelled.`,
     data: {
       type:
-        nextStatus === "accepted"
-          ? "lost_found_claim_accepted"
-          : nextStatus === "rejected"
-            ? "lost_found_claim_rejected"
-            : "lost_found_claim_cancelled",
+        nextStatus === 'accepted'
+          ? 'lost_found_claim_accepted'
+          : nextStatus === 'rejected'
+            ? 'lost_found_claim_rejected'
+            : 'lost_found_claim_cancelled',
       itemId: item.id.toString(),
       claimId: updatedClaim.id.toString(),
       itemType: item.itemType,
-      iconKey: "lost_found",
-      thumbnailUrl: item.images[0]?.imageUrl || "",
+      iconKey: 'lost_found',
+      thumbnailUrl: item.images[0]?.imageUrl || '',
     },
-  });
+  })
 
-  await safeCreateNotification("claim_status_updated", () =>
+  await safeCreateNotification('claim_status_updated', () =>
     createInAppNotificationForUser({
       userId: updatedClaim.requesterId,
       type:
-        nextStatus === "accepted"
-          ? "lost_found_claim_accepted"
-          : nextStatus === "rejected"
-            ? "lost_found_claim_rejected"
-            : "lost_found_claim_cancelled",
+        nextStatus === 'accepted'
+          ? 'lost_found_claim_accepted'
+          : nextStatus === 'rejected'
+            ? 'lost_found_claim_rejected'
+            : 'lost_found_claim_cancelled',
       title:
-        nextStatus === "accepted"
-          ? "Claim accepted"
-          : nextStatus === "rejected"
-            ? "Claim rejected"
-            : "Claim cancelled",
+        nextStatus === 'accepted'
+          ? 'Claim accepted'
+          : nextStatus === 'rejected'
+            ? 'Claim rejected'
+            : 'Claim cancelled',
       body:
-        nextStatus === "accepted"
+        nextStatus === 'accepted'
           ? `Your claim for "${item.title}" was accepted.`
-          : nextStatus === "rejected"
+          : nextStatus === 'rejected'
             ? `Your claim for "${item.title}" was rejected.`
             : `Your claim for "${item.title}" was cancelled.`,
       data: {
@@ -657,13 +720,13 @@ export async function setClaimStatus(
         claimId: updatedClaim.id,
         itemType: item.itemType,
         itemTitle: item.title,
-        iconKey: "lost_found",
+        iconKey: 'lost_found',
         thumbnailUrl: item.images[0]?.imageUrl || null,
       },
     }),
-  );
+  )
 
-  return { success: true, data: updatedClaim, message: "Claim status updated." };
+  return { success: true, data: updatedClaim, message: 'Claim status updated.' }
 }
 
 export async function markItemStatus(
@@ -672,7 +735,7 @@ export async function markItemStatus(
   role: string | undefined,
   status: ItemStatus,
 ) {
-  if (!isNonGuestRole(role)) return { success: false, message: "Unauthorized." };
+  if (!isNonGuestRole(role)) return { success: false, message: 'Unauthorized.' }
   const item = await db.query.lostFoundItems.findFirst({
     where: eq(lostFoundItems.id, itemId),
     with: {
@@ -681,62 +744,62 @@ export async function markItemStatus(
         limit: 1,
       },
     },
-  });
-  if (!item) return { success: false, message: "Lost/found item not found." };
-  if (item.ownerId !== ownerId) return { success: false, message: "Forbidden." };
+  })
+  if (!item) return { success: false, message: 'Lost/found item not found.' }
+  if (item.ownerId !== ownerId) return { success: false, message: 'Forbidden.' }
 
   const [updated] = await db
     .update(lostFoundItems)
     .set({ status, updatedAt: new Date() })
     .where(eq(lostFoundItems.id, itemId))
-    .returning();
+    .returning()
 
-  if (status === "resolved") {
+  if (status === 'resolved') {
     const acceptedClaims = await db.query.lostFoundClaims.findMany({
       where: and(
         eq(lostFoundClaims.itemId, itemId),
-        eq(lostFoundClaims.status, "accepted"),
+        eq(lostFoundClaims.status, 'accepted'),
       ),
       columns: { requesterId: true },
-    });
+    })
 
     await Promise.all(
       acceptedClaims.map(async (claim) => {
         await sendToUser(claim.requesterId, {
-          title: "Item marked as resolved",
+          title: 'Item marked as resolved',
           body: `The owner marked "${item.title}" as resolved.`,
           data: {
-            type: "lost_found_resolved",
+            type: 'lost_found_resolved',
             itemId: item.id.toString(),
             itemType: item.itemType,
-            iconKey: "lost_found",
-            thumbnailUrl: item.images[0]?.imageUrl || "",
+            iconKey: 'lost_found',
+            thumbnailUrl: item.images[0]?.imageUrl || '',
           },
-        });
-        await safeCreateNotification("item_resolved", () =>
+        })
+        await safeCreateNotification('item_resolved', () =>
           createInAppNotificationForUser({
             userId: claim.requesterId,
-            type: "lost_found_resolved",
-            title: "Item marked as resolved",
+            type: 'lost_found_resolved',
+            title: 'Item marked as resolved',
             body: `The owner marked "${item.title}" as resolved.`,
             data: {
               itemId: item.id,
               itemType: item.itemType,
               itemTitle: item.title,
-              iconKey: "lost_found",
+              iconKey: 'lost_found',
               thumbnailUrl: item.images[0]?.imageUrl || null,
             },
           }),
-        );
+        )
       }),
-    );
+    )
   }
 
-  return { success: true, data: updated, message: "Item status updated." };
+  return { success: true, data: updated, message: 'Item status updated.' }
 }
 
 export async function getMyLostFoundItems(userId: string, role?: string) {
-  if (!isNonGuestRole(role)) return { success: false, message: "Unauthorized." };
+  if (!isNonGuestRole(role)) return { success: false, message: 'Unauthorized.' }
   const items = await db.query.lostFoundItems.findMany({
     where: eq(lostFoundItems.ownerId, userId),
     orderBy: [desc(lostFoundItems.createdAt), desc(lostFoundItems.id)],
@@ -745,12 +808,12 @@ export async function getMyLostFoundItems(userId: string, role?: string) {
         orderBy: [asc(lostFoundImages.sortOrder)],
       },
     },
-  });
-  return { success: true, data: items.map(mapItem) };
+  })
+  return { success: true, data: items.map(mapItem) }
 }
 
 export async function getMyLostFoundClaims(userId: string, role?: string) {
-  if (!isNonGuestRole(role)) return { success: false, message: "Unauthorized." };
+  if (!isNonGuestRole(role)) return { success: false, message: 'Unauthorized.' }
   const claims = await db.query.lostFoundClaims.findMany({
     where: eq(lostFoundClaims.requesterId, userId),
     orderBy: [desc(lostFoundClaims.createdAt), desc(lostFoundClaims.id)],
@@ -766,6 +829,6 @@ export async function getMyLostFoundClaims(userId: string, role?: string) {
         },
       },
     },
-  });
-  return { success: true, data: claims };
+  })
+  return { success: true, data: claims }
 }

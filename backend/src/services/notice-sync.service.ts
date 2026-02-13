@@ -5,9 +5,7 @@ import { db } from '../lib/db.js'
 import { notice, type NewNotice } from '../models/notice-schema.js'
 import { UPLOAD_CONSTANTS, generatePublicId } from '../config/cloudinary.js'
 import { uploadAssignmentFileToCloudinary } from './cloudinary.service.js'
-import {
-  createInAppNotificationForAudience,
-} from './inAppNotification.service.js'
+import { createInAppNotificationForAudience } from './inAppNotification.service.js'
 import { sendToTopic } from './notification.service.js'
 
 export type NoticeSyncCategory =
@@ -78,7 +76,10 @@ function normalizeText(value: string | null | undefined): string {
   return (value ?? '').replace(/\s+/g, ' ').trim()
 }
 
-function normalizeUrl(value: string | null | undefined, baseUrl: string): string | null {
+function normalizeUrl(
+  value: string | null | undefined,
+  baseUrl: string,
+): string | null {
   const raw = normalizeText(value)
   if (!raw) return null
   try {
@@ -97,7 +98,9 @@ function getExternalRefFromUrl(url: string | null): string | null {
 function isCloudinaryNoticeAttachment(url: string | null | undefined): boolean {
   const value = normalizeText(url)
   if (!value) return false
-  return /res\.cloudinary\.com/i.test(value) && /\/notice-attachments\//i.test(value)
+  return (
+    /res\.cloudinary\.com/i.test(value) && /\/notice-attachments\//i.test(value)
+  )
 }
 
 function createHttpClient() {
@@ -110,7 +113,10 @@ function createHttpClient() {
   })
 }
 
-async function fetchHtml(client: ReturnType<typeof createHttpClient>, url: string): Promise<string> {
+async function fetchHtml(
+  client: ReturnType<typeof createHttpClient>,
+  url: string,
+): Promise<string> {
   return await client.get(url).text()
 }
 
@@ -128,7 +134,10 @@ function isDataImageUri(value: string): boolean {
   return /^data:image\/[a-z0-9.+-]+;base64,/i.test(value.trim())
 }
 
-function findBestImageSrc(detailHtml: ReturnType<typeof parse>, detailUrl: string): string | null {
+function findBestImageSrc(
+  detailHtml: ReturnType<typeof parse>,
+  detailUrl: string,
+): string | null {
   const images = detailHtml.querySelectorAll('.ck-table img')
   if (images.length === 0) return null
 
@@ -212,7 +221,11 @@ async function scrapeDetailAttachment(
     const imageSrc = findBestImageSrc(detailHtml, detailUrl)
     if (!imageSrc) return null
 
-    const uploadedUrl = await uploadDetailImageToCloudinary(client, imageSrc, detailUrl)
+    const uploadedUrl = await uploadDetailImageToCloudinary(
+      client,
+      imageSrc,
+      detailUrl,
+    )
     if (uploadedUrl) return uploadedUrl
   } catch (error) {
     console.error('Failed to scrape detail attachment:', detailUrl, error)
@@ -249,8 +262,11 @@ async function scrapeSource(
         (externalRef ? existingByRef.get(externalRef)?.attachmentUrl : null) ??
         null
       const attachmentUrl = detailUrl
-        ? (await scrapeDetailAttachment(client, detailUrl, existingAttachmentUrl)) ??
-          detailUrl
+        ? ((await scrapeDetailAttachment(
+            client,
+            detailUrl,
+            existingAttachmentUrl,
+          )) ?? detailUrl)
         : null
 
       return {
@@ -284,13 +300,12 @@ function makeLegacySubsection(category: NoticeSyncCategory): string {
 }
 
 function toLegacySection(category: NoticeSyncCategory): string {
-  if (category === 'results' || category === 'application_forms') return 'results'
+  if (category === 'results' || category === 'application_forms')
+    return 'results'
   return 'routines'
 }
 
-function toNoticePayload(
-  item: ScrapedNotice,
-): NewNotice {
+function toNoticePayload(item: ScrapedNotice): NewNotice {
   return {
     title: item.title,
     category: item.category,
@@ -350,7 +365,11 @@ export async function syncExamNotices(): Promise<SyncNoticesResult> {
       return entry.value
     }
     const source = NOTICE_SOURCES[index]
-    console.error('Failed to scrape notice category:', source.category, entry.reason)
+    console.error(
+      'Failed to scrape notice category:',
+      source.category,
+      entry.reason,
+    )
     return {
       source,
       scraped: [] as ScrapedNotice[],
@@ -380,7 +399,11 @@ export async function syncExamNotices(): Promise<SyncNoticesResult> {
   }
 
   const inserts: NewNotice[] = []
-  const updates: Array<{ id: number; payload: NewNotice; category: NoticeSyncCategory }> = []
+  const updates: Array<{
+    id: number
+    payload: NewNotice
+    category: NoticeSyncCategory
+  }> = []
 
   const insertedByCategory = new Map<NoticeSyncCategory, number>()
   const updatedByCategory = new Map<NoticeSyncCategory, number>()
@@ -436,50 +459,57 @@ export async function syncExamNotices(): Promise<SyncNoticesResult> {
 
   await Promise.all(
     updates.map((item) =>
-      db
-        .update(notice)
-        .set(item.payload)
-        .where(eq(notice.id, item.id)),
+      db.update(notice).set(item.payload).where(eq(notice.id, item.id)),
     ),
   )
 
+  const notificationPromises: Promise<unknown>[] = []
   for (const created of insertedRows) {
     const category = created.category as NoticeSyncCategory
-    createInAppNotificationForAudience({
-      audience: 'all',
-      type: 'notice_created',
-      title: 'New Notice Published',
-      body: created.title,
-      data: {
-        noticeId: created.id,
-        noticeTitle: created.title,
-        category,
-        section: toLegacySection(category),
-        subsection: makeLegacySubsection(category),
-        iconKey: 'notice',
-        ...(created.attachmentUrl
-          ? { thumbnailUrl: created.attachmentUrl as string }
-          : {}),
-      },
-    }).catch((error) =>
-      console.error('Failed to create sync notice in-app notification:', error),
+    notificationPromises.push(
+      createInAppNotificationForAudience({
+        audience: 'all',
+        type: 'notice_created',
+        title: 'New Notice Published',
+        body: created.title,
+        data: {
+          noticeId: created.id,
+          noticeTitle: created.title,
+          category,
+          section: toLegacySection(category),
+          subsection: makeLegacySubsection(category),
+          iconKey: 'notice',
+          ...(created.attachmentUrl
+            ? { thumbnailUrl: created.attachmentUrl as string }
+            : {}),
+        },
+      }).catch((error) =>
+        console.error(
+          'Failed to create sync notice in-app notification:',
+          error,
+        ),
+      ),
     )
 
-    sendToTopic('announcements', {
-      title: 'New Notice Published',
-      body: created.title,
-      data: {
-        noticeId: String(created.id),
-        type: 'notice_created',
-        category,
-        section: toLegacySection(category),
-        subsection: makeLegacySubsection(category),
-        iconKey: 'notice',
-      },
-    }).catch((error) =>
-      console.error('Failed to send sync notice FCM notification:', error),
+    notificationPromises.push(
+      sendToTopic('announcements', {
+        title: 'New Notice Published',
+        body: created.title,
+        data: {
+          noticeId: String(created.id),
+          type: 'notice_created',
+          category,
+          section: toLegacySection(category),
+          subsection: makeLegacySubsection(category),
+          iconKey: 'notice',
+        },
+      }).catch((error) =>
+        console.error('Failed to send sync notice FCM notification:', error),
+      ),
     )
   }
+
+  await Promise.allSettled(notificationPromises)
 
   const inserted = insertedRows.length
   const updated = updates.length
