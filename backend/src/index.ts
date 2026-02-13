@@ -223,16 +223,23 @@ async function ensureRuntimeSchema() {
 }
 
 async function startServer() {
-  try {
-    await ensureRuntimeSchema()
-  } catch (error) {
-    console.error('Failed to apply runtime schema checks:', error)
+  const runRuntimeSchemaChecks = async () => {
+    try {
+      await ensureRuntimeSchema()
+    } catch (error) {
+      console.error('Failed to apply runtime schema checks:', error)
+    }
   }
 
   if (ENV.MODE === "DEV") {
     httpServer.listen(3000, () =>
       console.log(`Server is running on port 3000 in ${ENV.MODE} mode`),
     )
+
+    // Keep dev startup responsive; don't block listen on schema sync.
+    void runRuntimeSchemaChecks()
+  } else {
+    await runRuntimeSchemaChecks()
   }
 
   startNotificationReminderJobs()
