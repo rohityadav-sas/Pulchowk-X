@@ -402,7 +402,7 @@
       (data.bannerUrl as string | undefined) ||
       (data.attachmentUrl as string | undefined)
     if (typeof value !== 'string' || value.trim().length === 0) return null
-    return optimizeCloudinaryThumbnailUrl(value, 140, 140)
+    return optimizeCloudinaryThumbnailUrl(value, 280, 280)
   }
 
   function isPdfUrl(url: string | null) {

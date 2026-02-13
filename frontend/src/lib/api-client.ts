@@ -176,6 +176,6 @@ export function optimizeCloudinaryThumbnailUrl(
 ): string {
   if (!url.includes("cloudinary.com")) return url;
   if (!url.includes("/upload/")) return url;
-  const transform = `f_auto,q_auto:best,dpr_auto,c_fill,g_auto,w_${width},h_${height}`;
+  const transform = `f_auto,q_auto:best,dpr_auto,c_limit,w_${width},h_${height},e_sharpen:70`;
   return url.replace("/upload/", `/upload/${transform}/`);
 }
