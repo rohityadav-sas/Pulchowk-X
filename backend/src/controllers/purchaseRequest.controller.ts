@@ -7,6 +7,7 @@ import {
     getPurchaseRequestStatus,
     cancelPurchaseRequest,
     deletePurchaseRequest,
+    deleteMultiplePurchaseRequests,
 } from "../services/purchaseRequest.service.js";
 
 const getUserId = (req: Request): string | null => {
@@ -190,6 +191,38 @@ export const DeleteRequest = async (req: Request, res: Response) => {
         return res.json(result);
     } catch (error) {
         console.error("Error in DeleteRequest:", error);
+        return res.status(500).json({ success: false, message: "An error occurred." });
+    }
+};
+
+export const DeleteMultipleRequests = async (req: Request, res: Response) => {
+    try {
+        const userId = getUserId(req);
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Authentication required." });
+        }
+
+        const { requestIds } = req.body;
+        if (!Array.isArray(requestIds)) {
+            return res.status(400).json({ success: false, message: "requestIds must be an array of numbers." });
+        }
+
+        // Convert to numbers and filter out NaNs
+        const ids = requestIds.map(id => parseInt(id)).filter(id => !isNaN(id));
+
+        if (ids.length === 0) {
+            return res.status(400).json({ success: false, message: "No valid request IDs provided." });
+        }
+
+        const result = await deleteMultiplePurchaseRequests(ids, userId);
+
+        if (!result.success) {
+            return res.status(400).json(result);
+        }
+
+        return res.json(result);
+    } catch (error) {
+        console.error("Error in DeleteMultipleRequests:", error);
         return res.status(500).json({ success: false, message: "An error occurred." });
     }
 };
