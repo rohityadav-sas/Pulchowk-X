@@ -198,6 +198,48 @@ export const getMyPurchaseRequests = async (buyerId: string) => {
   }
 };
 
+export const getIncomingPurchaseRequests = async (sellerId: string) => {
+  try {
+    // Find all listings belonging to this seller
+    const myListings = await db.query.bookListings.findMany({
+      where: eq(bookListings.sellerId, sellerId),
+      columns: { id: true },
+    });
+
+    const listingIds = myListings.map((l) => l.id);
+
+    if (listingIds.length === 0) {
+      return { success: true, data: [] };
+    }
+
+    // Find all requests for these listings
+    const requests = await db.query.bookPurchaseRequests.findMany({
+      where: inArray(bookPurchaseRequests.listingId, listingIds),
+      with: {
+        buyer: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+        listing: {
+          with: {
+            images: { limit: 1 },
+          },
+        },
+      },
+      orderBy: desc(bookPurchaseRequests.createdAt),
+    });
+
+    return { success: true, data: requests };
+  } catch (error) {
+    console.error("Error getting incoming purchase requests:", error);
+    return { success: false, message: "Failed to get incoming requests." };
+  }
+};
+
 export const respondToPurchaseRequest = async (
   requestId: number,
   sellerId: string,

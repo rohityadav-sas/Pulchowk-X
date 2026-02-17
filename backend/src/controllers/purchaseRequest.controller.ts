@@ -8,6 +8,7 @@ import {
     cancelPurchaseRequest,
     deletePurchaseRequest,
     deleteMultiplePurchaseRequests,
+    getIncomingPurchaseRequests,
 } from "../services/purchaseRequest.service.js";
 
 const getUserId = (req: Request): string | null => {
@@ -83,6 +84,26 @@ export const GetMyRequests = async (req: Request, res: Response) => {
         return res.json(result);
     } catch (error) {
         console.error("Error in GetMyRequests:", error);
+        return res.status(500).json({ success: false, message: "An error occurred." });
+    }
+};
+
+export const GetIncomingRequests = async (req: Request, res: Response) => {
+    try {
+        const userId = getUserId(req);
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Authentication required." });
+        }
+
+        const result = await getIncomingPurchaseRequests(userId);
+
+        if (!result.success) {
+            return res.status(400).json(result);
+        }
+
+        return res.json(result);
+    } catch (error) {
+        console.error("Error in GetIncomingRequests:", error);
         return res.status(500).json({ success: false, message: "An error occurred." });
     }
 };

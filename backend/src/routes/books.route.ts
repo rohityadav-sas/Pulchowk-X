@@ -50,6 +50,7 @@ import {
     CancelRequest,
     DeleteRequest,
     DeleteMultipleRequests,
+    GetIncomingRequests,
 } from "../controllers/purchaseRequest.controller.js";
 import {
     BlockUser,
@@ -94,6 +95,7 @@ router.post("/listings/:id/request", requireAuth, CreatePurchaseRequest);
 router.get("/listings/:id/requests", requireAuth, GetListingRequests);
 router.get("/listings/:id/request-status", requireAuth, GetRequestStatus);
 router.get("/my-requests", requireAuth, GetMyRequests);
+router.get("/requests/incoming", requireAuth, GetIncomingRequests);
 router.put("/requests/:requestId/respond", requireAuth, RespondToRequest);
 router.delete("/requests/bulk-delete", requireAuth, DeleteMultipleRequests);
 router.delete("/requests/:requestId", requireAuth, CancelRequest);
