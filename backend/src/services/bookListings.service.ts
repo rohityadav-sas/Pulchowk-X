@@ -88,9 +88,10 @@ export const createBookListing = async (
       })
       .returning()
 
-    // Trigger notification (data-only for client-side filtering)
-    // Trigger notification (data-only for client-side filtering)
+    // Trigger push notification for new book listing
     await sendToTopic('books', {
+      title: 'New Book Listed!',
+      body: `${data.title} is now available for ${data.price} NPR.`,
       data: {
         type: 'new_book',
         bookId: listing.id.toString(),
@@ -98,8 +99,6 @@ export const createBookListing = async (
         listingTitle: data.title,
         sellerId: sellerId,
         iconKey: 'book',
-        title: 'New Book Listed!',
-        body: `${data.title} is now available for ${data.price} NPR.`,
       },
     })
 
