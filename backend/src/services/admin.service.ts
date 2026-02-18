@@ -12,7 +12,7 @@ import {
   reviewMarketplaceReport,
   type ReportStatus,
 } from './trust.service.js'
-import { sendToUser } from './notification.service.js'
+import { sendToUser, sendToTopic } from './notification.service.js'
 import { createInAppNotificationForAudience } from './inAppNotification.service.js'
 
 const ALLOWED_ROLES = [
@@ -145,6 +145,20 @@ export async function updateUserRoleByAdmin(input: {
         previousRole: targetUser.role,
         nextRole: role,
         iconKey: 'general',
+      },
+    })
+
+    // Also notify all admins via the admins topic
+    await sendToTopic('admins', {
+      title: 'User Role Changed',
+      body: `${updated.name}'s role was updated to ${role} by an admin.`,
+      data: {
+        type: 'admin_role_change_alert',
+        targetUserId: updated.id,
+        targetUserName: updated.name,
+        newRole: role,
+        previousRole: targetUser.role,
+        iconKey: 'admin',
       },
     })
   }
