@@ -137,21 +137,23 @@ export async function updateUserRoleByAdmin(input: {
     })
 
   if (updated && targetUser.role !== role) {
+    console.log(`Notifying user ${updated.id} of role change to ${role}. Previous: ${targetUser.role}`);
     await sendToUser(updated.id, {
-      title: 'Role updated',
-      body: `Your account role is now ${role}.`,
+      title: 'Security Alert: Role Updated',
+      body: `Your account role has been changed to ${role.toUpperCase()}.`,
       data: {
         type: 'role_changed',
         previousRole: targetUser.role,
         nextRole: role,
-        iconKey: 'general',
+        iconKey: 'admin',
       },
     })
 
     // Also notify all admins via the admins topic
+    console.log(`Notifying admins topic of role change for ${updated.name}`);
     await sendToTopic('admins', {
-      title: 'User Role Changed',
-      body: `${updated.name}'s role was updated to ${role} by an admin.`,
+      title: 'User Role Updated',
+      body: `Admin Alert: ${updated.name}'s role was changed to ${role.toUpperCase()}.`,
       data: {
         type: 'admin_role_change_alert',
         targetUserId: updated.id,

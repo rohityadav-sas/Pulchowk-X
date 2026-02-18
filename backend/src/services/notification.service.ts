@@ -160,6 +160,23 @@ export const sendToTopic = async (
         ),
       )
     }
+
+    if (topic === 'admins') {
+      sideEffects.push(
+        createInAppNotificationForAudience({
+          audience: 'admins',
+          type: payload.data?.type || 'admin_alert',
+          title: derivedTitle,
+          body: derivedBody,
+          data: { iconKey: 'admin', ...payload.data },
+        }).catch((error) =>
+          console.error(
+            'Failed to create in-app audience notification:',
+            error,
+          ),
+        ),
+      )
+    }
   }
 
   if (!isFirebaseInitialized) {
@@ -360,7 +377,7 @@ export const sendToUser = async (
 
     if (!userData?.fcmToken) {
       console.warn(
-        `Cannot send notification: No FCM token found for user ${userId}`,
+        `Cannot send push notification: No FCM token found for user ${userId}. (In-app notification created)`,
       )
       await Promise.all(sideEffects)
       return
@@ -378,8 +395,11 @@ export const sendToUser = async (
       token: userData.fcmToken,
     }
 
+    console.log(
+      `Attempting to send FCM push to user ${userId} (Token length: ${userData.fcmToken.length})`,
+    )
     const response = await admin.messaging().send(message)
-    console.log(`Successfully sent notification to user ${userId}:`, response)
+    console.log(`FCM push SUCCESS for user ${userId}:`, response)
     await Promise.all(sideEffects)
     return response
   } catch (error) {
