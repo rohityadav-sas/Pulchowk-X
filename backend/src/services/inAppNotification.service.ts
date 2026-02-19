@@ -826,38 +826,18 @@ export async function listInAppNotifications(
   );
 
   if (options?.unreadOnly) {
-    filters.push(
-      isNull(
-        sql`(
-          select ${notificationReads.id}
-          from ${notificationReads}
-          where ${notificationReads.notificationId} = ${notifications.id}
-            and ${notificationReads.userId} = ${userId}
-          limit 1
-        )`,
-      ),
-    );
+    filters.push(isNull(notificationReads.readAt));
   }
 
   // Filter out dismissed notifications
-  filters.push(
-    isNull(
-      sql`(
-        select ${notificationReads.deletedAt}
-        from ${notificationReads}
-        where ${notificationReads.notificationId} = ${notifications.id}
-          and ${notificationReads.userId} = ${userId}
-          and ${notificationReads.deletedAt} is not null
-        limit 1
-      )`,
-    ),
-  );
+  filters.push(isNull(notificationReads.deletedAt));
 
   const whereClause = filters.length > 1 ? and(...filters) : filters[0];
 
   const [countRow] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(notifications)
+    .leftJoin(notificationReads, unreadJoinFilter)
     .where(whereClause);
 
   const rows = await db
@@ -871,6 +851,7 @@ export async function listInAppNotifications(
       audience: notifications.audience,
       createdAt: notifications.createdAt,
       readAt: notificationReads.readAt,
+      deletedAt: notificationReads.deletedAt,
     })
     .from(notifications)
     .leftJoin(notificationReads, unreadJoinFilter)
