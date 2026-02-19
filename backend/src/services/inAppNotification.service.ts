@@ -839,6 +839,20 @@ export async function listInAppNotifications(
     );
   }
 
+  // Filter out dismissed notifications
+  filters.push(
+    isNull(
+      sql`(
+        select ${notificationReads.deletedAt}
+        from ${notificationReads}
+        where ${notificationReads.notificationId} = ${notifications.id}
+          and ${notificationReads.userId} = ${userId}
+          and ${notificationReads.deletedAt} is not null
+        limit 1
+      )`,
+    ),
+  );
+
   const whereClause = filters.length > 1 ? and(...filters) : filters[0];
 
   const [countRow] = await db
@@ -969,3 +983,38 @@ export async function markAllNotificationsAsRead(userId: string, role?: UserRole
   return { success: true, updated: visibleRows.length };
 }
 
+export async function markNotificationDeleted(notificationId: number, userId: string, role?: string) {
+  try {
+    // Check if notification exists and belongs to user if direct
+    const [existing] = await db
+      .select({ audience: notifications.audience, recipientId: notifications.recipientId })
+      .from(notifications)
+      .where(eq(notifications.id, notificationId));
+
+    if (!existing) return { success: false, message: "Notification not found." };
+
+    if (existing.audience === "direct" && existing.recipientId === userId) {
+      // For direct notifications, we can actually delete the record
+      await db.delete(notifications).where(eq(notifications.id, notificationId));
+      return { success: true, message: "Notification deleted." };
+    }
+
+    // For audience notifications, we just mark it as dismissed for this user
+    await db
+      .insert(notificationReads)
+      .values({
+        notificationId,
+        userId,
+        deletedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [notificationReads.notificationId, notificationReads.userId],
+        set: { deletedAt: new Date() },
+      });
+
+    return { success: true, message: "Notification dismissed." };
+  } catch (err) {
+    console.error("Error deleting notification:", err);
+    return { success: false, message: "Internal server error." };
+  }
+}

@@ -58,6 +58,7 @@ export const notificationReads = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     readAt: timestamp("read_at", { mode: "date" }).defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at", { mode: "date" }),
   },
   (table) => [
     uniqueIndex("notification_reads_unique_idx").on(

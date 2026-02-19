@@ -7,6 +7,7 @@ import {
   MarkAllNotificationsRead,
   MarkNotificationRead,
   UpdateNotificationPreferences,
+  DeleteNotification,
 } from "../controllers/inAppNotification.controller.js";
 
 const router = express.Router();
@@ -16,6 +17,7 @@ router.get("/unread-count", requireAuth, GetUnreadCount);
 router.get("/preferences", requireAuth, GetNotificationPreferences);
 router.put("/preferences", requireAuth, UpdateNotificationPreferences);
 router.patch("/:id/read", requireAuth, MarkNotificationRead);
+router.delete("/:id", requireAuth, DeleteNotification);
 router.post("/mark-all-read", requireAuth, MarkAllNotificationsRead);
 
 export default router;

@@ -6,6 +6,7 @@ import {
   markNotificationAsRead,
   getNotificationPreferencesForUser,
   updateNotificationPreferencesForUser,
+  markNotificationDeleted,
 } from "../services/inAppNotification.service.js";
 import { type NotificationPreferences } from "../lib/notification-preferences.js";
 
@@ -100,5 +101,19 @@ export async function UpdateNotificationPreferences(req: Request, res: Response)
   }
 
   const result = await updateNotificationPreferencesForUser(userId, patch);
+  return res.json(result);
+}
+
+export async function DeleteNotification(req: Request, res: Response) {
+  const { userId, role } = getAuth(req);
+  if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
+
+  const notificationId = Number(req.params.id);
+  if (!Number.isInteger(notificationId) || notificationId <= 0) {
+    return res.status(400).json({ success: false, message: "Invalid notification id." });
+  }
+
+  const result = await markNotificationDeleted(notificationId, userId, role);
+  if (!result.success) return res.status(404).json(result);
   return res.json(result);
 }
