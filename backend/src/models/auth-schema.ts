@@ -23,6 +23,7 @@ export const user = pgTable("user", {
     .$type<NotificationPreferences>()
     .default(sql`${JSON.stringify(DEFAULT_NOTIFICATION_PREFERENCES)}::jsonb`)
     .notNull(),
+  lastActiveAt: timestamp("last_active_at").defaultNow(),
 });
 
 export const session = pgTable(

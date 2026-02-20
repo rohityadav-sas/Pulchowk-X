@@ -2,8 +2,8 @@ import express from "express";
 import crypto from "node:crypto";
 import { db } from "../lib/db.js";
 import { user, account } from "../models/auth-schema.js";
-import { eq, and } from "drizzle-orm";
-import { requireFirebaseAuth } from "../middleware/auth.middleware.js";
+import { eq, and, sql } from "drizzle-orm";
+import { requireFirebaseAuth, optionalAuth } from "../middleware/auth.middleware.js";
 
 import { determineUserRole } from "../lib/student-email-parser.js";
 import { sendToUser } from "../services/notification.service.js";
@@ -471,6 +471,47 @@ router.post("/update-fcm-token", requireFirebaseAuth, async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to update FCM token",
+            error: error instanceof Error ? error.message : "Unknown error",
+        });
+    }
+});
+
+/**
+ * Get active user count and update current user's lastActiveAt timestamp
+ * Uses optional auth so even guests/unauthenticated users might be counted or at least able to view the count
+ */
+router.get("/active-count", optionalAuth, async (req, res) => {
+    try {
+        const currentUser = (req as any).user;
+
+        // 1. If user is authenticated, update their lastActiveAt timestamp
+        if (currentUser && currentUser.id) {
+            await db
+                .update(user)
+                .set({ lastActiveAt: new Date() })
+                .where(eq(user.id, currentUser.id));
+        }
+
+        // 2. Query total count of users who were active in the last 15 minutes
+        const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+        
+        // Count users where lastActiveAt >= fifteenMinutesAgo
+        const [result] = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(user)
+            .where(sql`${user.lastActiveAt} >= ${fifteenMinutesAgo}`);
+
+        res.json({
+            success: true,
+            data: {
+                activeCount: Number(result?.count || 0)
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching active user count:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch active user count",
             error: error instanceof Error ? error.message : "Unknown error",
         });
     }
