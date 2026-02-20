@@ -80,7 +80,9 @@ function isTypeAllowedByPreferences(
     lower.startsWith('admin_') ||
     lower === 'role_changed' ||
     lower === 'security_alert' ||
-    lower === 'system_announcement'
+    lower === 'system_announcement' ||
+    lower === 'seller_verified' ||
+    lower === 'seller_revoked'
   const isLostFoundType =
     lower.startsWith('lost_') ||
     lower.startsWith('found_') ||

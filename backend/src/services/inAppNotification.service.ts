@@ -61,6 +61,8 @@ function inferIconKey(type: string) {
   }
   if (lower.includes("notice")) return "notice";
   if (lower.includes("assignment") || lower.includes("grading")) return "classroom";
+  if (lower === "seller_verified") return "verified";
+  if (lower === "seller_revoked") return "admin";
   return "general";
 }
 
@@ -428,7 +430,13 @@ function getRoleTypeFilter(role?: UserRole): SQL | null {
     return sql`(
       ${notifications.type} like 'notice_%'
       or ${notifications.type} like 'admin_%'
-      or ${notifications.type} in ('system_announcement', 'role_changed', 'security_alert')
+      or ${notifications.type} in (
+        'system_announcement',
+        'role_changed',
+        'security_alert',
+        'seller_verified',
+        'seller_revoked'
+      )
     )`;
   }
   return null;
@@ -462,7 +470,9 @@ function isNotificationTypeAllowedByPreferences(
     lower.startsWith("admin_") ||
     lower === "role_changed" ||
     lower === "security_alert" ||
-    lower === "system_announcement";
+    lower === "system_announcement" ||
+    lower === "seller_verified" ||
+    lower === "seller_revoked";
 
   if (isEventType && !preferences.eventReminders) return false;
   if (isNoticeType && !preferences.noticeUpdates) return false;
@@ -513,7 +523,13 @@ function getPreferenceTypeFilter(preferences: NotificationPreferences) {
     filters.push(
       sql`not (
         ${notifications.type} like 'admin_%'
-        or ${notifications.type} in ('role_changed', 'security_alert', 'system_announcement')
+        or ${notifications.type} in (
+          'role_changed',
+          'security_alert',
+          'system_announcement',
+          'seller_verified',
+          'seller_revoked'
+        )
       )`,
     );
   }
