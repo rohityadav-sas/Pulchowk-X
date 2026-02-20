@@ -115,6 +115,10 @@ async function ensureRuntimeSchema() {
   `)
   await db.execute(sql`
     ALTER TABLE "user"
+    ADD COLUMN IF NOT EXISTS "last_active_at" timestamp DEFAULT now()
+  `)
+  await db.execute(sql`
+    ALTER TABLE "user"
     ALTER COLUMN "notification_preferences"
     SET DEFAULT '{"eventReminders":true,"marketplaceAlerts":true,"noticeUpdates":true,"classroomAlerts":true,"chatAlerts":true,"adminAlerts":true}'::jsonb
   `)

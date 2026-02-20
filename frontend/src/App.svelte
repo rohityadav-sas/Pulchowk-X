@@ -5,6 +5,7 @@
     type RouterInstance,
     query,
     goto,
+    replace,
     route,
   } from "@mateothegreat/svelte5-router";
   import { QueryClientProvider } from "@tanstack/svelte-query";
@@ -187,10 +188,59 @@
     };
   });
 
-  const error = query("message");
-  let showError = $state(error === "unauthorized_domain");
+  const messageQuery = query("message");
+  const authErrorQuery = query("error");
+  let showDomainInfo = $state(messageQuery === "unauthorized_domain");
+  let showAuthError = $state(!!authErrorQuery);
 
-  if (error === "unauthorized_domain") goto("/");
+  function humanizeErrorCode(code: string) {
+    return code
+      .split("_")
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+  }
+
+  function mapAuthError(code: string | null | undefined) {
+    if (!code) return null;
+    switch (code) {
+      case "internal_server_error":
+        return {
+          title: "Sign-In Failed",
+          message:
+            "A server error occurred while creating your session. Please try signing in again.",
+        };
+      case "access_denied":
+        return {
+          title: "Access Denied",
+          message:
+            "Your sign-in request was denied by the identity provider. Please try again.",
+        };
+      case "callback_failed":
+        return {
+          title: "Sign-In Callback Failed",
+          message:
+            "The login callback could not be completed. Please retry sign-in.",
+        };
+      default:
+        return {
+          title: "Authentication Error",
+          message: `Sign-in failed: ${humanizeErrorCode(code)}.`,
+        };
+    }
+  }
+
+  const authErrorDetails = $derived(mapAuthError(authErrorQuery));
+
+  $effect(() => {
+    if (messageQuery !== "unauthorized_domain") return;
+    showDomainInfo = true;
+    if (normalizePath(currentPath || "/") !== "/") replace("/");
+  });
+
+  $effect(() => {
+    showAuthError = !!authErrorDetails;
+  });
 
   const embed = query("embed");
   const isEmbedded = $derived(embed === "true");
@@ -730,11 +780,15 @@
     {/if}
 
     <!-- Error Toast -->
-    <ErrorToast bind:show={showError} title="Sign-In Info">
+    <ErrorToast bind:show={showDomainInfo} title="Sign-In Info">
       Valid student-format <span class="font-medium text-gray-900"
         >@pcampus.edu.np</span
       >
       emails get student access. Other emails can continue with guest access.
+    </ErrorToast>
+    <ErrorToast bind:show={showAuthError} title={authErrorDetails?.title || "Authentication Error"}>
+      {authErrorDetails?.message ||
+        "Something went wrong during sign-in. Please try again."}
     </ErrorToast>
 
     <main
