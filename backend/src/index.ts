@@ -26,7 +26,7 @@ const httpServer = createServer(app)
 
 const __dirname = import.meta.dirname
 
-app.all('/api/auth/*', toNodeHandler(auth))
+app.all('/api/auth/*splat', toNodeHandler(auth))
 app.use(compression())
 app.use(express.json({ limit: '1mb' }))
 app.use("/api/events", eventRoutes)
@@ -65,7 +65,7 @@ app.use(
   }),
 )
 
-app.get('*', async (_, res) => {
+app.get('/{*splat}', async (_, res) => {
   res.setHeader('Cache-Control', 'no-cache')
   res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'))
 })
@@ -131,6 +131,14 @@ async function ensureRuntimeSchema() {
        OR NOT ("notification_preferences" ? 'classroomAlerts')
        OR NOT ("notification_preferences" ? 'chatAlerts')
        OR NOT ("notification_preferences" ? 'adminAlerts')
+  `)
+  await db.execute(sql`
+    ALTER TABLE "notification_reads"
+    ADD COLUMN IF NOT EXISTS "deleted_at" timestamp
+  `)
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS "notification_reads_user_deleted_idx"
+    ON "notification_reads" ("user_id", "deleted_at")
   `)
 
   await db.execute(sql`

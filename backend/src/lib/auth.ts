@@ -58,19 +58,31 @@ export const auth = betterAuth({
 
       // Determine role based on email format
       const email = session.user.email
-      const role = determineUserRole(email)
+      const derivedRole = determineUserRole(email)
       const parsedEmail = parseStudentEmail(email)
 
-      // Update user role if it's different from what was set
-      if (session.user.role !== role) {
+      // Read the persisted role to avoid clobbering manually assigned roles on sign-in.
+      const existingUser = await db.query.user.findFirst({
+        where: eq(schema.user.id, session.user.id),
+        columns: { role: true },
+      })
+      const currentRole = existingUser?.role ?? session.user.role
+      const isProtectedRole = currentRole === 'admin' || currentRole === 'teacher'
+
+      // Only auto-upgrade from guest -> student, never auto-downgrade or overwrite protected roles.
+      if (!isProtectedRole && currentRole === 'guest' && derivedRole === 'student') {
         await db
           .update(schema.user)
-          .set({ role })
+          .set({ role: derivedRole })
           .where(eq(schema.user.id, session.user.id))
       }
 
       // If valid student email, auto-create student profile
-      if (parsedEmail.isValid && role === 'student') {
+      if (
+        parsedEmail.isValid &&
+        (currentRole === 'student' ||
+          (!isProtectedRole && currentRole === 'guest' && derivedRole === 'student'))
+      ) {
         try {
           await createStudentProfileFromEmail(session.user.id, parsedEmail)
         } catch (error) {
