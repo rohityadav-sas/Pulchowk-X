@@ -142,6 +142,14 @@ router.post("/sync-user", requireFirebaseAuth, async (req, res) => {
     // Determine role based on email
     const role = determineUserRole(email);
 
+    // Ensure FCM token uniqueness: remove this token from any other users who might have it
+    if (fcmToken) {
+      await db
+        .update(user)
+        .set({ fcmToken: null })
+        .where(eq(user.fcmToken, fcmToken));
+    }
+
     // Check if user already exists by ID
     const existingUserById = await db.query.user.findFirst({
       where: eq(user.id, authStudentId),
@@ -475,6 +483,12 @@ router.post("/update-fcm-token", requireFirebaseAuth, async (req, res) => {
       });
       return;
     }
+
+    // Ensure FCM token uniqueness: remove this token from any other users who might have it
+    await db
+      .update(user)
+      .set({ fcmToken: null })
+      .where(eq(user.fcmToken, fcmToken));
 
     // Get user ID from verified Firebase token
     const firebaseUid = firebaseUser?.uid;
