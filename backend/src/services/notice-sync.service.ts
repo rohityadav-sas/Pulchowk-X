@@ -13,6 +13,7 @@ export type NoticeSyncCategory =
   | 'results'
   | 'application_forms'
   | 'exam_centers'
+  | 'exam_routines'
   | 'general'
 
 export interface SyncNoticesResult {
@@ -65,6 +66,10 @@ const NOTICE_SOURCES: NoticeSource[] = [
   {
     category: 'exam_centers',
     listUrl: 'https://exam.ioe.tu.edu.np/notices?notice_type=928',
+  },
+  {
+    category: 'exam_routines',
+    listUrl: 'https://exam.ioe.tu.edu.np/notices?notice_type=931',
   },
   {
     category: 'general',
@@ -304,12 +309,15 @@ function makeLegacySubsection(category: NoticeSyncCategory): string {
   if (category === 'results') return 'be'
   if (category === 'application_forms') return 'msc'
   if (category === 'exam_centers') return 'be'
+  if (category === 'exam_routines') return 'be'
   return 'msc'
 }
 
 function toLegacySection(category: NoticeSyncCategory): string {
   if (category === 'results' || category === 'application_forms')
     return 'results'
+  if (category === 'exam_routines' || category === 'exam_centers')
+    return 'routines'
   return 'routines'
 }
 
@@ -472,7 +480,9 @@ export async function syncExamNotices(): Promise<SyncNoticesResult> {
     ),
   )
 
-  const recentlyTouchedNoticeIds = new Set<number>(insertedRows.map((row) => row.id))
+  const recentlyTouchedNoticeIds = new Set<number>(
+    insertedRows.map((row) => row.id),
+  )
   for (const item of dedupedScraped) {
     const existing =
       (item.externalRef ? existingByRef.get(item.externalRef) : undefined) ??
@@ -531,7 +541,8 @@ export async function syncExamNotices(): Promise<SyncNoticesResult> {
 
   for (const updated of updates) {
     const category = updated.category
-    const normalizedLevel = updated.payload.level || makeLegacySubsection(category)
+    const normalizedLevel =
+      updated.payload.level || makeLegacySubsection(category)
     notificationPromises.push(
       createInAppNotificationForAudience({
         audience: 'all',

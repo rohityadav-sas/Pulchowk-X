@@ -1597,7 +1597,8 @@ export async function getLostFoundItems(filters?: {
     if (filters?.category) params.set('category', filters.category)
     if (filters?.status) params.set('status', filters.status)
     if (filters?.q) params.set('q', filters.q)
-    if (typeof filters?.limit === 'number') params.set('limit', String(filters.limit))
+    if (typeof filters?.limit === 'number')
+      params.set('limit', String(filters.limit))
     if (filters?.cursor) params.set('cursor', filters.cursor)
     const query = params.toString()
     const url = query ? `${API_LOST_FOUND}?${query}` : API_LOST_FOUND
@@ -1612,7 +1613,9 @@ export async function getLostFoundItem(
   id: number,
 ): Promise<{ success: boolean; data?: LostFoundItem; message?: string }> {
   try {
-    const res = await fetch(`${API_LOST_FOUND}/${id}`, { credentials: 'include' })
+    const res = await fetch(`${API_LOST_FOUND}/${id}`, {
+      credentials: 'include',
+    })
     return await res.json()
   } catch (error: any) {
     return { success: false, message: error.message }
@@ -1786,7 +1789,9 @@ export async function getMyLostFoundItems(): Promise<{
   message?: string
 }> {
   try {
-    const res = await fetch(`${API_LOST_FOUND}/my/items`, { credentials: 'include' })
+    const res = await fetch(`${API_LOST_FOUND}/my/items`, {
+      credentials: 'include',
+    })
     return await res.json()
   } catch (error: any) {
     return { success: false, message: error.message }
@@ -1799,7 +1804,9 @@ export async function getMyLostFoundClaims(): Promise<{
   message?: string
 }> {
   try {
-    const res = await fetch(`${API_LOST_FOUND}/my/claims`, { credentials: 'include' })
+    const res = await fetch(`${API_LOST_FOUND}/my/claims`, {
+      credentials: 'include',
+    })
     return await res.json()
   } catch (error: any) {
     return { success: false, message: error.message }
@@ -1943,7 +1950,12 @@ export interface Notice {
   title: string
   content: string
   section: 'results' | 'routines'
-  category?: 'results' | 'application_forms' | 'exam_centers' | 'general'
+  category?:
+    | 'results'
+    | 'application_forms'
+    | 'exam_centers'
+    | 'exam_routines'
+    | 'general'
   level?: string | null
   subsection: 'be' | 'msc'
   attachmentUrl: string | null
@@ -1960,6 +1972,7 @@ export interface NoticeStats {
   results: number
   applicationForms: number
   examCenters: number
+  examRoutines: number
   general: number
   beResults: number
   mscResults: number
@@ -1970,7 +1983,12 @@ export interface NoticeStats {
 
 export interface NoticeFilters {
   section?: string
-  category?: 'results' | 'application_forms' | 'exam_centers' | 'general'
+  category?:
+    | 'results'
+    | 'application_forms'
+    | 'exam_centers'
+    | 'exam_routines'
+    | 'general'
   level?: string
   subsection?: string
   search?: string
@@ -1983,7 +2001,12 @@ export interface NoticeWritePayload {
   title: string
   content?: string
   section?: string
-  category?: 'results' | 'application_forms' | 'exam_centers' | 'general'
+  category?:
+    | 'results'
+    | 'application_forms'
+    | 'exam_centers'
+    | 'exam_routines'
+    | 'general'
   level?: string | null
   subsection?: string | null
   attachmentUrl?: string | null
@@ -2001,9 +2024,7 @@ export interface PaginationMeta {
   nextCursor?: string | null
 }
 
-export async function getNotices(
-  filters?: NoticeFilters,
-): Promise<{
+export async function getNotices(filters?: NoticeFilters): Promise<{
   success: boolean
   data?: Notice[]
   message?: string
@@ -2294,9 +2315,12 @@ export async function getSellerReputation(sellerId: string): Promise<{
   message?: string
 }> {
   try {
-    const res = await fetch(`${API_BOOK_TRUST}/sellers/${sellerId}/reputation`, {
-      credentials: 'include',
-    })
+    const res = await fetch(
+      `${API_BOOK_TRUST}/sellers/${sellerId}/reputation`,
+      {
+        credentials: 'include',
+      },
+    )
     return await res.json()
   } catch (error: any) {
     return { success: false, message: error.message }
@@ -2580,7 +2604,14 @@ export interface GlobalSearchResponse {
   events: Array<
     Pick<
       ClubEvent,
-      'id' | 'title' | 'description' | 'eventStartTime' | 'eventEndTime' | 'venue' | 'clubId' | 'bannerUrl'
+      | 'id'
+      | 'title'
+      | 'description'
+      | 'eventStartTime'
+      | 'eventEndTime'
+      | 'venue'
+      | 'clubId'
+      | 'bannerUrl'
     > & {
       club?: Pick<Club, 'id' | 'name' | 'logoUrl'>
     }
@@ -2599,7 +2630,13 @@ export interface GlobalSearchResponse {
   notices: Array<
     Pick<
       Notice,
-      'id' | 'title' | 'content' | 'section' | 'subsection' | 'attachmentUrl' | 'createdAt'
+      | 'id'
+      | 'title'
+      | 'content'
+      | 'section'
+      | 'subsection'
+      | 'attachmentUrl'
+      | 'createdAt'
     >
   >
   lostFound: Array<{
@@ -2629,7 +2666,11 @@ export async function searchEverything(
   types?: Array<
     'clubs' | 'events' | 'books' | 'notices' | 'places' | 'lost_found'
   >,
-): Promise<{ success: boolean; data?: GlobalSearchResponse; message?: string }> {
+): Promise<{
+  success: boolean
+  data?: GlobalSearchResponse
+  message?: string
+}> {
   try {
     const params = new URLSearchParams()
     params.set('q', query)
@@ -2770,7 +2811,11 @@ export async function getNotificationPreferences(): Promise<{
 
 export async function updateNotificationPreferences(
   patch: Partial<NotificationPreferences>,
-): Promise<{ success: boolean; data?: NotificationPreferences; message?: string }> {
+): Promise<{
+  success: boolean
+  data?: NotificationPreferences
+  message?: string
+}> {
   try {
     const res = await fetch(`${API_NOTIFICATIONS}/preferences`, {
       method: 'PUT',

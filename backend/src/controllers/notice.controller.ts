@@ -17,12 +17,14 @@ type NoticeCategory =
   | 'results'
   | 'application_forms'
   | 'exam_centers'
+  | 'exam_routines'
   | 'general'
 
 const VALID_CATEGORIES: NoticeCategory[] = [
   'results',
   'application_forms',
   'exam_centers',
+  'exam_routines',
   'general',
 ]
 
@@ -63,12 +65,15 @@ function makeLegacySubsection(category: NoticeCategory): string {
   if (category === 'results') return 'be'
   if (category === 'application_forms') return 'msc'
   if (category === 'exam_centers') return 'be'
+  if (category === 'exam_routines') return 'be'
   return 'msc'
 }
 
 function toLegacySection(category: string): string {
   if (category === 'results' || category === 'application_forms')
     return 'results'
+  if (category === 'exam_routines' || category === 'exam_centers')
+    return 'routines'
   return 'routines'
 }
 
@@ -296,11 +301,12 @@ export async function getNoticeStats(_req: Request, res: Response) {
         // section=routines => categories(exam_centers, general)
         beResults: sql<number>`count(*) filter (where ${notice.category} in ('results', 'application_forms') and coalesce(${notice.level}, 'be') = 'be')::int`,
         mscResults: sql<number>`count(*) filter (where ${notice.category} in ('results', 'application_forms') and coalesce(${notice.level}, 'be') = 'msc')::int`,
-        beRoutines: sql<number>`count(*) filter (where ${notice.category} in ('exam_centers', 'general') and coalesce(${notice.level}, 'be') = 'be')::int`,
-        mscRoutines: sql<number>`count(*) filter (where ${notice.category} in ('exam_centers', 'general') and coalesce(${notice.level}, 'be') = 'msc')::int`,
+        beRoutines: sql<number>`count(*) filter (where ${notice.category} in ('exam_centers', 'exam_routines', 'general') and coalesce(${notice.level}, 'be') = 'be')::int`,
+        mscRoutines: sql<number>`count(*) filter (where ${notice.category} in ('exam_centers', 'exam_routines', 'general') and coalesce(${notice.level}, 'be') = 'msc')::int`,
         results: sql<number>`count(*) filter (where ${notice.category} = 'results')::int`,
         applicationForms: sql<number>`count(*) filter (where ${notice.category} = 'application_forms')::int`,
         examCenters: sql<number>`count(*) filter (where ${notice.category} = 'exam_centers')::int`,
+        examRoutines: sql<number>`count(*) filter (where ${notice.category} = 'exam_routines')::int`,
         general: sql<number>`count(*) filter (where ${notice.category} = 'general')::int`,
         newCount: sql<number>`count(*) filter (where ${notice.createdAt} >= now() - interval '7 days')::int`,
         total: sql<number>`count(*)::int`,
@@ -315,6 +321,7 @@ export async function getNoticeStats(_req: Request, res: Response) {
       results: 0,
       applicationForms: 0,
       examCenters: 0,
+      examRoutines: 0,
       general: 0,
       newCount: 0,
       total: 0,

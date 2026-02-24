@@ -1,8 +1,8 @@
 ﻿<script lang="ts">
-  import { goto, query as routeQuery } from "@mateothegreat/svelte5-router";
-  import { onMount } from "svelte";
-  import { authClient } from "../lib/auth-client";
-  import { fade } from "svelte/transition";
+  import { goto, query as routeQuery } from '@mateothegreat/svelte5-router'
+  import { onMount } from 'svelte'
+  import { authClient } from '../lib/auth-client'
+  import { fade } from 'svelte/transition'
   import {
     getNotices,
     getNoticeStats,
@@ -13,634 +13,634 @@
     type Notice,
     type NoticeStats,
     type NoticeWritePayload,
-  } from "../lib/api";
-  import { createQuery, useQueryClient } from "@tanstack/svelte-query";
-  import { optimizeCloudinaryUrl } from "../lib/api-client";
+  } from '../lib/api'
+  import { createQuery, useQueryClient } from '@tanstack/svelte-query'
+  import { optimizeCloudinaryUrl } from '../lib/api-client'
 
-  const { route } = $props();
-  const session = authClient.useSession();
-  const queryClient = useQueryClient();
+  const { route } = $props()
+  const session = authClient.useSession()
+  const queryClient = useQueryClient()
   const sessionUser = $derived(
     $session.data?.user as { role?: string } | undefined,
-  );
-  const isNoticeManager = $derived(sessionUser?.role === "notice_manager");
+  )
+  const isNoticeManager = $derived(sessionUser?.role === 'notice_manager')
 
   type NoticeCategory =
-    | "results"
-    | "application_forms"
-    | "exam_centers"
-    | "general";
+    | 'results'
+    | 'application_forms'
+    | 'exam_centers'
+    | 'exam_routines'
+    | 'general'
 
   function asNoticeCategory(
     value: string | null | undefined,
   ): NoticeCategory | null {
-    const normalized = (value || "").trim();
+    const normalized = (value || '').trim()
     if (
-      normalized === "results" ||
-      normalized === "application_forms" ||
-      normalized === "exam_centers" ||
-      normalized === "general"
+      normalized === 'results' ||
+      normalized === 'application_forms' ||
+      normalized === 'exam_centers' ||
+      normalized === 'exam_routines' ||
+      normalized === 'general'
     ) {
-      return normalized;
+      return normalized
     }
-    return null;
+    return null
   }
 
   function getCategoryFromPathname(pathname: string): NoticeCategory | null {
     const match = pathname.match(
-      /^\/notices\/(results|application_forms|exam_centers|general)\/?$/i,
-    );
-    return asNoticeCategory(match?.[1] || null);
+      /^\/notices\/(results|application_forms|exam_centers|exam_routines|general)\/?$/i,
+    )
+    return asNoticeCategory(match?.[1] || null)
   }
 
   function getInitialActiveCategory(): NoticeCategory {
-    if (typeof window !== "undefined") {
-      const fromPath = getCategoryFromPathname(window.location.pathname);
-      if (fromPath) return fromPath;
+    if (typeof window !== 'undefined') {
+      const fromPath = getCategoryFromPathname(window.location.pathname)
+      if (fromPath) return fromPath
     }
     const fromRoute = asNoticeCategory(
       (route?.result?.path?.params?.category as string | undefined) || null,
-    );
-    if (fromRoute) return fromRoute;
-    const fromQuery = asNoticeCategory(routeQuery("category"));
-    if (fromQuery) return fromQuery;
-    return "results";
+    )
+    if (fromRoute) return fromRoute
+    const fromQuery = asNoticeCategory(routeQuery('category'))
+    if (fromQuery) return fromQuery
+    return 'results'
   }
 
   // State
-  const PAGE_SIZE = 5;
-  let activeCategory = $state<NoticeCategory>(getInitialActiveCategory());
-  let searchQuery = $state("");
-  let debouncedSearchQuery = $state("");
-  let noticesOffset = $state(0);
-  let newCountSnapshot = $state(0);
-  let loadedNotices = $state<Notice[]>([]);
-  let totalNotices = $state(0);
-  let isAppendingNotices = $state(false);
-  let lastAppliedNoticesToken = $state<string | null>(null);
-  let lastNoticesDatasetKey = $state<string | null>(null);
-  let expandedNoticeId = $state<number | null>(null);
-  let highlightedNoticeId = $state<number | null>(null);
-  let hasAppliedNoticeHighlight = $state(false);
+  const PAGE_SIZE = 5
+  let activeCategory = $state<NoticeCategory>(getInitialActiveCategory())
+  let searchQuery = $state('')
+  let debouncedSearchQuery = $state('')
+  let noticesOffset = $state(0)
+  let newCountSnapshot = $state(0)
+  let loadedNotices = $state<Notice[]>([])
+  let totalNotices = $state(0)
+  let isAppendingNotices = $state(false)
+  let lastAppliedNoticesToken = $state<string | null>(null)
+  let lastNoticesDatasetKey = $state<string | null>(null)
+  let expandedNoticeId = $state<number | null>(null)
+  let highlightedNoticeId = $state<number | null>(null)
+  let hasAppliedNoticeHighlight = $state(false)
 
   // Image preview modal
-  let previewImage = $state<string | null>(null);
-  let previewTitle = $state("");
+  let previewImage = $state<string | null>(null)
+  let previewTitle = $state('')
 
   // Management modal state
-  let showManageModal = $state(false);
-  let editingNotice = $state<Notice | null>(null);
-  let isSubmitting = $state(false);
-  let formError = $state<string | null>(null);
-  let isUploadingAttachment = $state(false);
-  let attachmentUploadError = $state<string | null>(null);
-  let attachmentFileInput = $state<HTMLInputElement | null>(null);
-  let isDragActive = $state(false);
+  let showManageModal = $state(false)
+  let editingNotice = $state<Notice | null>(null)
+  let isSubmitting = $state(false)
+  let formError = $state<string | null>(null)
+  let isUploadingAttachment = $state(false)
+  let attachmentUploadError = $state<string | null>(null)
+  let attachmentFileInput = $state<HTMLInputElement | null>(null)
+  let isDragActive = $state(false)
 
   // Form state
-  let formTitle = $state("");
-  let formContent = $state("");
-  let formCategory = $state<NoticeCategory>("results");
-  let formAttachmentUrl = $state("");
-  let manualUrlInput = $state("");
-  let formAttachmentName = $state("");
-  let activeAttachmentTab = $state<"upload" | "url">("upload");
+  let formTitle = $state('')
+  let formContent = $state('')
+  let formCategory = $state<NoticeCategory>('results')
+  let formAttachmentUrl = $state('')
+  let manualUrlInput = $state('')
+  let formAttachmentName = $state('')
+  let activeAttachmentTab = $state<'upload' | 'url'>('upload')
 
   // Delete confirmation
-  let deleteConfirmId = $state<number | null>(null);
+  let deleteConfirmId = $state<number | null>(null)
 
   // Image loading progress state
-  let imagesLoaded = $state<Record<number, boolean>>({});
-  let imageProgress = $state<Record<number, number | undefined>>({});
-  let progressFailedUrls = new Set<string>();
-  const fullyLoadedUrls = new Set<string>();
+  let imagesLoaded = $state<Record<number, boolean>>({})
+  let imageProgress = $state<Record<number, number | undefined>>({})
+  let progressFailedUrls = new Set<string>()
+  const fullyLoadedUrls = new Set<string>()
 
   async function loadImageWithProgress(url: string, noticeId: number) {
     // Skip if we know this URL fails to provide progress
     if (!url || progressFailedUrls.has(url)) {
-      imageProgress[noticeId] = undefined;
-      return;
+      imageProgress[noticeId] = undefined
+      return
     }
 
     // Check if we've already fully loaded this image previously in the session
     if (fullyLoadedUrls.has(url)) {
       if (!imagesLoaded[noticeId]) {
-        imagesLoaded[noticeId] = true;
-        imageProgress[noticeId] = 100;
+        imagesLoaded[noticeId] = true
+        imageProgress[noticeId] = 100
       }
-      return;
+      return
     }
 
     // If the image is already loaded (from cache/onload firing first), don't reset
     if (imagesLoaded[noticeId]) {
-      imageProgress[noticeId] = 100;
-      fullyLoadedUrls.add(url);
-      return;
+      imageProgress[noticeId] = 100
+      fullyLoadedUrls.add(url)
+      return
     }
 
-    imageProgress[noticeId] = 0;
-    imagesLoaded[noticeId] = false;
+    imageProgress[noticeId] = 0
+    imagesLoaded[noticeId] = false
 
     // Use XMLHttpRequest for progress tracking (better CORS support than fetch)
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", url, true);
-    xhr.responseType = "blob";
+    const xhr = new XMLHttpRequest()
+    xhr.open('GET', url, true)
+    xhr.responseType = 'blob'
 
     xhr.onprogress = (event) => {
       if (event.lengthComputable) {
-        imageProgress[noticeId] = Math.round(
-          (event.loaded / event.total) * 100,
-        );
+        imageProgress[noticeId] = Math.round((event.loaded / event.total) * 100)
       }
-    };
+    }
 
     xhr.onload = () => {
       if (xhr.status === 200) {
-        imageProgress[noticeId] = 100;
-        imagesLoaded[noticeId] = true;
-        fullyLoadedUrls.add(url);
+        imageProgress[noticeId] = 100
+        imagesLoaded[noticeId] = true
+        fullyLoadedUrls.add(url)
       } else {
-        progressFailedUrls.add(url);
-        imageProgress[noticeId] = undefined;
+        progressFailedUrls.add(url)
+        imageProgress[noticeId] = undefined
       }
-    };
+    }
 
     xhr.onerror = () => {
-      console.log("XHR progress failed, falling back", url);
-      progressFailedUrls.add(url);
-      imageProgress[noticeId] = undefined;
-    };
+      console.log('XHR progress failed, falling back', url)
+      progressFailedUrls.add(url)
+      imageProgress[noticeId] = undefined
+    }
 
-    xhr.send();
+    xhr.send()
   }
 
   const noticesQuery = createQuery(() => ({
-    queryKey: ["notices", activeCategory, debouncedSearchQuery, noticesOffset],
+    queryKey: ['notices', activeCategory, debouncedSearchQuery, noticesOffset],
     queryFn: async () => {
       const result = await getNotices({
         category: activeCategory,
         search: debouncedSearchQuery || undefined,
         limit: PAGE_SIZE,
         offset: noticesOffset,
-      });
+      })
       if (!result.success || !result.data) {
-        throw new Error(result.message || "Failed to load notices");
+        throw new Error(result.message || 'Failed to load notices')
       }
       return {
         items: result.data,
         total: result.meta?.total ?? result.data.length,
-      };
+      }
     },
     staleTime: 20 * 1000,
-  }));
+  }))
 
   const statsQuery = createQuery(() => ({
-    queryKey: ["notice-stats"],
+    queryKey: ['notice-stats'],
     queryFn: async () => {
-      const result = await getNoticeStats();
+      const result = await getNoticeStats()
       if (!result.success || !result.data) {
-        throw new Error(result.message || "Failed to load notice stats");
+        throw new Error(result.message || 'Failed to load notice stats')
       }
-      return result.data;
+      return result.data
     },
     staleTime: 5 * 60 * 1000,
-  }));
+  }))
 
   function setCategory(category: NoticeCategory) {
-    const targetPath = `/notices/${category}`;
+    const targetPath = `/notices/${category}`
     const currentPath =
-      typeof window !== "undefined" ? window.location.pathname : "";
+      typeof window !== 'undefined' ? window.location.pathname : ''
 
     if (activeCategory !== category) {
-      activeCategory = category;
+      activeCategory = category
     }
 
     if (currentPath !== targetPath) {
-      goto(targetPath);
+      goto(targetPath)
     }
   }
 
-  const canLoadMoreNotices = $derived(loadedNotices.length < totalNotices);
+  const canLoadMoreNotices = $derived(loadedNotices.length < totalNotices)
 
   function loadMoreNotices() {
-    if (!canLoadMoreNotices || noticesQuery.isFetching) return;
-    isAppendingNotices = true;
-    noticesOffset = loadedNotices.length;
+    if (!canLoadMoreNotices || noticesQuery.isFetching) return
+    isAppendingNotices = true
+    noticesOffset = loadedNotices.length
   }
   function getNoticeSortTime(notice: Notice) {
-    const publishedRaw = notice.publishedDate?.trim();
+    const publishedRaw = notice.publishedDate?.trim()
     if (publishedRaw) {
-      const parsedPublished = new Date(publishedRaw);
+      const parsedPublished = new Date(publishedRaw)
       if (!Number.isNaN(parsedPublished.getTime())) {
-        return parsedPublished.getTime();
+        return parsedPublished.getTime()
       }
     }
-    const created = new Date(notice.createdAt || "");
-    if (!Number.isNaN(created.getTime())) return created.getTime();
-    return 0;
+    const created = new Date(notice.createdAt || '')
+    if (!Number.isNaN(created.getTime())) return created.getTime()
+    return 0
   }
 
   function sortNoticesLatestFirst(list: Notice[]) {
-    return [...list].sort(
-      (a, b) => getNoticeSortTime(b) - getNoticeSortTime(a),
-    );
+    return [...list].sort((a, b) => getNoticeSortTime(b) - getNoticeSortTime(a))
   }
 
-  const filteredNotices = $derived(sortNoticesLatestFirst(loadedNotices));
+  const filteredNotices = $derived(sortNoticesLatestFirst(loadedNotices))
 
   $effect(() => {
     const timeout = window.setTimeout(() => {
-      const nextSearch = searchQuery.trim();
+      const nextSearch = searchQuery.trim()
       if (debouncedSearchQuery !== nextSearch) {
-        debouncedSearchQuery = nextSearch;
+        debouncedSearchQuery = nextSearch
       }
-    }, 300);
-    return () => window.clearTimeout(timeout);
-  });
+    }, 300)
+    return () => window.clearTimeout(timeout)
+  })
 
   $effect(() => {
-    const datasetKey = `${activeCategory}|${debouncedSearchQuery}`;
-    if (lastNoticesDatasetKey === datasetKey) return;
+    const datasetKey = `${activeCategory}|${debouncedSearchQuery}`
+    if (lastNoticesDatasetKey === datasetKey) return
 
-    lastNoticesDatasetKey = datasetKey;
-    noticesOffset = 0;
-    newCountSnapshot = 0;
-    loadedNotices = [];
-    totalNotices = 0;
-    isAppendingNotices = false;
-    lastAppliedNoticesToken = null;
-  });
+    lastNoticesDatasetKey = datasetKey
+    noticesOffset = 0
+    newCountSnapshot = 0
+    loadedNotices = []
+    totalNotices = 0
+    isAppendingNotices = false
+    lastAppliedNoticesToken = null
+  })
 
   $effect(() => {
-    const page = noticesQuery.data;
-    if (!page) return;
+    const page = noticesQuery.data
+    if (!page) return
 
-    const pageToken = `${activeCategory}:${debouncedSearchQuery}:${noticesOffset}:${noticesQuery.dataUpdatedAt}`;
-    if (lastAppliedNoticesToken === pageToken) return;
-    lastAppliedNoticesToken = pageToken;
+    const pageToken = `${activeCategory}:${debouncedSearchQuery}:${noticesOffset}:${noticesQuery.dataUpdatedAt}`
+    if (lastAppliedNoticesToken === pageToken) return
+    lastAppliedNoticesToken = pageToken
 
-    let nextLoadedNotices: Notice[] = [];
+    let nextLoadedNotices: Notice[] = []
     if (noticesOffset === 0) {
-      nextLoadedNotices = page.items;
-      loadedNotices = nextLoadedNotices;
+      nextLoadedNotices = page.items
+      loadedNotices = nextLoadedNotices
       newCountSnapshot = nextLoadedNotices.filter((n) =>
         isNoticeNew(n.publishedDate, n.createdAt),
-      ).length;
+      ).length
     } else {
-      const existingIds = new Set(loadedNotices.map((n) => n.id));
-      const merged = [...loadedNotices];
+      const existingIds = new Set(loadedNotices.map((n) => n.id))
+      const merged = [...loadedNotices]
       for (const item of page.items) {
-        if (!existingIds.has(item.id)) merged.push(item);
+        if (!existingIds.has(item.id)) merged.push(item)
       }
-      nextLoadedNotices = merged;
-      loadedNotices = nextLoadedNotices;
+      nextLoadedNotices = merged
+      loadedNotices = nextLoadedNotices
     }
-    totalNotices = page.total;
-    isAppendingNotices = false;
-  });
+    totalNotices = page.total
+    isAppendingNotices = false
+  })
 
   const categoryCounts = $derived({
     results: statsQuery.data?.results ?? 0,
     application_forms: statsQuery.data?.applicationForms ?? 0,
     exam_centers: statsQuery.data?.examCenters ?? 0,
+    exam_routines: statsQuery.data?.examRoutines ?? 0,
     general: statsQuery.data?.general ?? 0,
-  });
-  const newCount = $derived(newCountSnapshot);
+  })
+  const newCount = $derived(newCountSnapshot)
 
   const routeCategoryFromPath = $derived(
     asNoticeCategory(
       (route?.result?.path?.params?.category as string | undefined) || null,
     ),
-  );
+  )
 
   function syncNoticesRouteState() {
     const categoryFromPathname =
-      typeof window !== "undefined"
+      typeof window !== 'undefined'
         ? getCategoryFromPathname(window.location.pathname)
-        : null;
-    const categoryFromQuery = asNoticeCategory(routeQuery("category"));
+        : null
+    const categoryFromQuery = asNoticeCategory(routeQuery('category'))
     const resolvedCategory =
       categoryFromPathname ||
       routeCategoryFromPath ||
       categoryFromQuery ||
-      activeCategory;
+      activeCategory
     if (activeCategory !== resolvedCategory) {
-      activeCategory = resolvedCategory;
+      activeCategory = resolvedCategory
     }
 
-    const noticeIdParam = Number(routeQuery("noticeId") || 0);
+    const noticeIdParam = Number(routeQuery('noticeId') || 0)
     if (noticeIdParam > 0 && highlightedNoticeId !== noticeIdParam) {
-      highlightedNoticeId = noticeIdParam;
-      hasAppliedNoticeHighlight = false;
+      highlightedNoticeId = noticeIdParam
+      hasAppliedNoticeHighlight = false
     }
   }
 
   onMount(() => {
-    syncNoticesRouteState();
-    window.addEventListener("pushState", syncNoticesRouteState);
-    window.addEventListener("replaceState", syncNoticesRouteState);
-    window.addEventListener("popstate", syncNoticesRouteState);
+    syncNoticesRouteState()
+    window.addEventListener('pushState', syncNoticesRouteState)
+    window.addEventListener('replaceState', syncNoticesRouteState)
+    window.addEventListener('popstate', syncNoticesRouteState)
 
     return () => {
-      window.removeEventListener("pushState", syncNoticesRouteState);
-      window.removeEventListener("replaceState", syncNoticesRouteState);
-      window.removeEventListener("popstate", syncNoticesRouteState);
-    };
-  });
+      window.removeEventListener('pushState', syncNoticesRouteState)
+      window.removeEventListener('replaceState', syncNoticesRouteState)
+      window.removeEventListener('popstate', syncNoticesRouteState)
+    }
+  })
 
   $effect(() => {
-    syncNoticesRouteState();
-  });
+    syncNoticesRouteState()
+  })
 
   function openImagePreview(url: string, title: string) {
-    previewImage = url;
-    previewTitle = title;
+    previewImage = url
+    previewTitle = title
   }
 
   // Load image with progress when a notice is expanded
   $effect(() => {
     if (expandedNoticeId !== null) {
-      const notice = filteredNotices.find((n) => n.id === expandedNoticeId);
+      const notice = filteredNotices.find((n) => n.id === expandedNoticeId)
       if (
         notice?.attachmentUrl &&
-        getAttachmentType(notice.attachmentUrl) === "image"
+        getAttachmentType(notice.attachmentUrl) === 'image'
       ) {
         if (
           !imagesLoaded[notice.id] &&
           imageProgress[notice.id] === undefined
         ) {
-          loadImageWithProgress(notice.attachmentUrl, notice.id);
+          loadImageWithProgress(notice.attachmentUrl, notice.id)
         }
       }
     }
-  });
+  })
 
   $effect(() => {
-    if (hasAppliedNoticeHighlight || !highlightedNoticeId) return;
-    if (!filteredNotices.length) return;
+    if (hasAppliedNoticeHighlight || !highlightedNoticeId) return
+    if (!filteredNotices.length) return
 
-    const target = filteredNotices.find((n) => n.id === highlightedNoticeId);
-    if (!target) return;
+    const target = filteredNotices.find((n) => n.id === highlightedNoticeId)
+    if (!target) return
 
-    hasAppliedNoticeHighlight = true;
-    expandedNoticeId = target.id;
+    hasAppliedNoticeHighlight = true
+    expandedNoticeId = target.id
 
     requestAnimationFrame(() => {
-      const element = document.getElementById(`notice-${target.id}`);
+      const element = document.getElementById(`notice-${target.id}`)
       if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
-    });
-  });
+    })
+  })
 
   function closeImagePreview() {
-    previewImage = null;
-    previewTitle = "";
+    previewImage = null
+    previewTitle = ''
   }
   function formatDate(publishedDate?: string | null, createdAt?: string) {
     if (publishedDate?.trim()) {
-      const parsedPublished = new Date(publishedDate);
+      const parsedPublished = new Date(publishedDate)
       if (!Number.isNaN(parsedPublished.getTime())) {
-        const now = new Date();
+        const now = new Date()
         const hasExplicitTime = /T\d{1,2}:\d{2}|\b\d{1,2}:\d{2}\b/.test(
           publishedDate,
-        );
+        )
         if (!hasExplicitTime) {
           const sameDay =
             parsedPublished.getFullYear() === now.getFullYear() &&
             parsedPublished.getMonth() === now.getMonth() &&
-            parsedPublished.getDate() === now.getDate();
-          if (sameDay) return "Today";
+            parsedPublished.getDate() === now.getDate()
+          if (sameDay) return 'Today'
         }
-        const diffMs = now.getTime() - parsedPublished.getTime();
-        const diffHours = diffMs / (1000 * 60 * 60);
-        const diffDays = diffMs / (1000 * 60 * 60 * 24);
-        if (diffHours < 1) return "Just now";
-        if (diffHours < 24) return "Today";
-        if (diffDays < 7) return `${Math.floor(diffDays)}d ago`;
-        return parsedPublished.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
+        const diffMs = now.getTime() - parsedPublished.getTime()
+        const diffHours = diffMs / (1000 * 60 * 60)
+        const diffDays = diffMs / (1000 * 60 * 60 * 24)
+        if (diffHours < 1) return 'Just now'
+        if (diffHours < 24) return 'Today'
+        if (diffDays < 7) return `${Math.floor(diffDays)}d ago`
+        return parsedPublished.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
           year:
             parsedPublished.getFullYear() !== now.getFullYear()
-              ? "numeric"
+              ? 'numeric'
               : undefined,
-        });
+        })
       }
       // If backend gives a non-ISO publish date string, show it directly.
-      return publishedDate;
+      return publishedDate
     }
 
-    const date = new Date(createdAt || "");
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffHours = diffMs / (1000 * 60 * 60);
-    const diffDays = diffMs / (1000 * 60 * 60 * 24);
-    if (diffHours < 1) return "Just now";
-    if (diffHours < 24) return `${Math.floor(diffHours)}h ago`;
-    if (diffDays < 7) return `${Math.floor(diffDays)}d ago`;
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
-    });
+    const date = new Date(createdAt || '')
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffHours = diffMs / (1000 * 60 * 60)
+    const diffDays = diffMs / (1000 * 60 * 60 * 24)
+    if (diffHours < 1) return 'Just now'
+    if (diffHours < 24) return `${Math.floor(diffHours)}h ago`
+    if (diffDays < 7) return `${Math.floor(diffDays)}d ago`
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+    })
   }
   function isNoticeNew(
     publishedDate?: string | null,
     createdAt?: string,
   ): boolean {
-    const sourceDate = publishedDate?.trim() || createdAt;
-    if (!sourceDate) return false;
-    const publishDate = new Date(sourceDate);
-    if (Number.isNaN(publishDate.getTime())) return false;
-    const now = new Date();
-    const diffMs = now.getTime() - publishDate.getTime();
-    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-    return diffMs < sevenDaysMs;
+    const sourceDate = publishedDate?.trim() || createdAt
+    if (!sourceDate) return false
+    const publishDate = new Date(sourceDate)
+    if (Number.isNaN(publishDate.getTime())) return false
+    const now = new Date()
+    const diffMs = now.getTime() - publishDate.getTime()
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000
+    return diffMs < sevenDaysMs
   }
   function getAttachmentType(
     url: string | null,
     name?: string | null,
-  ): "image" | "pdf" | "link" {
-    if (!url) return "link";
-    const lowerUrl = url.toLowerCase();
-    const lowerName = name?.toLowerCase() || "";
+  ): 'image' | 'pdf' | 'link' {
+    if (!url) return 'link'
+    const lowerUrl = url.toLowerCase()
+    const lowerName = name?.toLowerCase() || ''
 
     // Check for explicit PDF extensions
-    if (lowerUrl.endsWith(".pdf") || lowerName.endsWith(".pdf")) {
-      return "pdf";
+    if (lowerUrl.endsWith('.pdf') || lowerName.endsWith('.pdf')) {
+      return 'pdf'
     }
 
     // Check for Google Drive links (usually documents)
     if (
-      lowerUrl.includes("drive.google.com") ||
-      lowerUrl.includes("docs.google.com")
+      lowerUrl.includes('drive.google.com') ||
+      lowerUrl.includes('docs.google.com')
     ) {
-      return "pdf";
+      return 'pdf'
     }
 
     // Check for explicit image extensions logic (default to pdf if not image, or maintain current behavior?)
     // Current behavior defaults to 'image'. Let's check for known image extensions.
     const imageExtensions = [
-      ".jpg",
-      ".jpeg",
-      ".png",
-      ".gif",
-      ".webp",
-      ".svg",
-      ".bmp",
-    ];
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.svg',
+      '.bmp',
+    ]
     if (
       imageExtensions.some(
         (ext) => lowerUrl.endsWith(ext) || lowerName.endsWith(ext),
       )
     ) {
-      return "image";
+      return 'image'
     }
 
-    return "link";
+    return 'link'
   }
   function getAttachmentChipLabel(url: string | null, name?: string | null) {
-    const type = getAttachmentType(url, name);
-    if (type === "image") return "IMG";
-    if (type === "pdf") return "PDF";
-    return "LNK";
+    const type = getAttachmentType(url, name)
+    if (type === 'image') return 'IMG'
+    if (type === 'pdf') return 'PDF'
+    return 'LNK'
   }
   function toggleExpand(id: number) {
-    expandedNoticeId = expandedNoticeId === id ? null : id;
+    expandedNoticeId = expandedNoticeId === id ? null : id
   }
   function getAttachmentDisplayName(url: string | null, fallback: string) {
-    if (!url) return fallback;
+    if (!url) return fallback
     try {
-      const parsed = new URL(url);
-      const lastSegment = parsed.pathname.split("/").filter(Boolean).pop();
-      return lastSegment ? decodeURIComponent(lastSegment) : fallback;
+      const parsed = new URL(url)
+      const lastSegment = parsed.pathname.split('/').filter(Boolean).pop()
+      return lastSegment ? decodeURIComponent(lastSegment) : fallback
     } catch {
-      return fallback;
+      return fallback
     }
   }
   function getCategoryLabel(category: NoticeCategory) {
-    if (category === "application_forms") return "application forms";
-    if (category === "exam_centers") return "exam centers";
-    if (category === "general") return "general";
-    return "results";
+    if (category === 'application_forms') return 'application forms'
+    if (category === 'exam_centers') return 'exam centers'
+    if (category === 'exam_routines') return 'exam routines'
+    if (category === 'general') return 'general'
+    return 'results'
   }
   function openCreateModal() {
-    editingNotice = null;
-    formTitle = "";
-    formContent = "";
-    formCategory = activeCategory;
-    formAttachmentUrl = "";
+    editingNotice = null
+    formTitle = ''
+    formContent = ''
+    formCategory = activeCategory
+    formAttachmentUrl = ''
 
-    formAttachmentName = "";
-    attachmentUploadError = null;
-    if (attachmentFileInput) attachmentFileInput.value = "";
-    formError = null;
-    showManageModal = true;
+    formAttachmentName = ''
+    attachmentUploadError = null
+    if (attachmentFileInput) attachmentFileInput.value = ''
+    formError = null
+    showManageModal = true
   }
   function openEditModal(notice: Notice) {
-    editingNotice = notice;
-    formTitle = notice.title;
-    formContent = notice.content || "";
-    formCategory = (notice.category || "results") as NoticeCategory;
-    formAttachmentUrl = notice.attachmentUrl || "";
-    manualUrlInput = "";
-    activeAttachmentTab = "upload";
+    editingNotice = notice
+    formTitle = notice.title
+    formContent = notice.content || ''
+    formCategory = (notice.category || 'results') as NoticeCategory
+    formAttachmentUrl = notice.attachmentUrl || ''
+    manualUrlInput = ''
+    activeAttachmentTab = 'upload'
 
-    formAttachmentName = "";
-    attachmentUploadError = null;
-    if (attachmentFileInput) attachmentFileInput.value = "";
-    formError = null;
-    showManageModal = true;
+    formAttachmentName = ''
+    attachmentUploadError = null
+    if (attachmentFileInput) attachmentFileInput.value = ''
+    formError = null
+    showManageModal = true
   }
   function closeModal() {
-    showManageModal = false;
-    editingNotice = null;
-    formError = null;
+    showManageModal = false
+    editingNotice = null
+    formError = null
   }
   function clearAttachment() {
-    formAttachmentUrl = "";
-    manualUrlInput = "";
+    formAttachmentUrl = ''
+    manualUrlInput = ''
 
-    formAttachmentName = "";
-    attachmentUploadError = null;
-    if (attachmentFileInput) attachmentFileInput.value = "";
+    formAttachmentName = ''
+    attachmentUploadError = null
+    if (attachmentFileInput) attachmentFileInput.value = ''
   }
   async function handleAttachmentFileSelected(file: File) {
-    if (isUploadingAttachment) return;
-    isUploadingAttachment = true;
-    attachmentUploadError = null;
-    const result = await uploadNoticeAttachment(file);
-    isUploadingAttachment = false;
+    if (isUploadingAttachment) return
+    isUploadingAttachment = true
+    attachmentUploadError = null
+    const result = await uploadNoticeAttachment(file)
+    isUploadingAttachment = false
     if (!result.success || !result.data) {
       attachmentUploadError =
-        result.message || "Failed to upload attachment. Please try again.";
-      return;
+        result.message || 'Failed to upload attachment. Please try again.'
+      return
     }
-    formAttachmentUrl = result.data.url;
+    formAttachmentUrl = result.data.url
 
-    formAttachmentName = result.data.name || file.name;
+    formAttachmentName = result.data.name || file.name
   }
   async function handleAttachmentFileChange(event: Event) {
-    const target = event.currentTarget as HTMLInputElement;
-    const file = target.files?.[0];
-    if (!file) return;
-    await handleAttachmentFileSelected(file);
-    target.value = "";
+    const target = event.currentTarget as HTMLInputElement
+    const file = target.files?.[0]
+    if (!file) return
+    await handleAttachmentFileSelected(file)
+    target.value = ''
   }
   function handleAttachmentDragOver(event: DragEvent) {
-    event.preventDefault();
-    isDragActive = true;
+    event.preventDefault()
+    isDragActive = true
   }
   function handleAttachmentDragLeave(event: DragEvent) {
-    event.preventDefault();
-    isDragActive = false;
+    event.preventDefault()
+    isDragActive = false
   }
   async function handleAttachmentDrop(event: DragEvent) {
-    event.preventDefault();
-    isDragActive = false;
-    const file = event.dataTransfer?.files?.[0];
-    if (!file) return;
-    await handleAttachmentFileSelected(file);
+    event.preventDefault()
+    isDragActive = false
+    const file = event.dataTransfer?.files?.[0]
+    if (!file) return
+    await handleAttachmentFileSelected(file)
   }
   async function handleSubmit() {
     if (!formTitle.trim() || !formContent.trim()) {
-      formError = "Title and content are required";
-      return;
+      formError = 'Title and content are required'
+      return
     }
     if (isUploadingAttachment) {
-      formError = "Please wait for the attachment upload to finish";
-      return;
+      formError = 'Please wait for the attachment upload to finish'
+      return
     }
-    isSubmitting = true;
-    formError = null;
+    isSubmitting = true
+    formError = null
     const data = {
       title: formTitle.trim(),
       content: formContent.trim(),
       category: formCategory,
       attachmentUrl: formAttachmentUrl.trim() || null,
-    } satisfies NoticeWritePayload;
-    let result;
+    } satisfies NoticeWritePayload
+    let result
     if (editingNotice) {
-      result = await updateNotice(editingNotice.id, data);
+      result = await updateNotice(editingNotice.id, data)
     } else {
-      result = await createNotice(data);
+      result = await createNotice(data)
     }
-    isSubmitting = false;
+    isSubmitting = false
     if (result.success) {
-      closeModal();
-      await queryClient.invalidateQueries({ queryKey: ["notices"] });
-      await queryClient.invalidateQueries({ queryKey: ["notice-stats"] });
+      closeModal()
+      await queryClient.invalidateQueries({ queryKey: ['notices'] })
+      await queryClient.invalidateQueries({ queryKey: ['notice-stats'] })
     } else {
-      formError = result.message || "Failed to save notice";
+      formError = result.message || 'Failed to save notice'
     }
   }
   async function handleDelete(id: number) {
-    const result = await deleteNotice(id);
+    const result = await deleteNotice(id)
     if (result.success) {
-      deleteConfirmId = null;
-      await queryClient.invalidateQueries({ queryKey: ["notices"] });
-      await queryClient.invalidateQueries({ queryKey: ["notice-stats"] });
+      deleteConfirmId = null
+      await queryClient.invalidateQueries({ queryKey: ['notices'] })
+      await queryClient.invalidateQueries({ queryKey: ['notice-stats'] })
     }
   }
 </script>
@@ -650,7 +650,7 @@
     <!-- Category Tabs -->
     <div class="flex flex-wrap justify-center gap-2 mb-5">
       <button
-        onclick={() => setCategory("results")}
+        onclick={() => setCategory('results')}
         class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 {activeCategory ===
         'results'
           ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
@@ -680,7 +680,7 @@
         >
       </button>
       <button
-        onclick={() => setCategory("application_forms")}
+        onclick={() => setCategory('application_forms')}
         class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 {activeCategory ===
         'application_forms'
           ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
@@ -711,7 +711,7 @@
         >
       </button>
       <button
-        onclick={() => setCategory("exam_centers")}
+        onclick={() => setCategory('exam_centers')}
         class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 {activeCategory ===
         'exam_centers'
           ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
@@ -748,7 +748,38 @@
         >
       </button>
       <button
-        onclick={() => setCategory("general")}
+        onclick={() => setCategory('exam_routines')}
+        class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 {activeCategory ===
+        'exam_routines'
+          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+          : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}"
+      >
+        <svg
+          class="w-4 h-4 {activeCategory === 'exam_routines'
+            ? 'text-white'
+            : 'text-teal-600'}"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        Exam Routines
+        <span
+          class="inline-flex items-center justify-center min-w-5 h-5 text-[10px] leading-none px-1.5 rounded-full {activeCategory ===
+          'exam_routines'
+            ? 'bg-white/20 text-white'
+            : 'bg-slate-100 text-slate-700'}"
+          >{categoryCounts.exam_routines}</span
+        >
+      </button>
+      <button
+        onclick={() => setCategory('general')}
         class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 {activeCategory ===
         'general'
           ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
@@ -902,7 +933,7 @@
           <p class="text-slate-700 font-semibold">No notices found</p>
           <p class="text-slate-500 text-sm">
             {searchQuery
-              ? "Try a different search term"
+              ? 'Try a different search term'
               : `There are no ${getCategoryLabel(activeCategory)} notices posted yet.`}
           </p>
         </div>
@@ -912,7 +943,7 @@
       <div class="space-y-2.5" in:fade={{ delay: 100 }}>
         {#each filteredNotices as notice (notice.id)}
           <div
-            id={"notice-" + notice.id}
+            id={'notice-' + notice.id}
             class="group bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all overflow-hidden {highlightedNoticeId ===
             notice.id
               ? 'ring-2 ring-cyan-400 ring-offset-2 border-cyan-300 bg-cyan-50/30 notif-highlight-blink'
@@ -934,7 +965,7 @@
                       ? 'bg-amber-100 text-amber-600'
                       : 'bg-blue-100 text-blue-600'}"
               >
-                {#if activeCategory === "results"}
+                {#if activeCategory === 'results'}
                   <svg
                     class="w-4 h-4"
                     fill="none"
@@ -948,7 +979,7 @@
                       d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                {:else if activeCategory === "application_forms"}
+                {:else if activeCategory === 'application_forms'}
                   <svg
                     class="w-4 h-4"
                     fill="none"
@@ -962,7 +993,7 @@
                       d="M9 12h6m-6 4h6M8 7h8m2 14H6a2 2 0 01-2-2V5a2 2 0 012-2h9l5 5v11a2 2 0 01-2 2z"
                     />
                   </svg>
-                {:else if activeCategory === "exam_centers"}
+                {:else if activeCategory === 'exam_centers'}
                   <svg
                     class="w-4 h-4"
                     fill="none"
@@ -1071,7 +1102,7 @@
 
                   {#if notice.attachmentUrl}
                     <div class="mt-4 p-4 bg-slate-50 rounded-xl">
-                      {#if getAttachmentType(notice.attachmentUrl) === "image"}
+                      {#if getAttachmentType(notice.attachmentUrl) === 'image'}
                         <button
                           onclick={() =>
                             openImagePreview(
@@ -1120,17 +1151,17 @@
                               ? 'opacity-100'
                               : 'opacity-0'}"
                             onload={() => {
-                              imagesLoaded[notice.id] = true;
-                              fullyLoadedUrls.add(notice.attachmentUrl!);
+                              imagesLoaded[notice.id] = true
+                              fullyLoadedUrls.add(notice.attachmentUrl!)
                             }}
                           />
                         </button>
-                      {:else if getAttachmentType(notice.attachmentUrl) === "pdf"}
+                      {:else if getAttachmentType(notice.attachmentUrl) === 'pdf'}
                         <a
                           href={notice.attachmentUrl}
                           download={getAttachmentDisplayName(
                             notice.attachmentUrl,
-                            "attachment.pdf",
+                            'attachment.pdf',
                           )}
                           class="flex items-center gap-3 text-blue-600 hover:text-blue-700"
                         >
@@ -1274,14 +1305,14 @@
     >
       <div class="p-4 border-b border-slate-200">
         <h2 class="text-lg font-bold text-slate-800">
-          {editingNotice ? "Edit Notice" : "Create Notice"}
+          {editingNotice ? 'Edit Notice' : 'Create Notice'}
         </h2>
       </div>
 
       <form
         onsubmit={(e) => {
-          e.preventDefault();
-          handleSubmit();
+          e.preventDefault()
+          handleSubmit()
         }}
         class="p-4 space-y-3"
       >
@@ -1330,6 +1361,7 @@
               <option value="results">Results</option>
               <option value="application_forms">Application Forms</option>
               <option value="exam_centers">Exam Centers</option>
+              <option value="exam_routines">Exam Routines</option>
               <option value="general">General</option>
             </select>
           </div>
@@ -1345,7 +1377,7 @@
             <div class="flex p-0.5 bg-slate-100 rounded-lg mb-3">
               <button
                 type="button"
-                onclick={() => (activeAttachmentTab = "upload")}
+                onclick={() => (activeAttachmentTab = 'upload')}
                 class="flex-1 py-1 text-xs font-medium rounded-md transition-all {activeAttachmentTab ===
                 'upload'
                   ? 'bg-white text-slate-800 shadow-sm'
@@ -1355,7 +1387,7 @@
               </button>
               <button
                 type="button"
-                onclick={() => (activeAttachmentTab = "url")}
+                onclick={() => (activeAttachmentTab = 'url')}
                 class="flex-1 py-1 text-xs font-medium rounded-md transition-all {activeAttachmentTab ===
                 'url'
                   ? 'bg-white text-slate-800 shadow-sm'
@@ -1365,7 +1397,7 @@
               </button>
             </div>
 
-            {#if activeAttachmentTab === "upload"}
+            {#if activeAttachmentTab === 'upload'}
               <!-- Upload zone when no file is attached -->
               <label
                 class="flex flex-col items-center justify-center gap-1 w-full h-24 rounded-xl border-2 border-dashed cursor-pointer transition-all {isDragActive
@@ -1420,9 +1452,9 @@
                     disabled={!manualUrlInput.trim()}
                     onclick={() => {
                       if (manualUrlInput.trim()) {
-                        formAttachmentUrl = manualUrlInput.trim();
+                        formAttachmentUrl = manualUrlInput.trim()
                         formAttachmentName =
-                          manualUrlInput.split("/").pop() || "External Link";
+                          manualUrlInput.split('/').pop() || 'External Link'
                       }
                     }}
                     class="px-3 py-1.5 bg-slate-800 text-white rounded-lg text-sm font-medium hover:bg-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1440,7 +1472,7 @@
             <div
               class="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl"
             >
-              {#if getAttachmentType(formAttachmentUrl, formAttachmentName) === "image"}
+              {#if getAttachmentType(formAttachmentUrl, formAttachmentName) === 'image'}
                 <div
                   class="shrink-0 w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center"
                 >
@@ -1479,18 +1511,18 @@
               {/if}
               <div class="flex-1 min-w-0">
                 <p class="font-medium text-slate-800 truncate">
-                  {formAttachmentName || "Uploaded file"}
+                  {formAttachmentName || 'Uploaded file'}
                 </p>
                 <p class="text-sm text-slate-500">
                   {getAttachmentType(formAttachmentUrl, formAttachmentName) ===
-                  "image"
-                    ? "Image file"
+                  'image'
+                    ? 'Image file'
                     : getAttachmentType(
                           formAttachmentUrl,
                           formAttachmentName,
-                        ) === "pdf"
-                      ? "PDF Document"
-                      : "External link"}
+                        ) === 'pdf'
+                      ? 'PDF Document'
+                      : 'External link'}
                 </p>
               </div>
               <button
@@ -1558,12 +1590,12 @@
             class="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
             {isSubmitting
-              ? "Saving..."
+              ? 'Saving...'
               : isUploadingAttachment
-                ? "Uploading..."
+                ? 'Uploading...'
                 : editingNotice
-                  ? "Update"
-                  : "Create"}
+                  ? 'Update'
+                  : 'Create'}
           </button>
         </div>
       </form>
