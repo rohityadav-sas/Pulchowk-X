@@ -1715,7 +1715,7 @@
       </div>
     {/if}
 
-    <!-- Chat Toggle Button -->
+    <!-- Chat Toggle Button (Isolated) -->
     <button
       onclick={() => (chatOpen = !chatOpen)}
       class="w-12 h-12 bg-blue-600 text-white rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-105 active:scale-90 shadow-blue-600/35 relative group"
@@ -3282,10 +3282,10 @@
     />
 
     <div
-      class="absolute bottom-24 right-4 md:bottom-auto md:top-4 md:right-16 z-50 bg-white/95 backdrop-blur rounded-xl shadow-xl border border-cyan-200 p-1 flex gap-1"
+      class="fixed bottom-12 left-5 md:absolute md:top-4 md:right-16 md:bottom-auto md:left-auto z-50 bg-white/95 backdrop-blur rounded-xl shadow-xl border border-cyan-200 p-1 flex gap-1"
     >
       <button
-        class="px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-colors {isSatellite
+        class="px-4.5 py-2.5 md:px-3 md:py-1.5 rounded-lg text-sm md:text-xs font-semibold tracking-wide transition-colors {isSatellite
           ? 'text-slate-600 hover:bg-slate-100'
           : 'bg-cyan-100 text-cyan-800'}"
         onclick={() => (isSatellite = false)}
@@ -3293,7 +3293,7 @@
         Map
       </button>
       <button
-        class="px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-colors {isSatellite
+        class="px-4.5 py-2.5 md:px-3 md:py-1.5 rounded-lg text-sm md:text-xs font-semibold tracking-wide transition-colors {isSatellite
           ? 'bg-cyan-100 text-cyan-800'
           : 'text-slate-600 hover:bg-slate-100'}"
         onclick={() => (isSatellite = true)}
