@@ -92,7 +92,7 @@
 {/if}
 
 <aside
-    class="fixed inset-y-0 left-0 z-50 flex flex-col bg-white/80 backdrop-blur-xl border-r border-slate-200/60 transition-transform duration-300 md:relative md:translate-x-0 group/sidebar {isOpen
+    class="fixed inset-y-0 left-0 z-50 flex flex-col bg-white/80 backdrop-blur-xl border-r border-slate-200/60 transition-transform duration-300 md:sticky md:top-0 md:h-screen md:translate-x-0 group/sidebar {isOpen
         ? 'translate-x-0'
         : '-translate-x-full'}"
     style="width: {sidebarWidth}px"
