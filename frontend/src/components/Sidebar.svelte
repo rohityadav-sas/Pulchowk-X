@@ -87,7 +87,8 @@
             isOpen = false;
         }
     }
-    function expandAndFocusSearch() {
+    function expandAndFocusSearch(e?: MouseEvent) {
+        e?.stopPropagation();
         sidebarWidth = 260;
         isCollapsed = false;
         shouldFocusSearch = true;
@@ -161,7 +162,7 @@
             <button
                 class="w-full aspect-square flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:text-cyan-600 transition-colors"
                 aria-label="Search"
-                onclick={expandAndFocusSearch}
+                onclick={(e) => expandAndFocusSearch(e)}
             >
                 <svg
                     class="w-5 h-5"
