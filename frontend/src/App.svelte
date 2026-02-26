@@ -505,9 +505,7 @@
           "Something went wrong during sign-in. Please try again."}
       </ErrorToast>
 
-      <main
-        class="{isEmbedded ? 'h-screen' : 'min-h-[calc(100vh-4rem)]'} relative"
-      >
+      <main class="{isEmbedded ? 'h-screen' : 'flex-1'} relative min-h-0">
         {#if !isMapRoute}
           <div
             class="pointer-events-none absolute inset-0 z-0 opacity-35 bg-[linear-gradient(to_right,rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-size-[42px_42px]"

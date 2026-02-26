@@ -11,7 +11,11 @@
   let loading = $state(false);
   let error = $state<string | null>(null);
   let results = $state<GlobalSearchResponse | null>(null);
-  let { size = "lg" }: { size?: "sm" | "lg" } = $props();
+  let {
+    size = "lg",
+    autofocus = false,
+  }: { size?: "sm" | "lg"; autofocus?: boolean } = $props();
+  let inputElement: HTMLInputElement | null = $state(null);
 
   let scope = $state<
     "all" | "clubs" | "events" | "books" | "notices" | "places" | "lost_found"
@@ -79,6 +83,11 @@
 
   onMount(() => {
     window.addEventListener("click", handleClickOutside);
+
+    if (autofocus && inputElement) {
+      inputElement.focus();
+    }
+
     return () => window.removeEventListener("click", handleClickOutside);
   });
 
@@ -149,6 +158,7 @@
         </svg>
       </div>
       <input
+        bind:this={inputElement}
         bind:value={query}
         onfocus={() => (open = true)}
         placeholder={size === "sm"
