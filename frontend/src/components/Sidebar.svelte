@@ -28,6 +28,7 @@
     let sidebarWidth = $state(260);
     let isResizing = $state(false);
     let isCollapsed = $state(false);
+    let shouldFocusSearch = $state(false);
 
     function startResizing() {
         isResizing = true;
@@ -85,6 +86,14 @@
         if (window.innerWidth < 768) {
             isOpen = false;
         }
+    }
+    function expandAndFocusSearch() {
+        sidebarWidth = 260;
+        isCollapsed = false;
+        shouldFocusSearch = true;
+        setTimeout(() => {
+            shouldFocusSearch = false;
+        }, 100);
     }
 </script>
 
@@ -152,7 +161,7 @@
             <button
                 class="w-full aspect-square flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:text-cyan-600 transition-colors"
                 aria-label="Search"
-                onclick={handleLinkClick}
+                onclick={expandAndFocusSearch}
             >
                 <svg
                     class="w-5 h-5"
@@ -169,7 +178,7 @@
                 </svg>
             </button>
         {:else}
-            <GlobalSearch size="sm" />
+            <GlobalSearch size="sm" autofocus={shouldFocusSearch} />
         {/if}
     </div>
 

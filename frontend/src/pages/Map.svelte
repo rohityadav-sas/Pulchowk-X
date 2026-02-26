@@ -1760,7 +1760,7 @@
 {/if}
 
 <div
-  class="relative w-full h-[calc(100vh-4rem)] bg-linear-to-b from-cyan-50 via-white to-blue-50"
+  class="relative w-full h-full bg-linear-to-b from-cyan-50 via-white to-blue-50"
 >
   {#if !isNavigating && !isMapFullscreen}
     <!-- Search Container -->
