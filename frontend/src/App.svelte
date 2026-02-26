@@ -244,6 +244,15 @@
 
   const embed = query("embed");
   let isSidebarOpen = $state(false);
+  let sidebarWidth = $state(260);
+  let isResizing = $state(false);
+  let isCollapsed = $state(false);
+
+  onMount(() => {
+    if (window.innerWidth >= 768) {
+      isSidebarOpen = true;
+    }
+  });
   const isEmbedded = $derived(embed === "true");
 
   function isGuestAllowedPath(path: string) {
@@ -455,10 +464,16 @@
         {isNoticeManagerRole}
         {showNavSessionLoader}
         bind:isOpen={isSidebarOpen}
+        bind:sidebarWidth={sidebarWidth}
+        bind:isResizing={isResizing}
+        bind:isCollapsed={isCollapsed}
       />
     {/if}
 
-    <div class="flex-1 flex flex-col min-w-0">
+    <div 
+      class="flex-1 flex flex-col min-w-0 {!isResizing ? 'transition-[margin-left] duration-300' : ''} main-content-wrapper"
+      style="--sidebar-offset: {isSidebarOpen && !isEmbedded ? sidebarWidth + 'px' : '0px'}; will-change: margin-left;"
+    >
       {#if !isEmbedded}
         <!-- Mobile Header -->
         <header
@@ -517,7 +532,11 @@
               ? 'opacity-100 visible'
               : 'opacity-0 invisible pointer-events-none'}"
           >
-            <MapComponent />
+            <MapComponent 
+              bind:isSidebarOpen={isSidebarOpen} 
+              sidebarWidth={sidebarWidth}
+              isResizing={isResizing}
+            />
           </div>
         {/if}
         <div class={isMapRoute ? "hidden" : "contents"}>
@@ -527,3 +546,15 @@
     </div>
   </div>
 </QueryClientProvider>
+
+<style>
+  .main-content-wrapper {
+    margin-left: 0;
+  }
+
+  @media (min-width: 768px) {
+    .main-content-wrapper {
+      margin-left: var(--sidebar-offset);
+    }
+  }
+</style>

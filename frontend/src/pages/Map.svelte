@@ -155,7 +155,24 @@
     }
   });
 
+  import { untrack } from "svelte";
   const labels = pulchowkData.features.slice(1);
+
+  let { 
+    isSidebarOpen = $bindable(false),
+    sidebarWidth = 260,
+    isResizing = false
+  }: { 
+    isSidebarOpen: boolean,
+    sidebarWidth: number,
+    isResizing: boolean
+  } = $props();
+
+  $effect(() => {
+    if (map && (sidebarWidth || isSidebarOpen !== undefined)) {
+      map.resize();
+    }
+  });
 
   let search = $state("");
   let showSuggestions = $state(false);
@@ -194,6 +211,16 @@
   let fullscreenProgressFailedUrls = new Set<string>();
   const fullyLoadedUrls = new Set<string>();
   const fullyLoadedFullscreenUrls = new Set<string>();
+
+  $effect(() => {
+    if (showFullScreenImage) {
+      const prevState = untrack(() => isSidebarOpen);
+      isSidebarOpen = false;
+      return () => {
+        isSidebarOpen = prevState;
+      };
+    }
+  });
 
   function getMapCardImageUrl(url: string): string {
     return optimizeCloudinaryThumbnailUrl(url, 560, 320);
@@ -337,7 +364,9 @@
 
       fullscreenImageProgress[index] = 100;
       // Create blob URL so <img> uses already-downloaded data instantly
-      fullscreenBlobUrls[index] = URL.createObjectURL(new Blob(chunks as any[]));
+      fullscreenBlobUrls[index] = URL.createObjectURL(
+        new Blob(chunks as any[]),
+      );
     } catch (error) {
       fullscreenProgressFailedUrls.add(url);
       fullscreenImageProgress[index] = undefined;
