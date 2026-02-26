@@ -255,8 +255,8 @@
       }
 
       imageProgress[index] = 100;
-      imagesLoaded[index] = true;
-      fullyLoadedUrls.add(url);
+      // Don't set imagesLoaded here — let the <img onload> do it
+      // to avoid a white flash between progress hiding and image rendering
     } catch (error) {
       console.log("Fetch progress failed, falling back", url);
       progressFailedUrls.add(url);
@@ -330,8 +330,8 @@
       }
 
       fullscreenImageProgress[index] = 100;
-      fullscreenImagesLoaded[index] = true;
-      fullyLoadedFullscreenUrls.add(url);
+      // Don't set fullscreenImagesLoaded here — let the <img onload> do it
+      // to avoid a white flash between progress hiding and image rendering
     } catch (error) {
       fullscreenProgressFailedUrls.add(url);
       fullscreenImageProgress[index] = undefined;

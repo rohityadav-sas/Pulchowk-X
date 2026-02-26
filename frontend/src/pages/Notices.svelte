@@ -157,8 +157,8 @@
     xhr.onload = () => {
       if (xhr.status === 200) {
         imageProgress[noticeId] = 100
-        imagesLoaded[noticeId] = true
-        fullyLoadedUrls.add(url)
+        // Don't set imagesLoaded here — let the <img onload> do it
+        // to avoid a white flash between progress hiding and image rendering
       } else {
         progressFailedUrls.add(url)
         imageProgress[noticeId] = undefined
