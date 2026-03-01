@@ -244,30 +244,6 @@
 
   const embed = query("embed");
   let isSidebarOpen = $state(false);
-  let sidebarWidth = $state(260);
-  let isResizing = $state(false);
-  let isCollapsed = $state(false);
-
-  $effect(() => {
-    if (isSidebarOpen) {
-      document.body.classList.add("sidebar-open");
-    } else {
-      document.body.classList.remove("sidebar-open");
-    }
-  });
-
-  onMount(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        isSidebarOpen = true;
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Initial check
-
-    return () => window.removeEventListener("resize", handleResize);
-  });
   const isEmbedded = $derived(embed === "true");
 
   function isGuestAllowedPath(path: string) {
@@ -479,20 +455,10 @@
         {isNoticeManagerRole}
         {showNavSessionLoader}
         bind:isOpen={isSidebarOpen}
-        bind:sidebarWidth
-        bind:isResizing
-        bind:isCollapsed
       />
     {/if}
 
-    <div
-      class="flex-1 flex flex-col min-w-0 {!isResizing
-        ? 'transition-[margin-left] duration-500 ease-in-out'
-        : ''} main-content-wrapper"
-      style="--sidebar-offset: {isSidebarOpen && !isEmbedded
-        ? sidebarWidth + 'px'
-        : '0px'}; will-change: margin-left;"
-    >
+    <div class="flex-1 flex flex-col min-w-0">
       {#if !isEmbedded}
         <!-- Mobile Header -->
         <header
@@ -551,7 +517,7 @@
               ? 'opacity-100 visible'
               : 'opacity-0 invisible pointer-events-none'}"
           >
-            <MapComponent bind:isSidebarOpen {sidebarWidth} {isResizing} />
+            <MapComponent />
           </div>
         {/if}
         <div class={isMapRoute ? "hidden" : "contents"}>
@@ -561,15 +527,3 @@
     </div>
   </div>
 </QueryClientProvider>
-
-<style>
-  .main-content-wrapper {
-    margin-left: 0;
-  }
-
-  @media (min-width: 768px) {
-    .main-content-wrapper {
-      margin-left: var(--sidebar-offset);
-    }
-  }
-</style>
