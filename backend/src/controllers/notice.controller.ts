@@ -10,6 +10,11 @@ import {
 } from '../services/inAppNotification.service.js'
 import { sendToTopic } from '../services/notification.service.js'
 import { syncExamNotices } from '../services/notice-sync.service.js'
+import {
+  buildNoticeChangeData,
+  buildNoticeUpdateNotificationTitle,
+  computeNoticeFieldChanges,
+} from '../lib/notice-update-diff.js'
 
 type AuthedRequest = Request & { user?: { id: string; role?: string | null } }
 
@@ -458,6 +463,17 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
         .json({ success: false, message: 'Invalid notice ID' })
     }
 
+    const [existing] = await db
+      .select()
+      .from(notice)
+      .where(eq(notice.id, noticeId))
+
+    if (!existing) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Notice not found' })
+    }
+
     const body = req.body ?? {}
     const {
       title,
@@ -489,6 +505,13 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
     if (sourceUrl !== undefined) updateData.sourceUrl = sourceUrl
     if (externalRef !== undefined) updateData.externalRef = externalRef
 
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No updatable fields were provided',
+      })
+    }
+
     const [updated] = await db
       .update(notice)
       .set(updateData)
@@ -504,50 +527,58 @@ export async function updateNotice(req: AuthedRequest, res: Response) {
     const effectiveCategory = (updated.category as NoticeCategory) || 'general'
     const effectiveLevel =
       updated.level || makeLegacySubsection(effectiveCategory)
+    const changes = computeNoticeFieldChanges(existing, updated)
 
-    await Promise.allSettled([
-      createInAppNotificationForAudience({
-        audience: 'all',
-        type: 'notice_updated',
-        title: 'Notice Updated',
-        body: updated.title,
-        data: {
-          noticeId: updated.id,
-          noticeTitle: updated.title,
-          category: effectiveCategory,
-          section: toLegacySection(effectiveCategory),
-          level: effectiveLevel,
-          subsection: effectiveLevel,
-          publisherId: req.user.id,
-          iconKey: 'notice',
-          ...(isImageUrl(updated.attachmentUrl)
-            ? { thumbnailUrl: updated.attachmentUrl as string }
-            : {}),
-        },
-      }).catch((error) =>
-        console.error('Failed to create notice update notification:', error),
-      ),
+    if (changes.length > 0) {
+      const noticeChangeData = buildNoticeChangeData(changes)
+      const notificationTitle = buildNoticeUpdateNotificationTitle(changes)
 
-      sendToTopic('notices', {
-        title: 'Notice Updated',
-        body: updated.title,
-        data: {
-          noticeId: updated.id.toString(),
+      await Promise.allSettled([
+        createInAppNotificationForAudience({
+          audience: 'all',
           type: 'notice_updated',
-          category: effectiveCategory,
-          section: toLegacySection(effectiveCategory),
-          level: effectiveLevel,
-          subsection: effectiveLevel,
-          publisherId: req.user.id,
-          iconKey: 'notice',
-        },
-      }).catch((error) =>
-        console.error(
-          'Failed to send notice update FCM topic notification:',
-          error,
+          title: notificationTitle,
+          body: updated.title,
+          data: {
+            noticeId: updated.id,
+            noticeTitle: updated.title,
+            category: effectiveCategory,
+            section: toLegacySection(effectiveCategory),
+            level: effectiveLevel,
+            subsection: effectiveLevel,
+            publisherId: req.user.id,
+            iconKey: 'notice',
+            ...noticeChangeData,
+            ...(isImageUrl(updated.attachmentUrl)
+              ? { thumbnailUrl: updated.attachmentUrl as string }
+              : {}),
+          },
+        }).catch((error) =>
+          console.error('Failed to create notice update notification:', error),
         ),
-      ),
-    ])
+
+        sendToTopic('notices', {
+          title: notificationTitle,
+          body: updated.title,
+          data: {
+            noticeId: updated.id.toString(),
+            type: 'notice_updated',
+            category: effectiveCategory,
+            section: toLegacySection(effectiveCategory),
+            level: effectiveLevel,
+            subsection: effectiveLevel,
+            publisherId: req.user.id,
+            iconKey: 'notice',
+            ...noticeChangeData,
+          },
+        }).catch((error) =>
+          console.error(
+            'Failed to send notice update FCM topic notification:',
+            error,
+          ),
+        ),
+      ])
+    }
 
     return res.json({
       success: true,

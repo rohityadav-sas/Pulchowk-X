@@ -8,6 +8,12 @@ import { UPLOAD_CONSTANTS, generatePublicId } from '../config/cloudinary.js'
 import { uploadAssignmentFileToCloudinary } from './cloudinary.service.js'
 import { createInAppNotificationForAudience } from './inAppNotification.service.js'
 import { sendToTopic } from './notification.service.js'
+import {
+  buildNoticeChangeData,
+  buildNoticeUpdateNotificationTitle,
+  computeNoticeFieldChanges,
+  type NoticeFieldChange,
+} from '../lib/notice-update-diff.js'
 
 export type NoticeSyncCategory =
   | 'results'
@@ -470,6 +476,7 @@ async function runSyncExamNotices(): Promise<SyncNoticesResult> {
     id: number
     payload: NewNotice
     category: NoticeSyncCategory
+    changes: NoticeFieldChange[]
   }> = []
 
   const insertedByCategory = new Map<NoticeSyncCategory, number>()
@@ -488,21 +495,14 @@ async function runSyncExamNotices(): Promise<SyncNoticesResult> {
       continue
     }
 
-    const hasChanges =
-      existing.title !== payload.title ||
-      existing.category !== payload.category ||
-      (existing.level ?? null) !== (payload.level ?? null) ||
-      (existing.attachmentUrl ?? null) !== (payload.attachmentUrl ?? null) ||
-      (existing.publishedDate ?? null) !== (payload.publishedDate ?? null) ||
-      (existing.sourceUrl ?? null) !== (payload.sourceUrl ?? null) ||
-      (existing.externalRef ?? null) !== (payload.externalRef ?? null)
-
-    if (!hasChanges) continue
+    const changes = computeNoticeFieldChanges(existing, payload)
+    if (changes.length === 0) continue
 
     updates.push({
       id: existing.id,
       payload,
       category: item.category,
+      changes,
     })
     updatedByCategory.set(
       item.category,
@@ -585,11 +585,13 @@ async function runSyncExamNotices(): Promise<SyncNoticesResult> {
     const category = updated.category
     const normalizedLevel =
       updated.payload.level || makeLegacySubsection(category)
+    const noticeChangeData = buildNoticeChangeData(updated.changes)
+    const notificationTitle = buildNoticeUpdateNotificationTitle(updated.changes)
     notificationPromises.push(
       createInAppNotificationForAudience({
         audience: 'all',
         type: 'notice_updated',
-        title: 'Notice Updated',
+        title: notificationTitle,
         body: updated.payload.title,
         data: {
           noticeId: updated.id,
@@ -598,6 +600,7 @@ async function runSyncExamNotices(): Promise<SyncNoticesResult> {
           section: toLegacySection(category),
           subsection: normalizedLevel,
           iconKey: 'notice',
+          ...noticeChangeData,
           ...(isImageUrl(updated.payload.attachmentUrl)
             ? { thumbnailUrl: updated.payload.attachmentUrl as string }
             : {}),
@@ -612,7 +615,7 @@ async function runSyncExamNotices(): Promise<SyncNoticesResult> {
 
     notificationPromises.push(
       sendToTopic('announcements', {
-        title: 'Notice Updated',
+        title: notificationTitle,
         body: updated.payload.title,
         data: {
           noticeId: String(updated.id),
@@ -621,6 +624,7 @@ async function runSyncExamNotices(): Promise<SyncNoticesResult> {
           section: toLegacySection(category),
           subsection: normalizedLevel,
           iconKey: 'notice',
+          ...noticeChangeData,
         },
       }).catch((error) =>
         console.error(
