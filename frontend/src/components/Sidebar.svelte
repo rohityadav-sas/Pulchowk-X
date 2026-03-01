@@ -60,14 +60,15 @@
 
     function handleMouseMove(e: MouseEvent) {
         if (!isResizing) return;
-
-        const clampedWidth = Math.max(
-            MIN_SIDEBAR_WIDTH,
-            Math.min(e.clientX, MAX_SIDEBAR_WIDTH),
-        );
-
-        sidebarWidth = clampedWidth;
-        isCollapsed = false;
+        const newWidth = e.clientX;
+        if (newWidth >= MIN_SIDEBAR_WIDTH && newWidth <= MAX_SIDEBAR_WIDTH) {
+            sidebarWidth = newWidth;
+            isCollapsed = false;
+        } else if (newWidth < MIN_SIDEBAR_WIDTH / 2) {
+            // Snap to collapsed if dragged very far left
+            sidebarWidth = COLLAPSED_WIDTH;
+            isCollapsed = true;
+        }
     }
 
     function stopResizing() {
@@ -610,7 +611,7 @@
     </nav>
 
     <!-- User Profile / Footer -->
-    <div class="px-4 py-2 border-t border-slate-100 bg-slate-50/50">
+    <div class="px-4 border-t border-slate-100 bg-slate-50/50">
         {#if showNavSessionLoader}
             <div class="flex items-center gap-3 px-2 py-6">
                 <div
